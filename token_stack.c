@@ -1,5 +1,19 @@
 #include "token_stack.h"
 
+void Token_stack_error(int error) {
+    static const char *ERRORS[SERR+1] = {
+        "Stack error: unknown",
+        "Stack error: PUSH",
+        "Stack error: POP",
+        "Stack error: TOP",
+        "Stack error: INIT"
+    };
+    if (error <= 0 || error > SERR) {
+        error = 0;
+    }
+    printf("%s", ERRORS[error]);
+}
+
 void Token_stack_init( Token_stack *stack ) {
     if (stack == NULL) {
         return;
