@@ -494,8 +494,7 @@ int get_token(Token *token){
                     if (!(DS_Add_Tester(ptr_Str, c))){/**error**/}
                     state = STATE_DHEX;
                 } else{
-                    HexaDecimal(prt_Str, token);
-                    //conversion_Int(ptr_Str,token);
+                    conversion_Int(ptr_Str,token);
                     token->ID = TOKEN_ID_HEX2;
                     free(ptr_Str);
                     state = STATE_HEX2;
@@ -529,7 +528,7 @@ int get_token(Token *token){
                 } else if (c == 'p'){
                     state = STATE_HEXP;
                 } else{
-
+                    HexaDecimal(prt_Str, token);
                     token->ID = TOKEN_ID_DHEX2;
                     printf("token DHEX2\n"); //token DHEX2
                     state = STATE_START;
