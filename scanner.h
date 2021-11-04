@@ -5,6 +5,20 @@
 #include "Dynamic_string.h"
 
 typedef enum {
+    KEYWORD_DO,
+    KEYWORD_ELSE,
+    KEYWORD_END,
+    KEYWORD_FUNCTION,
+    KEYWORD_GLOBAL,
+    KEYWORD_IF,
+    KEYWORD_INTEGER,
+    KEYWORD_LOCAL,
+    KEYWORD_NIL,
+    KEYWORD_NUMBER,
+    KEYWORD_REQUIRE,
+    KEYWORD_RETURN,
+    KEYWORD_STRING,
+    KEYWORD_THEN,
     KEYWORD_AND,
     KEYWORD_AS,
     KEYWORD_ASC,
@@ -63,6 +77,7 @@ typedef enum {
     TOKEN_ID_GT,
     TOKEN_ID_EQ,
     TOKEN_ID_ASSIGN,
+    TOKEN_ID_FSTR,
     TOKEN_ID_STR5,
     TOKEN_ID_INT0,
     TOKEN_ID_HEX2,
