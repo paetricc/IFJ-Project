@@ -44,6 +44,7 @@ typedef enum {
 
 typedef enum {
     TOKEN_ID_KEYWORD,
+    TOKEN_ID_IDENTIFICATOR,
     TOKEN_ID_EOL,
     TOKEN_ID_CMA,
     TOKEN_ID_SPACE,
@@ -63,7 +64,7 @@ typedef enum {
     TOKEN_ID_GT,
     TOKEN_ID_EQ,
     TOKEN_ID_ASSIGN,
-    TOKEN_ID_STR5,
+    TOKEN_ID_FSTR,
     TOKEN_ID_INT0,
     TOKEN_ID_HEX2,
     TOKEN_ID_DHEX2,

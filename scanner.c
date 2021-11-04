@@ -20,22 +20,26 @@
 #define STATE_STR2 111
 #define STATE_STR3 112
 #define STATE_STR4 113
-#define STATE_INT0 114
-#define STATE_HEX 115
-#define STATE_HEX2 116
-#define STATE_DHEX 117
-#define STATE_DHEX2 118
-#define STATE_HEXP 119
-#define STATE_HEXP2 120
-#define STATE_HEXP3 121
-#define STATE_DBL 122
-#define STATE_DBL2 123
-#define STATE_EXP 124
-#define STATE_EXP2 125
-#define STATE_EXP3 126
-#define STATE_INT 127
-#define STATE_ID 128
-#define STATE_ERROR 129
+#define STATE_STR5 114
+#define STATE_STR6 115
+#define STATE_STR7 116
+#define STATE_STR8 117
+#define STATE_INT0 118
+#define STATE_HEX 119
+#define STATE_HEX2 120
+#define STATE_DHEX 121
+#define STATE_DHEX2 122
+#define STATE_HEXP 123
+#define STATE_HEXP2 124
+#define STATE_HEXP3 125
+#define STATE_DBL 126
+#define STATE_DBL2 127
+#define STATE_EXP 128
+#define STATE_EXP2 129
+#define STATE_EXP3 130
+#define STATE_INT 131
+#define STATE_ID 132
+#define STATE_ERROR 133
 
 FILE *source_file;
 Dynamic_string *dynamic_string;
@@ -233,7 +237,7 @@ int get_token(Token *token){
             case STATE_STR:
                 if (c == '"') {
                     //token STR5
-                    printf("token STR5\n");
+                    printf("token FSTR\n");
                     state = STATE_START;
                 } else if (c == '\\'){
                     state = STATE_STR2;
@@ -244,8 +248,10 @@ int get_token(Token *token){
                 }
                 break;
             case STATE_STR2:
-                if (c >= '0' && c <='2') {
+                if (c == '0' || c == '1') {
                     state = STATE_STR3;
+                } else if (c == '2'){
+                    state = STATE_STR6;
                 } else if (c == '\\' || c == '"' || c == 'n' || c == 't'){
                     state = STATE_STR;
                 } else {
@@ -253,14 +259,46 @@ int get_token(Token *token){
                 }
                 break;
             case STATE_STR3:
-                if (c >= '0' && c <='5') {
+                if (c == '0') {
                     state = STATE_STR4;
+                }else if (c >= '1' && c <= '9') {
+                    state = STATE_STR5;
                 } else {
                     state = STATE_ERROR;
                 }
                 break;
             case STATE_STR4:
-                if (c >= '1' && c <='5') {
+                if (c >= '1' && c <='9') {
+                    state = STATE_STR;
+                } else {
+                    state = STATE_ERROR;
+                }
+                break;
+            case STATE_STR5:
+                if (c >= '0' && c <='9') {
+                    state = STATE_STR;
+                } else {
+                    state = STATE_ERROR;
+                }
+                break;
+            case STATE_STR6:
+                if (c >= '0' && c <='4') {
+                    state = STATE_STR7;
+                }else if (c == '5') {
+                    state = STATE_STR8;
+                } else {
+                    state = STATE_ERROR;
+                }
+                break;
+            case STATE_STR7:
+                if (c >= '0' && c <='9') {
+                    state = STATE_STR;
+                } else {
+                    state = STATE_ERROR;
+                }
+                break;
+            case STATE_STR8:
+                if (c >= '0' && c <='5') {
                     state = STATE_STR;
                 } else {
                     state = STATE_ERROR;
