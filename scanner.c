@@ -79,6 +79,24 @@ bool DS_Add_Tester(Dynamic_string *str, char c){
     }
     return true;
 }
+
+void HexaDecimal(char *name, Token *res) {
+    int point = 0;
+    while(name[point++] != '.');
+    int WholeNumberPart = point - 3;
+    int DecimalPart = strlen(name) - point;
+    double exp = 1.0f;
+    double tmp = 0;
+    while(WholeNumberPart-- != 1) exp = exp * 16;
+    for (int i = 2; i < strlen(name); i++) {
+        if(name[i] == '.') continue; 
+        int shift = (name[i] >= 65 && name[i] <= 70 ) ? name[i] - 55 : name[i] - 87;
+        tmp += shift*exp;
+        exp /= 16;
+    }
+    (*res).Value.Double = tmp;
+}
+
 void KW_ID_Cmp(Dynamic_string *str, Token *token){
     token->ID = TOKEN_ID_KEYWORD;
     if (DS_Cmp(str, "do")){token->Value.keyword = KEYWORD_DO;}
@@ -476,7 +494,8 @@ int get_token(Token *token){
                     if (!(DS_Add_Tester(ptr_Str, c))){/**error**/}
                     state = STATE_DHEX;
                 } else{
-                    conversion_Int(ptr_Str,token);
+                    HexaDecimal(prt_Str, token);
+                    //conversion_Int(ptr_Str,token);
                     token->ID = TOKEN_ID_HEX2;
                     free(ptr_Str);
                     state = STATE_HEX2;
@@ -510,6 +529,8 @@ int get_token(Token *token){
                 } else if (c == 'p'){
                     state = STATE_HEXP;
                 } else{
+
+                    token->ID = TOKEN_ID_DHEX2;
                     printf("token DHEX2\n"); //token DHEX2
                     state = STATE_START;
                     ungetc(c, source_file);
