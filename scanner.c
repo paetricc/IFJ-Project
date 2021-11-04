@@ -40,6 +40,22 @@
 #define STATE_INT 131
 #define STATE_ID 132
 #define STATE_ERROR 133
+#define STATE_INT0 114
+#define STATE_HEX 115
+#define STATE_HEX2 116
+#define STATE_DHEX 117
+#define STATE_DHEX2 118
+#define STATE_HEXP 119
+#define STATE_HEXP2 120
+#define STATE_HEXP3 121
+#define STATE_DBL 122
+#define STATE_DBL2 123
+#define STATE_EXP 124
+#define STATE_EXP2 125
+#define STATE_EXP3 126
+#define STATE_INT 127
+#define STATE_ID 128
+#define STATE_ERROR 129
 
 FILE *source_file;
 Dynamic_string *dynamic_string;
@@ -99,6 +115,10 @@ int get_token(Token *token){
     }
     char c;
     bool exp_Version = true;
+    
+int get_token(Token *token){
+    source_file = stdin;
+    char c;
     int state = STATE_START;
     while ((c = (char) getc(source_file)) != '\0'){
         c = (char) getc(source_file);
@@ -179,6 +199,19 @@ int get_token(Token *token){
                         break;
                     case '_':
                         if (!(DS_Add_Tester(ptr_Str, c))){/**error**/}
+
+                        state = STATE_INT0;
+                        break;
+                    case '1' ... '9':
+                        state = STATE_INT;
+                        break;
+                    case 'A' ... 'Z':
+                        state = STATE_ID;
+                        break;
+                    case 'a' ... 'z':
+                        state = STATE_ID;
+                        break;
+                    case '_':
                         state = STATE_ID;
                         break;
                     case '\0':
@@ -306,6 +339,12 @@ int get_token(Token *token){
                     state = STATE_STR2;
                 } else if ((c >= 32 && c != '"') || (c >= 32 && c != '\\')){
                     if (!(DS_Add_Tester(ptr_Str, c))){/**error**/}
+                    //token STR5
+                    printf("token STR5\n");
+                    state = STATE_START;
+                } else if (c == '\\'){
+                    state = STATE_STR2;
+                } else if ((c >= 32 && c != '"') || (c >= 32 && c != '\\')){
                     state = STATE_STR;
                 } else{
                     state = STATE_ERROR;
@@ -320,6 +359,9 @@ int get_token(Token *token){
                     state = STATE_STR6;
                 } else if (c == '\\' || c == '"' || c == 'n' || c == 't'){
                     if (!(DS_Add_Tester(ptr_Str, c))){/**error**/ }
+                if (c >= '0' && c <='2') {
+                    state = STATE_STR3;
+                } else if (c == '\\' || c == '"' || c == 'n' || c == 't'){
                     state = STATE_STR;
                 } else {
                     state = STATE_ERROR;
@@ -332,6 +374,8 @@ int get_token(Token *token){
                 }else if (c >= '1' && c <= '9') {
                     if (!(DS_Add_Tester(ptr_Str, c))){/**error**/}
                     state = STATE_STR5;
+                if (c >= '0' && c <='5') {
+                    state = STATE_STR4;
                 } else {
                     state = STATE_ERROR;
                 }
@@ -374,6 +418,7 @@ int get_token(Token *token){
             case STATE_STR8:
                 if (c >= '0' && c <='5') {
                     if (!(DS_Add_Tester(ptr_Str, c))){/**error**/}
+                if (c >= '1' && c <='5') {
                     state = STATE_STR;
                 } else {
                     state = STATE_ERROR;
@@ -401,6 +446,16 @@ int get_token(Token *token){
                     conversion_Int(ptr_Str,token);
                     token->ID = TOKEN_ID_INT0;
                     free(ptr_Str);
+                    state = STATE_HEX;
+                }else if (c == '0') {
+                    state = STATE_INT0;
+                }else if (c >= '1' && c <= '9'){
+                    state = STATE_INT;
+                }else if (c == 'e' || c == 'E'){
+                    state = STATE_EXP;
+                } else if (c == '.'){
+                    state = STATE_DBL;
+                }else{
                     printf("token INT0\n"); //token INT0
                     state = STATE_START;
                 }
@@ -424,6 +479,10 @@ int get_token(Token *token){
                     conversion_Int(ptr_Str,token);
                     token->ID = TOKEN_ID_HEX2;
                     free(ptr_Str);
+                    state = STATE_HEX2;
+                } else if (c == '.'){
+                    state = STATE_DHEX;
+                } else{
                     printf("token HEX2\n"); //token HEX2
                     state = STATE_START;
                     ungetc(c, source_file);
@@ -437,11 +496,15 @@ int get_token(Token *token){
                     if (!(DS_Add_Tester(ptr_Str, c))){/**error**/}
                     state = STATE_HEXP;
                     if (!(DS_Add_Tester(ptr_Str, c))){/**error**/}
+                    state = STATE_DHEX2;
+                } else if (c == 'p'){
+                    state = STATE_HEXP;
                 } else{
                     state = STATE_ERROR;
                 }
                 break;
             case STATE_DHEX2: //TODO
+            case STATE_DHEX2:
                 if ((c >= 'a' && c <='f') || (c >= 'A' && c <='F') || (c >= '0' && c <='9')) {
                     state = STATE_DHEX2;
                 } else if (c == 'p'){
@@ -476,6 +539,8 @@ int get_token(Token *token){
                     conversion_Double(ptr_Str,token);
                     token->ID = TOKEN_ID_HEXP3;
                     free(ptr_Str);
+                    state = STATE_HEXP3;
+                } else{
                     printf("token HEXP3\n"); //token HEXP3
                     state = STATE_START;
                     ungetc(c, source_file);
@@ -487,6 +552,8 @@ int get_token(Token *token){
                     state = STATE_EXP3;
                 } else if (c == '+' || c == '-'){
                     if (!(DS_Add_Tester(ptr_Str, c))){/**error**/}
+                    state = STATE_EXP3;
+                } else if (c == '+' || c == '-'){
                     state = STATE_EXP2;
                 } else{
                     state = STATE_ERROR;
@@ -514,6 +581,8 @@ int get_token(Token *token){
                         token->ID = TOKEN_ID_EXP3;
                         free(ptr_Str);
                     }
+                    state = STATE_EXP3;
+                } else{
                     printf("token EXP3\n"); //token EXP3
                     state = STATE_START;
                     ungetc(c, source_file);
@@ -538,6 +607,10 @@ int get_token(Token *token){
                     conversion_Double(ptr_Str,token);
                     token->ID = TOKEN_ID_DBL2;
                     free(ptr_Str);
+                    state = STATE_EXP;
+                } else if (c >= '0' && c <= '9'){
+                        state = STATE_DBL2;
+                } else{
                     printf("token DBL2\n"); //token DBL2
                     state = STATE_START;
                     ungetc(c, source_file);
@@ -559,6 +632,12 @@ int get_token(Token *token){
                     conversion_Int(ptr_Str,token);
                     token->ID = TOKEN_ID_INT;
                     free(ptr_Str);
+                    state = STATE_EXP;
+                } else if (c == '.'){
+                    state = STATE_DBL;
+                }else if (c >= '0' && c <='9'){
+                    state = STATE_INT;
+                } else{
                     printf("token INT\n"); //token INT
                     state = STATE_START;
                     ungetc(c, source_file);
@@ -571,6 +650,8 @@ int get_token(Token *token){
                 } else{
                     KW_ID_Cmp(ptr_Str, token);
                     free(ptr_Str);
+                    state = STATE_ID;
+                } else{
                     printf("token ID\n"); //token ID
                     state = STATE_START;
                     ungetc(c, source_file);
