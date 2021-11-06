@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <Dynamic_string.h>
+#include "Dynamic_string.h"
 
 #define DYN_STR_LEN 8
 
