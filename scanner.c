@@ -80,17 +80,17 @@ bool DS_Add_Tester(Dynamic_string *str, char c){
     return true;
 }
 
-void HexaDecimal(char *name, Token *res) {
+void HexaDecimal(Dynamic_string *name, Token *res) {
     int point = 0;
-    while(name[point++] != '.');
+    while(name->str[point++] != '.');
     int WholeNumberPart = point - 3;
-    int DecimalPart = strlen(name) - point;
+    int DecimalPart = strlen(name->str) - point;
     double exp = 1.0f;
     double tmp = 0;
     while(WholeNumberPart-- != 1) exp = exp * 16;
-    for (int i = 2; i < strlen(name); i++) {
-        if(name[i] == '.') continue; 
-        int shift = (name[i] >= 65 && name[i] <= 70 ) ? name[i] - 55 : name[i] - 87;
+    for (int i = 2; i < strlen(name->str); i++) {
+        if(name->str[i] == '.') continue; 
+        int shift = (name->str[i] >= 65 && name->str[i] <= 70 ) ? name->str[i] - 55 : name->str[i] - 87;
         tmp += shift*exp;
         exp /= 16;
     }
@@ -528,7 +528,7 @@ int get_token(Token *token){
                 } else if (c == 'p'){
                     state = STATE_HEXP;
                 } else{
-                    HexaDecimal(prt_Str, token);
+                    HexaDecimal(ptr_Str, token);
                     token->ID = TOKEN_ID_DHEX2;
                     printf("token DHEX2\n"); //token DHEX2
                     state = STATE_START;
