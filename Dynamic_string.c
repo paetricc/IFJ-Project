@@ -38,7 +38,7 @@ bool DS_Copy(Dynamic_string *string,Dynamic_string *s_new){
 }
 
 int DS_Cmp(Dynamic_string *string, const char *c_string){
-    return strcmp(string->str, c_string);
+    return (strcmp(string->str, c_string) == 0);
 }
 
 void DS_Free(Dynamic_string *string){

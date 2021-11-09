@@ -69,6 +69,6 @@ typedef struct {
 } Token;
 
 
-//int get_token(Token *token);
+Token get_token(Token *, FILE *);
 
 #endif
