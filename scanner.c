@@ -107,11 +107,8 @@ void KW_ID_Cmp(Dynamic_string *str, Token *token){
 }
 
 Token get_token(Token *token, FILE *source_file ) {
-    //source_file = stdin;
-    
-    //token->Value.string = dynamic_string;
-    //Dynamic_string string;
     Dynamic_string *ptr_Str = (Dynamic_string *)malloc(sizeof(Dynamic_string));
+    token->Value.string = (Dynamic_string *)malloc(sizeof(Dynamic_string));
     if (!(DS_Init(ptr_Str))) {
         //error
     }
