@@ -1,6 +1,8 @@
 #include "scanner.h"
+#include "parser.h"
 
 int main(void) {
-    get_token();
+    FILE *source_file = stdin;
+    parse(source_file);
     return 0;
 }

@@ -41,7 +41,7 @@
 #define STATE_ID 132
 #define STATE_ERROR 133
 
-FILE *source_file;
+//FILE *source_file;
 Dynamic_string *dynamic_string;
 
 void conversion_Int(Dynamic_string *str, Token *token){
@@ -106,12 +106,12 @@ void KW_ID_Cmp(Dynamic_string *str, Token *token){
     }
 }
 
-int get_token(Token *token) {
-    source_file = stdin;
-    token->Value.string = dynamic_string;
-
-    Dynamic_string string;
-    Dynamic_string *ptr_Str = &string;
+Token get_token(Token *token, FILE *source_file ) {
+    //source_file = stdin;
+    
+    //token->Value.string = dynamic_string;
+    //Dynamic_string string;
+    Dynamic_string *ptr_Str = (Dynamic_string *)malloc(sizeof(Dynamic_string));
     if (!(DS_Init(ptr_Str))) {
         //error
     }
@@ -551,9 +551,9 @@ int get_token(Token *token) {
                         conversion_Int(ptr_Str, token);
                         token->ID = TOKEN_ID_INT;
                         free(ptr_Str);
-
                         state = STATE_START;
                         ungetc(c, source_file);
+                        return *token;
                     }
                     break;
                 case STATE_ID:
@@ -563,9 +563,9 @@ int get_token(Token *token) {
                     } else {
                         KW_ID_Cmp(ptr_Str, token);
                         free(ptr_Str);
-
                         state = STATE_START;
                         ungetc(c, source_file); // TODO nejsem si jsitý
+                        return *token;
                     }
                     break;
                 default:
