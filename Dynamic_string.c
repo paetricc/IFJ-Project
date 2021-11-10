@@ -29,7 +29,7 @@ bool DS_Add(Dynamic_string *string, char c){
 
 bool DS_Copy(Dynamic_string *string,Dynamic_string *s_new){
     unsigned int s_new_size = string->length;
-    if (!(s_new->str = realloc(s_new->str,s_new_size))){
+    if (!(s_new->str = (char *)realloc(s_new->str,s_new_size))){
         return false;
     }
     strcpy(s_new->str,string->str);
