@@ -56,8 +56,8 @@ void conversion_Double(Dynamic_string *str, Token *token){
     token->Value.Double = value;
 }
 
-bool DS_Add_Tester(Dynamic_string *str, char c){
-    if (!(DS_Add(str, c))){
+bool DS_Add_Tester(Dynamic_string *str, char c) {
+    if (!(DS_Add(str, c))) {
         free(str);
         return false;
     }
@@ -115,33 +115,39 @@ Token get_token(Token *token, FILE *source_file ) {
         bool exp_Version = true;
         char c;
         int state = STATE_START;
-        while ((c = (char) getc(source_file)) != '\0') {
+        while (((c = (char) getc(source_file)) != '\0') || (state == STATE_STR)) {
             switch (state) {
                 case STATE_START:               //co jde ze startu
                     switch (c) {
                         case '\n':
                             token->ID = TOKEN_ID_EOL;
                             state = STATE_START;
+                            return *token;
                             break;
                         case ',':
                             token->ID = TOKEN_ID_CMA;
                             state = STATE_START;
+                            return *token;
                             break;
                         case ' ':
                             token->ID = TOKEN_ID_SPACE;
                             state = STATE_START;
+                            return *token;
                             break;
                         case ')':
                             token->ID = TOKEN_ID_RBR;
                             state = STATE_START;
+                            return *token;
                             break;
                         case '(':
                             token->ID = TOKEN_ID_LBR;
                             state = STATE_START;
+                            return *token;
                             break;
                         case '+':
                             token->ID = TOKEN_ID_ADD;
                             state = STATE_START;
+                            return *token;
                             break;
                         case '-':
                             state = STATE_SUB;
@@ -149,6 +155,7 @@ Token get_token(Token *token, FILE *source_file ) {
                         case '*':
                             token->ID = TOKEN_ID_MUL;
                             state = STATE_START;
+                            return *token;
                             break;
                         case '/':
                             state = STATE_DIV;
@@ -203,6 +210,7 @@ Token get_token(Token *token, FILE *source_file ) {
                         token->ID = TOKEN_ID_SUB;
                         state = STATE_START;
                         ungetc(c, source_file);
+                        return *token;
                     }
                     break;
                 case STATE_LCMT2:
@@ -245,16 +253,19 @@ Token get_token(Token *token, FILE *source_file ) {
                     if (c == '/') {
                         token->ID = TOKEN_ID_DIV2;
                         state = STATE_START;
+                        return *token;
                     } else {
                         token->ID = TOKEN_ID_DIV;
                         state = STATE_START;
                         ungetc(c, source_file);
+                        return *token;
                     }
                     break;
                 case STATE_NEQ:
                     if (c == '=') {
                         token->ID = TOKEN_ID_NEQ2;
                         state = STATE_START;
+                        return *token;
                     } else {
                         state = STATE_ERROR;
                     }
@@ -263,43 +274,54 @@ Token get_token(Token *token, FILE *source_file ) {
                     if (c == '=') {
                         token->ID = TOKEN_ID_LTE;
                         state = STATE_START;
+                        return *token;
                     } else {
                         token->ID = TOKEN_ID_LT;
                         state = STATE_START;
                         ungetc(c, source_file);
+                        return *token;
                     }
                     break;
                 case STATE_GT:
                     if (c == '=') {
                         token->ID = TOKEN_ID_GTE;
                         state = STATE_START;
+                        return *token;
                     } else {
                         token->ID = TOKEN_ID_GT;
                         state = STATE_START;
                         ungetc(c, source_file);
+                        return *token;
                     }
                     break;
                 case STATE_ASSIGN:
                     if (c == '=') {
                         token->ID = TOKEN_ID_EQ;
                         state = STATE_START;
+                        return *token;
                     } else {
                         token->ID = TOKEN_ID_ASSIGN;
                         state = STATE_START;
                         ungetc(c, source_file);
+                        return *token;
                     }
                     break;
                 case STATE_STR:
                     if (c == '"') {
                         token->ID = TOKEN_ID_FSTR;
                         if (!(DS_Copy(ptr_Str, token->Value.string))) {/**error**/}
+                        printf("string: %s\n", ptr_Str->str);
                         free(ptr_Str);
                         state = STATE_START;
                         ungetc(c, source_file);
+                        return *token;
                     } else if (c == '\\') {
                         if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_STR2;
                     } else if ((c >= 32 && c != '"') || (c >= 32 && c != '\\')) {
+                        state = STATE_STR;
+                    }else if (c == '\n'){
+                        if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_STR;
                     } else {
                         state = STATE_ERROR;
@@ -396,7 +418,8 @@ Token get_token(Token *token, FILE *source_file ) {
                         token->ID = TOKEN_ID_INT0;
                         free(ptr_Str);
                         state = STATE_START;
-                        ungetc(c, source_file); // TODO možná to tu nemá být
+                        ungetc(c, source_file);
+                        return *token;
                     }
                     break;
                 case STATE_HEX:
@@ -419,6 +442,8 @@ Token get_token(Token *token, FILE *source_file ) {
                         token->ID = TOKEN_ID_HEX2;
                         free(ptr_Str);
                         state = STATE_START;
+                        ungetc(c, source_file);
+                        return *token;
                     }
                     break;
                 case STATE_DHEX:
@@ -432,7 +457,7 @@ Token get_token(Token *token, FILE *source_file ) {
                         state = STATE_ERROR;
                     }
                     break;
-                case STATE_DHEX2: //TODO
+                case STATE_DHEX2:
                     if ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (c >= '0' && c <= '9')) {
                         state = STATE_DHEX2;
                     } else if (c == 'p') {
@@ -442,6 +467,7 @@ Token get_token(Token *token, FILE *source_file ) {
                         token->ID = TOKEN_ID_DHEX2;
                         state = STATE_START;
                         ungetc(c, source_file);
+                        return *token;
                     }
                     break;
                 case STATE_HEXP:
@@ -469,6 +495,8 @@ Token get_token(Token *token, FILE *source_file ) {
                         token->ID = TOKEN_ID_HEXP3;
                         free(ptr_Str);
                         state = STATE_START;
+                        ungetc(c, source_file);
+                        return *token;
                     }
                     break;
                 case STATE_EXP:
@@ -499,10 +527,14 @@ Token get_token(Token *token, FILE *source_file ) {
                             conversion_Int(ptr_Str, token);
                             token->ID = TOKEN_ID_EXP3;
                             free(ptr_Str);
+                            ungetc(c, source_file);
+                            return *token;
                         } else {
                             conversion_Double(ptr_Str, token);
                             token->ID = TOKEN_ID_EXP3;
                             free(ptr_Str);
+                            ungetc(c, source_file);
+                            return *token;
                         }
                         state = STATE_START;
                         ungetc(c, source_file); // možná to tu nemá být
@@ -527,9 +559,9 @@ Token get_token(Token *token, FILE *source_file ) {
                         conversion_Double(ptr_Str, token);
                         token->ID = TOKEN_ID_DBL2;
                         free(ptr_Str);
-
                         state = STATE_START;
                         ungetc(c, source_file);
+                        return *token;
                     }
                     break;
                 case STATE_INT:
@@ -561,7 +593,7 @@ Token get_token(Token *token, FILE *source_file ) {
                         KW_ID_Cmp(ptr_Str, token);
                         free(ptr_Str);
                         state = STATE_START;
-                        ungetc(c, source_file); // TODO nejsem si jsitý
+                        ungetc(c, source_file);
                         return *token;
                     }
                     break;
@@ -569,11 +601,10 @@ Token get_token(Token *token, FILE *source_file ) {
                     state = STATE_ERROR;
                     break;
             }
-            printf("%d\n", state);
             if (state == STATE_ERROR) {
                 break;
             }
         }
         token->ID = TOKEN_ID_EOF;
-        printf("token EOF\n"); //token EOF
+        return *token;
     }
