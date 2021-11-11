@@ -173,6 +173,7 @@ Token get_token(Token *token, FILE *source_file ) {
                             state = STATE_ASSIGN;
                             break;
                         case '"':
+                            if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                             state = STATE_STR;
                             break;
                         case '0':
@@ -309,8 +310,8 @@ Token get_token(Token *token, FILE *source_file ) {
                 case STATE_STR:
                     if (c == '"') {
                         token->ID = TOKEN_ID_FSTR;
+                        if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         if (!(DS_Copy(ptr_Str, token->Value.string))) {/**error**/}
-                        printf("string: %s\n", ptr_Str->str);
                         free(ptr_Str);
                         state = STATE_START;
                         ungetc(c, source_file);
@@ -319,6 +320,7 @@ Token get_token(Token *token, FILE *source_file ) {
                         if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_STR2;
                     } else if ((c >= 32 && c != '"') || (c >= 32 && c != '\\')) {
+                        if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_STR;
                     }else if (c == '\n'){
                         if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
