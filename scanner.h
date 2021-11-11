@@ -44,7 +44,6 @@ typedef enum {
     TOKEN_ID_EQ,
     TOKEN_ID_ASSIGN,
     TOKEN_ID_FSTR,
-    TOKEN_ID_STR5,
     TOKEN_ID_INT0,
     TOKEN_ID_HEX2,
     TOKEN_ID_DHEX2,
