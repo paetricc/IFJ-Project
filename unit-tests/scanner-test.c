@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../scanner.h"
-
+#include "scanner-test.h"
+#include "../scanner.c"
+#include "../Dynamic_string.c"
 
 /**
  * Prelozi enum hodnotu keyword na string obsahujici jeho nazev.
@@ -96,8 +97,6 @@ char *Token_ID_to_string(Token_ID id) {
             return "TOKEN_ID_ASSIGN";
         case TOKEN_ID_FSTR:
             return "TOKEN_ID_FSTR";
-        case TOKEN_ID_STR5:
-            return "TOKEN_ID_STR5";
         case TOKEN_ID_INT0:
             return "TOKEN_ID_INT0";
         case TOKEN_ID_HEX2:
@@ -125,9 +124,24 @@ char *Token_ID_to_string(Token_ID id) {
  * @param *token Ukazatel na strukturu tokenu
 */
 void print_token(Token *token) {
+    // vytisknu id tokenu
     fprintf(stdout, "Token ID: %s\n", Token_ID_to_string(token->ID));
-    if(token->ID == TOKEN_ID_KEYWORD)
+
+    if(token->ID == TOKEN_ID_KEYWORD) // token je klicove slovo
         fprintf(stdout, "Keyword: %s\n", keyword_to_string(token->Value.keyword));
+
+    else if(token->ID == TOKEN_ID_FSTR) // token je string
+        fprintf(stdout, "String value: %s\n", token->Value.string->str);
+
+    else if(token->ID == TOKEN_ID_INT0 || token->ID == TOKEN_ID_HEX2 ||
+                token->ID == TOKEN_ID_INT) // token je integer
+        fprintf(stdout, "Integer value: %d\n", token->Value.Integer);
+
+    else if(token->ID == TOKEN_ID_DHEX2 || token->ID == TOKEN_ID_HEXP3 ||
+                token->ID == TOKEN_ID_DBL2) // token je double
+        fprintf(stdout, "Double value: %f\n", token->Value.Double);
+    //else if(token->ID == TOKEN_ID_EXP3) Value je Integer nebo Double - nelze rozhodnout
+    else{}
 }
 
 int main() {
@@ -135,10 +149,14 @@ int main() {
     if(token == NULL) {
         fprintf(stderr, "Nepodařilo se přiřadit paměť pro testovací token");
     }
-        
+
     printf ("Testy na lexikální analyzátor - scanner.c\n");
-    printf ("-----------------------------------------\n");  
+    printf ("-----------------------------------------\n");
+
+    FILE *f = stdin;
     
+    get_token(token, f);
+    print_token(token);
 
     free(token);
     return 0;
