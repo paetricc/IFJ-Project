@@ -8,12 +8,12 @@ scanner-test:
 	$(CC) $(FLAGS) *.c -o $(NAME)-test
 
 run1: scanner-test
-	@./scanner-test < test1 > current-test1.output
+	@./scanner-test < test1.in > current-test1.output
 	@diff -su current-test1.output test1.output
 	@rm current-test1.output
 
 run3: scanner-test
-	@./scanner-test < test3 > current-test3.output
+	@./scanner-test < test3.in > current-test3.output
 	@diff -su current-test3.output test3.output
 	@rm current-test3.output
 
