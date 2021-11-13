@@ -4,6 +4,8 @@
 #include "../scanner.c"
 #include "../Dynamic_string.c"
 
+// TODO include scanner-test.h nestaci - musim jak opicka includovat oba .c soubory
+
 /**
  * Prelozi enum hodnotu keyword na string obsahujici jeho nazev.
  *
@@ -144,19 +146,69 @@ void print_token(Token *token) {
     else{}
 }
 
+/**
+ * Test funguji nasledovne:
+
+ * Vstupni soubor odeslu scanneru, ktery z nej vyzobne lexem a vygeneruje token.
+ * Na vystup vytisknu jednak lexem, ktery scanner precetl, tak i token, ktery
+ * scanner vygeneroval.
+ * 
+ * Pro praci se vstupnim souboren pouzijeme 4 pomocne promenne, krere slouzi jen
+ * a pouze k tomu, abychom mohli zpetne zjistit, jaky lexem byl scannerem precten.
+ *
+*/
 int main() {
     Token *token = malloc(sizeof(token));
     if(token == NULL) {
         fprintf(stderr, "Nepodařilo se přiřadit paměť pro testovací token");
+        return 1;
     }
 
-    printf ("Testy na lexikální analyzátor - scanner.c\n");
-    printf ("-----------------------------------------\n");
+    fprintf(stdout, "Testy na lexikální analyzátor - scanner.c\n");
+    fprintf(stdout, "-----------------------------------------\n\n");
 
-    FILE *f = stdin;
+    // vstupni soubor
+    FILE *read_file = stdin;
+    // indexy urcujici pozici v ctenem souboru
+    long new_read_index;
+    long last_read_index;
+    // jezdci udavajici skutecnou pozici v ctenem souboru
+    fpos_t new_read_pos;
+    fpos_t last_read_pos;
+    // ulozim si jezdec na zacatku cteneho souboru
+    fgetpos(read_file, &last_read_pos);
     
-    get_token(token, f);
-    print_token(token);
+    do { 
+        // ziskam token -> ze vstupu je uzobnut lexem
+        get_token(token, read_file);
+        // ulozim si, kde scanner skoncil s ctenim
+        fgetpos(read_file, &new_read_pos);
+        new_read_index = ftell(read_file);
+
+        // budu cist na pozici, kde zacal puvodne scanner
+        fsetpos(read_file, &last_read_pos);
+        last_read_index = ftell(read_file);
+        // a vsechno, co scanner precetl si ulozim do stringu
+        char read_lex[new_read_index - last_read_index + 1];
+        int i = 0;
+        
+        //budu cist tak dlouho, dokud nenarazim na pozici, kde skoncil scanner
+        while(new_read_index != last_read_index) {
+            // jednotlive znaky prectene scannerem ukladam do stringu
+            read_lex[i] = fgetc(read_file);
+            // a ulozim si index, na kterem ctu
+            last_read_index = ftell(read_file);
+            i++;
+        }
+        // string ukoncim a ulozim si, kde scanner (a taky ted ja) prestal cist
+        read_lex[i] = '\0';
+        fgetpos(read_file, &last_read_pos);
+
+        fprintf(stdout, "Scanner přečetl lexém:[%s]\n", read_lex);
+        fprintf(stdout, "a vrátil token: \n");
+        print_token(token);
+        fprintf(stdout, "\n\n");
+    } while(token->ID != TOKEN_ID_EOF);
 
     free(token);
     return 0;
