@@ -63,6 +63,12 @@ void parse(FILE *source_file) {
             case TOKEN_ID_EOL:
                 printf("TOKEN_ID_EOL\n");
                 break;
+            case TOKEN_ID_TAB:
+                printf("TOKEN_ID_TAB\n");
+                break;
+            case TOKEN_ID_CLN:
+                printf("TOKEN_ID_CLN\n");
+                break;
             case TOKEN_ID_CMA:
                 printf("TOKEN_ID_CMA\n");
                 break;
@@ -132,8 +138,11 @@ void parse(FILE *source_file) {
             case TOKEN_ID_HEXP3:
                 printf("TOKEN_ID_HEXP3: %lf\n", test->Value.Double);
                 break;
-            case TOKEN_ID_EXP3:
-                printf("TOKEN_ID_EXP3\n");
+            case TOKEN_ID_EXP3I:
+                printf("TOKEN_ID_HEX2: %d\n", test->Value.Integer);
+                break;
+            case TOKEN_ID_EXP3D:
+                printf("TOKEN_ID_HEXP3: %lf\n", test->Value.Double);
                 break;
             case TOKEN_ID_DBL2:
                 printf("TOKEN_ID_DBL2: %f\n", test->Value.Double);
@@ -143,6 +152,9 @@ void parse(FILE *source_file) {
                 break;
             case TOKEN_ID_ID:
                 printf("TOKEN_ID_ID: %s\n", test->Value.string->str);
+                break;
+            case TOKEN_ID_ERROR:
+                printf("TOKEN_ID_ERROR\n");
                 break;
             case TOKEN_ID_EOF:
                 printf("TOKEN_ID_EOF\n");

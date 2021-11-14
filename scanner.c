@@ -119,6 +119,16 @@ Token get_token(Token *token, FILE *source_file ) {
             switch (state) {
                 case STATE_START:               //co jde ze startu
                     switch (c) {
+                        case 9:
+                            token->ID = TOKEN_ID_TAB;
+                            state = STATE_START;
+                            return *token;
+                            break;
+                        case ':':
+                            token->ID = TOKEN_ID_CLN;
+                            state = STATE_START;
+                            return *token;
+                            break;
                         case '\n':
                             token->ID = TOKEN_ID_EOL;
                             state = STATE_START;
@@ -218,10 +228,10 @@ Token get_token(Token *token, FILE *source_file ) {
                     if (c == '[') {
                         state = STATE_BCMT;
                     } else if (c == '\n') {
-                        printf("token LCMT2\n"); //token LCMT2;
-                        token->ID = TOKEN_ID_EOL;
-                        printf("token EOL\n"); //token EOL
+                        token->ID = TOKEN_ID_LCMT2;
                         state = STATE_START;
+                        ungetc(c, source_file);
+                        return *token;
                     } else {
                         state = STATE_LCMT2;
                     }
@@ -244,8 +254,10 @@ Token get_token(Token *token, FILE *source_file ) {
                     break;
                 case STATE_BCMT3:
                     if (c == ']') {
-                        printf("token BCMT4\n"); //token BCMT4
+                        token->ID = TOKEN_ID_BCMT4;
                         state = STATE_START;
+                        ungetc(c, source_file);
+                        return *token;
                     } else {
                         state = STATE_ERROR;
                     }
@@ -527,13 +539,13 @@ Token get_token(Token *token, FILE *source_file ) {
                     } else {
                         if (exp_Version) {
                             conversion_Int(ptr_Str, token);
-                            token->ID = TOKEN_ID_EXP3;
+                            token->ID = TOKEN_ID_EXP3I;
                             free(ptr_Str);
                             ungetc(c, source_file);
                             return *token;
                         } else {
                             conversion_Double(ptr_Str, token);
-                            token->ID = TOKEN_ID_EXP3;
+                            token->ID = TOKEN_ID_EXP3D;
                             free(ptr_Str);
                             ungetc(c, source_file);
                             return *token;
