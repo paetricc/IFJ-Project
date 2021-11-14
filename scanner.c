@@ -72,10 +72,18 @@ void HexaDecimal(char *name, Token *res) {
     double exp = 1.0f;
     double tmp = 0;
     while(WholeNumberPart-- != 1) exp = exp * 16;
-    for (int i = 2; i < strlen(name); i++) {
+    printf("test: %s\n", name);
+    for (int i = 2; name[i] != '\0'; i++) {
         if(name[i] == '.') continue; 
-        int shift = (name[i] >= 65 && name[i] <= 70 ) ? name[i] - 55 : name[i] - 87;
-        tmp += shift*exp;
+        int shift  = 0;
+        if ( name[i] >= 65 && name[i] <= 70 ) {
+            shift = name[i] - 55;
+        } else if ( name[i] >= 97  && name[i] <= 102 ) {
+            shift = name[i] - 87;
+        } else {
+            shift = name[i] - 48;
+        }
+        if (shift) tmp += shift*exp;
         exp /= 16;
     }
     (*res).Value.Double = tmp;
@@ -461,8 +469,10 @@ Token get_token(Token *token, FILE *source_file ) {
                     break;
                 case STATE_DHEX2:
                     if ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (c >= '0' && c <= '9')) {
+                        if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_DHEX2;
                     } else if (c == 'p') {
+                        if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_HEXP;
                     } else {
                         HexaDecimal(ptr_Str->str, token);
