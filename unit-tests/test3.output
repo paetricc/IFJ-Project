@@ -1,0 +1,936 @@
+Testy na lexikální analyzátor - scanner.c
+-----------------------------------------
+
+Scanner přečetl lexém:[-- Program 1: Vypocet faktorialu (iterativne)]
+a vrátil token:
+Token ID: TOKEN_ID_LCMT2
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[require]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: KEYWORD_REQUIRE
+
+
+Scanner přečetl lexém:["ifj21"]
+a vrátil token: 
+Token ID: TOKEN_ID_FSTR
+String Value: "ifj21"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[function]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword = KEYWORD_FUNCTION
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[main]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "main"
+
+
+Scanner přečetl lexém:[(]
+a vrátil token: 
+Token ID: TOKEN_ID_LBR
+
+
+Scanner přečetl lexém:[)]
+a vrátil token: 
+Token ID: TOKEN_ID_RBR
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[-- uzivatelska funkce bez parametru]
+a vrátil token: 
+Token ID: TOKEN_ID_LCMT2
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[local]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+String Value: "KEYWORD_LOCAL"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[a]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "a"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[:]
+a vrátil token: 
+Token ID: TOKEN_ID_CLN
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[integer]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: "KEYWORD_INTEGER"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[local]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+String Value: "KEYWORD_LOCAL"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[vysl]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "vysl"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[:]
+a vrátil token: 
+Token ID: TOKEN_ID_CLN
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[integer]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: "KEYWORD_INTEGER"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[=]
+a vrátil token: 
+Token ID: TOKEN_ID_ASSIGN
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[0]
+a vrátil token: 
+Token ID: TOKEN_ID_INT0
+Integer Value: 0
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[write]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "write"
+
+
+Scanner přečetl lexém:[(]
+a vrátil token: 
+Token ID: TOKEN_ID_LBR
+
+
+Scanner přečetl lexém:[)]
+a vrátil token: 
+Token ID: TOKEN_ID_RBR
+
+
+Scanner přečetl lexém:["Zadejte cislo pro vypocet faktorialu\n"]
+a vrátil token: 
+Token ID: TOKEN_ID_FSTR
+String Value: "Zadejte cislo pro vypocet faktorialu\n"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[a]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "a"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[=]
+a vrátil token: 
+Token ID: TOKEN_ID_ASSIGN
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[readi]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "readi"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[(]
+a vrátil token: 
+Token ID: TOKEN_ID_LBR
+
+
+Scanner přečetl lexém:[)]
+a vrátil token: 
+Token ID: TOKEN_ID_RBR
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[if]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: "if"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[a]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "a"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[==]
+a vrátil token: 
+Token ID: TOKEN_ID_EQ
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[nil]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: "nil"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[then]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: "then"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[write]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "write"
+
+
+Scanner přečetl lexém:[(]
+a vrátil token: 
+Token ID: TOKEN_ID_LBR
+
+
+Scanner přečetl lexém:["a je nil\n"]
+a vrátil token: 
+Token ID: TOKEN_ID_FSTR
+String Value: "a je nil\n"
+
+
+Scanner přečetl lexém:[)]
+a vrátil token: 
+Token ID: TOKEN_ID_RBR
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[return]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: "KEYWORD_RETURN"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[else]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: "KEYWORD_ELSE"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[end]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: "KEYWORD_END"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[if]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: "KEYWORD_IF"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[a]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "a"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[<]
+a vrátil token: 
+Token ID: TOKEN_ID_LT
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[0]
+a vrátil token: 
+Token ID: TOKEN_ID_INT0
+Integer Value: 0
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[then]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: "KEYWORD_THEN"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[write]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "write"
+
+
+Scanner přečetl lexém:[(]
+a vrátil token: 
+Token ID: TOKEN_ID_LBR
+
+
+Scanner přečetl lexém:["Faktorial nelze spocitat\n"]
+a vrátil token: 
+Token ID: TOKEN_ID_FSTR
+String Value: "Faktorial nelze spocitat\n"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[else]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: "KEYWORD_ELSE"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[vysl]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "vysl"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[=]
+a vrátil token: 
+Token ID: TOKEN_ID_ASSIGN
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[1]
+a vrátil token: 
+Token ID: TOKEN_ID_INT
+Integer Value: 1
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[while]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: "KEYWORD_WHILE"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[a]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "a"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[>]
+a vrátil token: 
+Token ID: TOKEN_ID_GT
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[0]
+a vrátil token: 
+Token ID: TOKEN_ID_INT0
+Integer Value: 0
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[do]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+String Value: "KEYWORD_DO"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[vysl]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "vysl"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+String Value: "main"
+
+
+Scanner přečetl lexém:[=]
+a vrátil token: 
+Token ID: TOKEN_ID_ASSIGN
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[vysl]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "vysl"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[*]
+a vrátil token: 
+Token ID: TOKEN_ID_MUL
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[a]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "a"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[a]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "a"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[=]
+a vrátil token: 
+Token ID: TOKEN_ID_ASSIGN
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[a]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "a"
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[-]
+a vrátil token: 
+Token ID: TOKEN_ID_SUB
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[1]
+a vrátil token: 
+Token ID: TOKEN_ID_INT
+Integer Value: 1
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[-- dva prikazy]
+a vrátil token: 
+Token ID: TOKEN_ID_LCMT2
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[end]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: "KEYWORD_END"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[write]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "write"
+
+
+Scanner přečetl lexém:[(]
+a vrátil token: 
+Token ID: TOKEN_ID_LBR
+
+
+Scanner přečetl lexém:["Vysledek je: "]
+a vrátil token: 
+Token ID: TOKEN_ID_FSTR
+String Value: "Vysledek je: "
+
+
+Scanner přečetl lexém:[,]
+a vrátil token: 
+Token ID: TOKEN_ID_CMA
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[vysl]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "vysl"
+
+
+Scanner přečetl lexém:[,]
+a vrátil token: 
+Token ID: TOKEN_ID_CMA
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:["\n"]
+a vrátil token: 
+Token ID: TOKEN_ID_FSTR
+String Value: "\n"
+
+
+Scanner přečetl lexém:[)]
+a vrátil token: 
+Token ID: TOKEN_ID_RBR
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[end]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: "KEYWORD_END"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[end]
+a vrátil token: 
+Token ID: TOKEN_ID_KEYWORD
+Keyword: "KEYWORD_END"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[main]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String Value: "main"
+
+
+Scanner přečetl lexém:[(]
+a vrátil token: 
+Token ID: TOKEN_ID_LBR
+
+
+Scanner přečetl lexém:[)]
+a vrátil token: 
+Token ID: TOKEN_ID_RBR
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[-- prikaz hlavniho tela programu]
+a vrátil token: 
+Token ID: TOKEN_ID_LCMT2
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[]
+a vrátil token: 
+Token ID: TOKEN_ID_EOF
