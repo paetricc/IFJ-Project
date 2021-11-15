@@ -46,7 +46,8 @@ Dynamic_string *dynamic_string;
 
 void conversion_Int(Dynamic_string *str, Token *token){
     char *ptr;
-    int value = (int) strtol(str->str,&ptr,10);
+    int value = (token->ID == TOKEN_ID_INT || token->ID == TOKEN_ID_INT0) ? 
+    strtol(str->str,&ptr,10) : strtol(str->str,&ptr,16);
     token->Value.Integer = value;
 }
 
@@ -72,10 +73,17 @@ void HexaDecimal(char *name, Token *res) {
     double exp = 1.0f;
     double tmp = 0;
     while(WholeNumberPart-- != 1) exp = exp * 16;
-    for (int i = 2; i < strlen(name); i++) {
+    for (int i = 2; name[i] != '\0'; i++) {
         if(name[i] == '.') continue; 
-        int shift = (name[i] >= 65 && name[i] <= 70 ) ? name[i] - 55 : name[i] - 87;
-        tmp += shift*exp;
+        int shift  = 0;
+        if ( name[i] >= 65 && name[i] <= 70 ) {
+            shift = name[i] - 55;
+        } else if ( name[i] >= 97  && name[i] <= 102 ) {
+            shift = name[i] - 87;
+        } else {
+            shift = name[i] - 48;
+        }
+        if (shift) tmp += shift*exp;
         exp /= 16;
     }
     (*res).Value.Double = tmp;
@@ -218,10 +226,12 @@ Token get_token(Token *token, FILE *source_file ) {
                     if (c == '[') {
                         state = STATE_BCMT;
                     } else if (c == '\n') {
-                        printf("token LCMT2\n"); //token LCMT2;
-                        token->ID = TOKEN_ID_EOL;
-                        printf("token EOL\n"); //token EOL
-                        state = STATE_START;
+                        //printf("token LCMT2\n"); //token LCMT2;
+                        token->ID = TOKEN_ID_LCMT2;
+                        ungetc(c, source_file);
+                        //printf("token EOL\n"); //token EOL
+                        //state = STATE_START;
+                        return *token;
                     } else {
                         state = STATE_LCMT2;
                     }
@@ -314,7 +324,6 @@ Token get_token(Token *token, FILE *source_file ) {
                         if (!(DS_Copy(ptr_Str, token->Value.string))) {/**error**/}
                         free(ptr_Str);
                         state = STATE_START;
-                        ungetc(c, source_file);
                         return *token;
                     } else if (c == '\\') {
                         if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
@@ -416,8 +425,8 @@ Token get_token(Token *token, FILE *source_file ) {
                         if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_DBL;
                     } else {
-                        conversion_Int(ptr_Str, token);
                         token->ID = TOKEN_ID_INT0;
+                        conversion_Int(ptr_Str, token);
                         free(ptr_Str);
                         state = STATE_START;
                         ungetc(c, source_file);
@@ -440,8 +449,8 @@ Token get_token(Token *token, FILE *source_file ) {
                         if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_DHEX;
                     } else {
-                        conversion_Int(ptr_Str, token);
                         token->ID = TOKEN_ID_HEX2;
+                        conversion_Int(ptr_Str, token);
                         free(ptr_Str);
                         state = STATE_START;
                         ungetc(c, source_file);
@@ -461,8 +470,10 @@ Token get_token(Token *token, FILE *source_file ) {
                     break;
                 case STATE_DHEX2:
                     if ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (c >= '0' && c <= '9')) {
+                        if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_DHEX2;
                     } else if (c == 'p') {
+                        if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_HEXP;
                     } else {
                         HexaDecimal(ptr_Str->str, token);
@@ -526,8 +537,8 @@ Token get_token(Token *token, FILE *source_file ) {
                         state = STATE_EXP3;
                     } else {
                         if (exp_Version) {
-                            conversion_Int(ptr_Str, token);
                             token->ID = TOKEN_ID_EXP3;
+                            conversion_Int(ptr_Str, token);
                             free(ptr_Str);
                             ungetc(c, source_file);
                             return *token;
@@ -579,8 +590,8 @@ Token get_token(Token *token, FILE *source_file ) {
                         if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_INT;
                     } else {
-                        conversion_Int(ptr_Str, token);
                         token->ID = TOKEN_ID_INT;
+                        conversion_Int(ptr_Str, token);
                         free(ptr_Str);
                         state = STATE_START;
                         ungetc(c, source_file);
