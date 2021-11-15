@@ -53,7 +53,7 @@ void conversion_Int(Dynamic_string *str, Token *token){
 
 void conversion_Double(Dynamic_string *str, Token *token){
     char *ptr;
-    double value = strtod(str->str,ptr);
+    double value = strtod(str->str,&ptr);
     token->Value.Double = value;
 }
 
