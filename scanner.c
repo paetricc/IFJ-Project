@@ -53,7 +53,7 @@ void conversion_Int(Dynamic_string *str, Token *token){
 
 void conversion_Double(Dynamic_string *str, Token *token){
     char *ptr;
-    double value = strtod(str->str,NULL);
+    double value = strtod(str->str,ptr);
     token->Value.Double = value;
 }
 
@@ -73,7 +73,6 @@ void HexaDecimal(char *name, Token *res) {
     double exp = 1.0f;
     double tmp = 0;
     while(WholeNumberPart-- != 1) exp = exp * 16;
-    printf("test: %s\n", name);
     for (int i = 2; name[i] != '\0'; i++) {
         if(name[i] == '.') continue; 
         int shift  = 0;
