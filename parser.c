@@ -129,6 +129,9 @@ void parse(FILE *source_file) {
             case TOKEN_ID_INT0:
                 printf("TOKEN_ID_INT0: %d\n", test->Value.Integer);
                 break;
+            case TOKEN_ID_ZERO:
+                printf("TOKEN_ID_ZERO: %d\n", test->Value.Integer);
+                break;
             case TOKEN_ID_HEX2:
                 printf("TOKEN_ID_HEX2: %d\n", test->Value.Integer);
                 break;
@@ -139,10 +142,10 @@ void parse(FILE *source_file) {
                 printf("TOKEN_ID_HEXP3: %lf\n", test->Value.Double);
                 break;
             case TOKEN_ID_EXP3I:
-                printf("TOKEN_ID_HEX2: %d\n", test->Value.Integer);
+                printf("TOKEN_ID_EXP3I: %d\n", test->Value.Integer);
                 break;
             case TOKEN_ID_EXP3D:
-                printf("TOKEN_ID_HEXP3: %lf\n", test->Value.Double);
+                printf("TOKEN_ID_EXP3D: %lf\n", test->Value.Double);
                 break;
             case TOKEN_ID_DBL2:
                 printf("TOKEN_ID_DBL2: %f\n", test->Value.Double);
