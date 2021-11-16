@@ -90,6 +90,45 @@ a vrátil token:
 Token ID: TOKEN_ID_GTE
 
 
+Scanner přečetl lexém:[590e-1]
+a vrátil token: 
+Token ID: TOKEN_ID_EXP3I
+Integer value: 59
+
+
+Scanner přečetl lexém:[:]
+a vrátil token: 
+Token ID: TOKEN_ID_CLN
+
+
+Scanner přečetl lexém:[8.01e+1]
+a vrátil token: 
+Token ID: TOKEN_ID_EXP3D
+Double value: 80.100000
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[0.11e1]
+a vrátil token: 
+Token ID: TOKEN_ID_EXP3D
+Double value: 1.100000
+
+
+Scanner přečetl lexém:[,]
+a vrátil token: 
+Token ID: TOKEN_ID_CMA
+
+
+Scanner přečetl lexém:[690e-2]
+a vrátil token: 
+Token ID: TOKEN_ID_EXP3D
+Double value: 6.900000
+
+
 Scanner přečetl lexém:[
 ]
 a vrátil token: 
@@ -129,11 +168,6 @@ Token ID: TOKEN_ID_LBR
 Scanner přečetl lexém:[)]
 a vrátil token: 
 Token ID: TOKEN_ID_RBR
-
-
-Scanner přečetl lexém:[,]
-a vrátil token: 
-Token ID: TOKEN_ID_CMA
 
 
 Scanner přečetl lexém:[

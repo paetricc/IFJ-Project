@@ -63,6 +63,10 @@ char *Token_ID_to_string(Token_ID id) {
             return "TOKEN_ID_EOL";
         case TOKEN_ID_CMA:
             return "TOKEN_ID_CMA";
+        case TOKEN_ID_CLN:
+            return "TOKEN_ID_CLN";
+        case TOKEN_ID_TAB:
+            return "TOKEN_ID_TAB";
         case TOKEN_ID_SPACE:
             return "TOKEN_ID_SPACE";
         case TOKEN_ID_RBR:
@@ -140,11 +144,12 @@ void print_token(Token *token) {
         fprintf(stdout, "String value: %s\n", token->Value.string->str);
 
     else if(token->ID == TOKEN_ID_INT0 || token->ID == TOKEN_ID_HEX2 ||
-                token->ID == TOKEN_ID_INT || token->ID == TOKEN_ID_ZERO) // token je integer
+                token->ID == TOKEN_ID_INT || token->ID == TOKEN_ID_ZERO ||
+                token->ID == TOKEN_ID_EXP3I) // token je integer
         fprintf(stdout, "Integer value: %d\n", token->Value.Integer);
 
     else if(token->ID == TOKEN_ID_DHEX2 || token->ID == TOKEN_ID_HEXP3 ||
-                token->ID == TOKEN_ID_DBL2) // token je double
+                token->ID == TOKEN_ID_DBL2 || token->ID == TOKEN_ID_EXP3D) // token je double
         fprintf(stdout, "Double value: %f\n", token->Value.Double);
     //else if(token->ID == TOKEN_ID_EXP3) Value je Integer nebo Double - nelze rozhodnout
     else{}
