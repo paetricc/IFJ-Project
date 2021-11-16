@@ -99,6 +99,8 @@ char *Token_ID_to_string(Token_ID id) {
             return "TOKEN_ID_ASSIGN";
         case TOKEN_ID_FSTR:
             return "TOKEN_ID_FSTR";
+        case TOKEN_ID_ZERO:
+            return "TOKEN_ID_ZERO";
         case TOKEN_ID_INT0:
             return "TOKEN_ID_INT0";
         case TOKEN_ID_HEX2:
@@ -107,8 +109,10 @@ char *Token_ID_to_string(Token_ID id) {
             return "TOKEN_ID_DHEX2";
         case TOKEN_ID_HEXP3:
             return "TOKEN_ID_HEXP3";
-        case TOKEN_ID_EXP3:
-            return "TOKEN_ID_EXP3";
+        case TOKEN_ID_EXP3I:
+            return "TOKEN_ID_EXP3I";
+        case TOKEN_ID_EXP3D:
+            return "TOKEN_ID_EXP3D";
         case TOKEN_ID_DBL2:
             return "TOKEN_ID_DBL2";
         case TOKEN_ID_INT:
