@@ -141,11 +141,8 @@ void parse(FILE *source_file) {
             case TOKEN_ID_HEXP3:
                 printf("TOKEN_ID_HEXP3: %lf\n", test->Value.Double);
                 break;
-            case TOKEN_ID_EXP3I:
-                printf("TOKEN_ID_EXP3I: %d\n", test->Value.Integer);
-                break;
-            case TOKEN_ID_EXP3D:
-                printf("TOKEN_ID_EXP3D: %lf\n", test->Value.Double);
+            case TOKEN_ID_EXP3:
+                printf("TOKEN_ID_EXP3I: %lf\n", test->Value.Double);
                 break;
             case TOKEN_ID_DBL2:
                 printf("TOKEN_ID_DBL2: %f\n", test->Value.Double);

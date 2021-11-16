@@ -53,9 +53,7 @@ void conversion_Int(Dynamic_string *str, Token *token){
 }
 
 void conversion_Double(Dynamic_string *str, Token *token){
-    char *ptr;
-    double value = strtod(str->str,&ptr);
-    token->Value.Double = value;
+    token->Value.Double = atof(str->str);
 }
 
 bool DS_Add_Tester(Dynamic_string *str, char c) {
@@ -121,7 +119,6 @@ Token get_token(Token *token, FILE *source_file ) {
     if (!(DS_Init(ptr_Str))) {
         //error
     }
-        bool exp_Version = true;
         char c;
         int state = STATE_START;
         while (((c = (char) getc(source_file)) != '\0') || (state == STATE_STR)) {
@@ -398,11 +395,9 @@ Token get_token(Token *token, FILE *source_file ) {
                     if (c == '0') {
                         state = STATE_INT0;
                     } else if (c == 'e' || c == 'E') {
-                        exp_Version = true;
                         if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_EXP;
                     } else if (c == '.') {
-                        exp_Version = false;
                         if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_DBL;
                     } else if (c >= '1' && c <= '9') {
@@ -423,11 +418,9 @@ Token get_token(Token *token, FILE *source_file ) {
                     } else if (c == '0') {
                         state = STATE_INT0;
                     } else if (c == 'e' || c == 'E') {
-                        exp_Version = true;
                         if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_EXP;
                     } else if (c == '.') {
-                        exp_Version = false;
                         if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_DBL;
                     }else if (c >= '1' && c <= '9') {
@@ -541,19 +534,11 @@ Token get_token(Token *token, FILE *source_file ) {
                         if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_EXP3;
                     } else {
-                        if (exp_Version) {
-                            token->ID = TOKEN_ID_EXP3I;
-                            conversion_Int(ptr_Str, token);
-                            free(ptr_Str);
-                            ungetc(c, source_file);
-                            return *token;
-                        } else {
-                            token->ID = TOKEN_ID_EXP3D;
-                            conversion_Double(ptr_Str, token);
-                            free(ptr_Str);
-                            ungetc(c, source_file);
-                            return *token;
-                        }
+                        token->ID = TOKEN_ID_EXP3;
+                        conversion_Double(ptr_Str, token);
+                        free(ptr_Str);
+                        ungetc(c, source_file);
+                        return *token;
                     }
                     break;
                 case STATE_DBL:
@@ -581,11 +566,9 @@ Token get_token(Token *token, FILE *source_file ) {
                     break;
                 case STATE_INT:
                     if (c == 'e' || c == 'E') {
-                        exp_Version = true;
                         if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_EXP;
                     } else if (c == '.') {
-                        exp_Version = false;
                         if (!(DS_Add_Tester(ptr_Str, c))) {/**error**/}
                         state = STATE_DBL;
                     } else if (c >= '0' && c <= '9') {
