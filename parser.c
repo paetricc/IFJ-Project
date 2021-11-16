@@ -2,10 +2,13 @@
 #include "parser.h"
 #include <stdlib.h>
 
-void parse(FILE *source_file) {
+int parse(FILE *source_file) {
     Token *test = (Token *) malloc(sizeof(Token));
     do {
-        get_token(test, source_file);
+        int ERROR_TYPE = get_token(test, source_file);
+        if(ERROR_TYPE) {
+            return ERROR_TYPE;
+        }
         //token basic test
         switch (test->ID)
         {
