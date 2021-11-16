@@ -140,7 +140,7 @@ void print_token(Token *token) {
         fprintf(stdout, "String value: %s\n", token->Value.string->str);
 
     else if(token->ID == TOKEN_ID_INT0 || token->ID == TOKEN_ID_HEX2 ||
-                token->ID == TOKEN_ID_INT) // token je integer
+                token->ID == TOKEN_ID_INT || token->ID == TOKEN_ID_ZERO) // token je integer
         fprintf(stdout, "Integer value: %d\n", token->Value.Integer);
 
     else if(token->ID == TOKEN_ID_DHEX2 || token->ID == TOKEN_ID_HEXP3 ||

@@ -1,5 +1,5 @@
 51=0
-69.42<0.0>0xAb1==0xf.4/00x4.1p-1<=0x4.1p+2>=
+69.42<0.0>0xAb1==0xf.4/0x4.1p-1<=0x4.1p+2>=
 ~=//*+-(),
 --
 --asdf
@@ -7,4 +7,4 @@
 --[[asdf]]
 tmp _variable1_extra
 """yo"
-"hola hej kapitane""<3VHDL\n\t\000\255\199"
+"hola hej kapitane""<3VHDL\n\t\001\255\199"
