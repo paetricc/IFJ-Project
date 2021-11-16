@@ -132,7 +132,7 @@ void print_token(Token *token) {
     if(token->ID == TOKEN_ID_KEYWORD) // token je klicove slovo
         fprintf(stdout, "Keyword: %s\n", keyword_to_string(token->Value.keyword));
 
-    else if(token->ID == TOKEN_ID_FSTR) // token je string
+    else if(token->ID == TOKEN_ID_FSTR || token->ID == TOKEN_ID_ID) // token je string
         fprintf(stdout, "String value: %s\n", token->Value.string->str);
 
     else if(token->ID == TOKEN_ID_INT0 || token->ID == TOKEN_ID_HEX2 ||
