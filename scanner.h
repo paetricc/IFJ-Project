@@ -48,10 +48,14 @@ typedef enum {
     TOKEN_ID_HEX2,
     TOKEN_ID_DHEX2,
     TOKEN_ID_HEXP3,
-    TOKEN_ID_EXP3,
+    TOKEN_ID_EXP3I,
+    TOKEN_ID_EXP3D,
     TOKEN_ID_DBL2,
     TOKEN_ID_INT,
     TOKEN_ID_ID,
+    TOKEN_ID_TAB,
+    TOKEN_ID_CLN,
+    TOKEN_ID_ERROR,
     TOKEN_ID_EOF
 } Token_ID;
 
