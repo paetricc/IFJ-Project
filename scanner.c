@@ -84,7 +84,7 @@ int get_token(Token *token, FILE *source_file ) {
     }
         char c;
         int state = STATE_START;
-        while (((c = (char) getc(source_file)) != '\0') || (state == STATE_STR)) {
+        while (((c = (char) getc(source_file)) != EOF) || (state == STATE_STR)) {
             switch (state) {
                 case STATE_START:               //co jde ze startu
                     switch (c) {
