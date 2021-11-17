@@ -148,7 +148,6 @@ void print_token(Token *token) {
     else if(token->ID == TOKEN_ID_DHEX2 || token->ID == TOKEN_ID_HEXP3 ||
                 token->ID == TOKEN_ID_DBL2 || token->ID == TOKEN_ID_EXP3) // token je double
         fprintf(stdout, "Double value: %f\n", token->Value.Double);
-    //else if(token->ID == TOKEN_ID_EXP3) Value je Integer nebo Double - nelze rozhodnout
     else{}
 }
 
