@@ -113,10 +113,8 @@ char *Token_ID_to_string(Token_ID id) {
             return "TOKEN_ID_DHEX2";
         case TOKEN_ID_HEXP3:
             return "TOKEN_ID_HEXP3";
-        case TOKEN_ID_EXP3I:
-            return "TOKEN_ID_EXP3I";
-        case TOKEN_ID_EXP3D:
-            return "TOKEN_ID_EXP3D";
+        case TOKEN_ID_EXP3:
+            return "TOKEN_ID_EXP3";
         case TOKEN_ID_DBL2:
             return "TOKEN_ID_DBL2";
         case TOKEN_ID_INT:
@@ -144,14 +142,12 @@ void print_token(Token *token) {
         fprintf(stdout, "String value: %s\n", token->Value.string->str);
 
     else if(token->ID == TOKEN_ID_INT0 || token->ID == TOKEN_ID_HEX2 ||
-                token->ID == TOKEN_ID_INT || token->ID == TOKEN_ID_ZERO ||
-                token->ID == TOKEN_ID_EXP3I) // token je integer
+                token->ID == TOKEN_ID_INT || token->ID == TOKEN_ID_ZERO) // token je integer
         fprintf(stdout, "Integer value: %d\n", token->Value.Integer);
 
     else if(token->ID == TOKEN_ID_DHEX2 || token->ID == TOKEN_ID_HEXP3 ||
-                token->ID == TOKEN_ID_DBL2 || token->ID == TOKEN_ID_EXP3D) // token je double
+                token->ID == TOKEN_ID_DBL2 || token->ID == TOKEN_ID_EXP3) // token je double
         fprintf(stdout, "Double value: %f\n", token->Value.Double);
-    //else if(token->ID == TOKEN_ID_EXP3) Value je Integer nebo Double - nelze rozhodnout
     else{}
 }
 

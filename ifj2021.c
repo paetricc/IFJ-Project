@@ -3,6 +3,6 @@
 
 int main(void) {
     FILE *source_file = stdin;
-    parse(source_file);
-    return 0;
+    int ERROR_TYPE = parse(source_file);
+    return ERROR_TYPE;
 }

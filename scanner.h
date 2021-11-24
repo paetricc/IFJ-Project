@@ -4,6 +4,43 @@
 #include <stdio.h>
 #include "Dynamic_string.h"
 
+#define STATE_START 99
+#define STATE_SUB 100
+#define STATE_LCMT2 101
+#define STATE_BCMT 102
+#define STATE_BCMT2 103
+#define STATE_BCMT3 104
+#define STATE_DIV 105
+#define STATE_NEQ 106
+#define STATE_LT 107
+#define STATE_GT 108
+#define STATE_ASSIGN 109
+#define STATE_STR 110
+#define STATE_STR2 111
+#define STATE_STR3 112
+#define STATE_STR4 113
+#define STATE_STR5 114
+#define STATE_STR6 115
+#define STATE_STR7 116
+#define STATE_STR8 117
+#define STATE_INT0 118
+#define STATE_HEX 119
+#define STATE_HEX2 120
+#define STATE_DHEX 121
+#define STATE_DHEX2 122
+#define STATE_HEXP 123
+#define STATE_HEXP2 124
+#define STATE_HEXP3 125
+#define STATE_DBL 126
+#define STATE_DBL2 127
+#define STATE_EXP 128
+#define STATE_EXP2 129
+#define STATE_EXP3 130
+#define STATE_INT 131
+#define STATE_ID 132
+#define STATE_ZERO 133
+#define STATE_ERROR 134
+
 typedef enum {
     KEYWORD_DO,
     KEYWORD_ELSE,
@@ -49,8 +86,7 @@ typedef enum {
     TOKEN_ID_HEX2,
     TOKEN_ID_DHEX2,
     TOKEN_ID_HEXP3,
-    TOKEN_ID_EXP3I,
-    TOKEN_ID_EXP3D,
+    TOKEN_ID_EXP3,
     TOKEN_ID_DBL2,
     TOKEN_ID_INT,
     TOKEN_ID_ID,
@@ -73,6 +109,6 @@ typedef struct {
 } Token;
 
 
-Token get_token(Token *, FILE *);
+int get_token(Token *, FILE *);
 
 #endif

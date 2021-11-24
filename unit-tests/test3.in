@@ -2,7 +2,7 @@
 require "ifj21"
 
 function main() -- uzivatelska funkce bez parametru
- 	local a : integer
+	local a : integer
 	local vysl : integer = 0
 	write("Zadejte cislo pro vypocet faktorialu\n")
 	a = readi()
