@@ -1,0 +1,286 @@
+Testy na lexikální analyzátor - scanner.c
+-----------------------------------------
+
+Scanner přečetl lexém:[51]
+a vrátil token: 
+Token ID: TOKEN_ID_INT
+Integer value: 51
+
+
+Scanner přečetl lexém:[=]
+a vrátil token: 
+Token ID: TOKEN_ID_ASSIGN
+
+
+Scanner přečetl lexém:[0]
+a vrátil token: 
+Token ID: TOKEN_ID_ZERO
+Integer value: 0
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[69.42]
+a vrátil token: 
+Token ID: TOKEN_ID_DBL2
+Double value: 69.420000
+
+
+Scanner přečetl lexém:[<]
+a vrátil token: 
+Token ID: TOKEN_ID_LT
+
+
+Scanner přečetl lexém:[0.0]
+a vrátil token: 
+Token ID: TOKEN_ID_DBL2
+Double value: 0.000000
+
+
+Scanner přečetl lexém:[>]
+a vrátil token: 
+Token ID: TOKEN_ID_GT
+
+
+Scanner přečetl lexém:[0xAb1]
+a vrátil token: 
+Token ID: TOKEN_ID_HEX2
+Integer value: 2737
+
+
+Scanner přečetl lexém:[==]
+a vrátil token: 
+Token ID: TOKEN_ID_EQ
+
+
+Scanner přečetl lexém:[0xf.4]
+a vrátil token: 
+Token ID: TOKEN_ID_DHEX2
+Double value: 15.250000
+
+
+Scanner přečetl lexém:[/]
+a vrátil token: 
+Token ID: TOKEN_ID_DIV
+
+
+Scanner přečetl lexém:[0x4.1p-1]
+a vrátil token: 
+Token ID: TOKEN_ID_HEXP3
+Double value: 2.031250
+
+
+Scanner přečetl lexém:[<=]
+a vrátil token: 
+Token ID: TOKEN_ID_LTE
+
+
+Scanner přečetl lexém:[0x4.1p+2]
+a vrátil token: 
+Token ID: TOKEN_ID_HEXP3
+Double value: 16.250000
+
+
+Scanner přečetl lexém:[>=]
+a vrátil token: 
+Token ID: TOKEN_ID_GTE
+
+
+Scanner přečetl lexém:[590e-1]
+a vrátil token: 
+Token ID: TOKEN_ID_EXP3
+Double value: 59.000000
+
+
+Scanner přečetl lexém:[:]
+a vrátil token: 
+Token ID: TOKEN_ID_CLN
+
+
+Scanner přečetl lexém:[8.01e+1]
+a vrátil token: 
+Token ID: TOKEN_ID_EXP3
+Double value: 80.100000
+
+
+Scanner přečetl lexém:[	]
+a vrátil token: 
+Token ID: TOKEN_ID_TAB
+
+
+Scanner přečetl lexém:[0.11e1]
+a vrátil token: 
+Token ID: TOKEN_ID_EXP3
+Double value: 1.100000
+
+
+Scanner přečetl lexém:[,]
+a vrátil token: 
+Token ID: TOKEN_ID_CMA
+
+
+Scanner přečetl lexém:[690e-2]
+a vrátil token: 
+Token ID: TOKEN_ID_EXP3
+Double value: 6.900000
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[~=]
+a vrátil token: 
+Token ID: TOKEN_ID_NEQ2
+
+
+Scanner přečetl lexém:[//]
+a vrátil token: 
+Token ID: TOKEN_ID_DIV2
+
+
+Scanner přečetl lexém:[*]
+a vrátil token: 
+Token ID: TOKEN_ID_MUL
+
+
+Scanner přečetl lexém:[+]
+a vrátil token: 
+Token ID: TOKEN_ID_ADD
+
+
+Scanner přečetl lexém:[-]
+a vrátil token: 
+Token ID: TOKEN_ID_SUB
+
+
+Scanner přečetl lexém:[(]
+a vrátil token: 
+Token ID: TOKEN_ID_LBR
+
+
+Scanner přečetl lexém:[)]
+a vrátil token: 
+Token ID: TOKEN_ID_RBR
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[--]
+a vrátil token: 
+Token ID: TOKEN_ID_LCMT2
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[--asdf]
+a vrátil token: 
+Token ID: TOKEN_ID_LCMT2
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[--[[]]]
+a vrátil token: 
+Token ID: TOKEN_ID_BCMT4
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[--[[asdf]]]
+a vrátil token: 
+Token ID: TOKEN_ID_BCMT4
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[tmp]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String value: tmp
+
+
+Scanner přečetl lexém:[ ]
+a vrátil token: 
+Token ID: TOKEN_ID_SPACE
+
+
+Scanner přečetl lexém:[_variable1_extra]
+a vrátil token: 
+Token ID: TOKEN_ID_ID
+String value: _variable1_extra
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[""]
+a vrátil token: 
+Token ID: TOKEN_ID_FSTR
+String value: ""
+
+
+Scanner přečetl lexém:["yo"]
+a vrátil token: 
+Token ID: TOKEN_ID_FSTR
+String value: "yo"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:["hola hej kapitane"]
+a vrátil token: 
+Token ID: TOKEN_ID_FSTR
+String value: "hola hej kapitane"
+
+
+Scanner přečetl lexém:["<3VHDL\n\t\001\255\199"]
+a vrátil token: 
+Token ID: TOKEN_ID_FSTR
+String value: "<3VHDL\n\t\001\255\199"
+
+
+Scanner přečetl lexém:[
+]
+a vrátil token: 
+Token ID: TOKEN_ID_EOL
+
+
+Scanner přečetl lexém:[]
+a vrátil token: 
+Token ID: TOKEN_ID_EOF
+
+
