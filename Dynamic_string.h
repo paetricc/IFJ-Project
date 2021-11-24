@@ -42,7 +42,7 @@ bool DS_Add(Dynamic_string *string, char c);
  * Funkce prekopiruje jeden string do druheho.
  *
  * @param string Ukazatel na string.
- * @param s_nek Ukazatel na string, do kterého bude nakopirovan predchovi parametr string.
+ * @param s_new Ukazatel na string, do kterého bude nakopirovan predchovi parametr string.
  * @return Vraci true pokud se povede nakopirovat string do stringu a malloc jinak vraci false.
  */
 bool DS_Copy(Dynamic_string *string,Dynamic_string *s_new);
