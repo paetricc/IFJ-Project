@@ -1,13 +1,28 @@
+/**
+ * Projekt: IFJ2021
+ *
+ * @brief Implementace scanneru na predavani tokenu.
+ *
+ * @author Tomáš Bártů xbartu11@stud.fit.vutbr.cz
+ * @author Tony Pham xphamt00@stud.fit.vutbr.cz
+ * @author Vít Janeček xjanec30@stud.fit.vutbr.cz
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
-
 #include "scanner.h"
 #include "error.h"
-//FILE *source_file;
+
 Dynamic_string *dynamic_string;
 
+/**
+ * Funkce prevede string na int a ulozi ho do tokenu.
+ *
+ * @param str Ukazatel na string k prevedeni.
+ * @param token Ukazatel na token do ktereho se ulozi prevedeny int.
+ */
 void conversion_Int(Dynamic_string *str, Token *token){
     char *ptr;
     int value = (token->ID == TOKEN_ID_INT || token->ID == TOKEN_ID_INT0) ? 
@@ -15,10 +30,24 @@ void conversion_Int(Dynamic_string *str, Token *token){
     token->Value.Integer = value;
 }
 
+/**
+ * Funkce prevede string na double a ulozi ho do tokenu.
+ *
+ * @param str Ukazatel na string k prevedeni.
+ * @param token Ukazatel na token do ktereho se ulozi prevedeny double.
+ */
+ 
 void conversion_Double(Dynamic_string *str, Token *token){
     token->Value.Double = atof(str->str);
 }
 
+/**
+ * Funkce prida znak do stringu.
+ *
+ * @param str Ukazatel na string.
+ * @param c Znak ktery je pridan do stringu.
+ * @return vrati true pokud se povede pridat char do stringu jinak vraci false.
+ */
 bool DS_Add_Tester(Dynamic_string *str, char c) {
     if (!(DS_Add(str, c))) {
         free(str);
@@ -27,11 +56,16 @@ bool DS_Add_Tester(Dynamic_string *str, char c) {
     return true;
 }
 
+/**
+ * Funkce prevede string na hexadecimal a ulozi ho do tokenu.
+ *
+ * @param name Ukazatel na string.
+ * @param res Ukazatel na token do ktereho se ulozi prevedeny HexaDecimal.
+ */
 void HexaDecimal(char *name, Token *res) {
     int point = 0;
     while(name[point++] != '.');
     int WholeNumberPart = point - 3;
-    int DecimalPart = strlen(name) - point;
     double exp = 1.0f;
     double tmp = 0;
     while(WholeNumberPart-- != 1) exp = exp * 16;
@@ -51,6 +85,13 @@ void HexaDecimal(char *name, Token *res) {
     (*res).Value.Double = tmp;
 }
 
+/**
+ * Funkce porovna string s keywordy, jestli se string rovna keywordu da ho do value.keyword a zapise ho do tokenu keyword
+ * jinak ho da do tokenu id a value.string.
+ *
+ * @param str Ukazatel na string.
+ * @param token Ukazatel na token do ktereho se ulozi klicove slovo nebo id.
+ */
 void KW_ID_Cmp(Dynamic_string *str, Token *token){
     token->ID = TOKEN_ID_KEYWORD;
     if (DS_Cmp(str, "do")){token->Value.keyword = KEYWORD_DO;}
@@ -79,6 +120,7 @@ void KW_ID_Cmp(Dynamic_string *str, Token *token){
 int get_token(Token *token, FILE *source_file ) {
     Dynamic_string *ptr_Str = (Dynamic_string *)malloc(sizeof(Dynamic_string));
     token->Value.string = (Dynamic_string *)malloc(sizeof(Dynamic_string));
+
     if (!(DS_Init(ptr_Str))) {
         return ERROR_COMPILER;
     }
@@ -86,7 +128,7 @@ int get_token(Token *token, FILE *source_file ) {
         int state = STATE_START;
         while (((c = (char) getc(source_file)) != EOF) || (state == STATE_STR)) {
             switch (state) {
-                case STATE_START:               //co jde ze startu
+                case STATE_START:
                     switch (c) {
                         case 9:
                             token->ID = TOKEN_ID_TAB;
@@ -167,11 +209,24 @@ int get_token(Token *token, FILE *source_file ) {
                             state = STATE_ID;
                             break;
                         case '\0':
-                            printf("token EOF\n"); //TODO checknout
                             break;
+                        case '.':
+                            state = STATE_DOT;
+                            break;
+                        case '#':
+                            token->ID = TOKEN_ID_LEN;
+                            return ERROR_PASSED;
                         default:
                             state = STATE_ERROR;
                             break;
+                    }
+                    break;
+                case STATE_DOT:
+                    if (c == '.') {
+                        token->ID = TOKEN_ID_DDOT;
+                        return ERROR_PASSED;
+                    } else {
+                        state = STATE_ERROR;
                     }
                     break;
                 case STATE_SUB:
