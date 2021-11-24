@@ -1,8 +1,14 @@
+/**
+ * Projekt: IFJ2021
+ *
+ * @brief Implementace dynamickeho stringu pro ukladani v scanneru
+ *
+ * @author Tony Pham xphamt00@stud.fit.vutbr.cz
+ * @author Vít Janeček xjanec30@stud.fit.vutbr.cz
+ */
 
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
 #include "Dynamic_string.h"
 
 #define DYN_STR_LEN 8
@@ -29,7 +35,7 @@ bool DS_Add(Dynamic_string *string, char c){
 
 bool DS_Copy(Dynamic_string *string,Dynamic_string *s_new){
     unsigned int s_new_size = string->length;
-    if (!(s_new->str = realloc(s_new->str,s_new_size))){
+    if (!(s_new->str = (char *)realloc(s_new->str,s_new_size))){
         return false;
     }
     strcpy(s_new->str,string->str);
