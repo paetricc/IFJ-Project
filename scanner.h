@@ -1,9 +1,21 @@
+/**
+ * Projekt: IFJ2021
+ *
+ * @brief Implementace scanneru na predavani tokenu.
+ *
+ * @author Tomáš Bártů xbartu11@stud.fit.vutbr.cz
+ * @author Tony Pham xphamt00@stud.fit.vutbr.cz
+ * @author Vít Janeček xjanec30@stud.fit.vutbr.cz
+ */
+
 #ifndef _SCANNER_H
 #define _SCANNER_H
 
 #include <stdio.h>
 #include "Dynamic_string.h"
-
+/**
+ * Stavy scanneru
+ */
 #define STATE_START 99
 #define STATE_SUB 100
 #define STATE_LCMT2 101
@@ -40,6 +52,11 @@
 #define STATE_ID 132
 #define STATE_ZERO 133
 #define STATE_ERROR 134
+#define STATE_DOT 135
+
+/**
+ * @enum Klicova slova kodu.
+ */
 
 typedef enum {
     KEYWORD_DO,
@@ -59,6 +76,9 @@ typedef enum {
     KEYWORD_WHILE,
 } Keyword;
 
+/**
+ * @enum Tokeny, ktery vraci scanner.
+ */
 typedef enum {
     TOKEN_ID_KEYWORD,
     TOKEN_ID_EOL,
@@ -92,10 +112,15 @@ typedef enum {
     TOKEN_ID_ID,
     TOKEN_ID_TAB,
     TOKEN_ID_CLN,
+    TOKEN_ID_DDOT,
+    TOKEN_ID_LEN,
     TOKEN_ID_ERROR,
     TOKEN_ID_EOF
 } Token_ID;
 
+/**
+ * @union Rozsireni Value->co muze reprezentovat.
+ */
 typedef union {
     Dynamic_string *string;
     int Integer;
@@ -103,12 +128,21 @@ typedef union {
     double Double;
 }Token_Value;
 
+/**
+ * @struct Struktura reprezentujici token.
+ */
 typedef struct {
     Token_ID ID;
     Token_Value Value;
 } Token;
 
-
+/**
+ * Funkce prochazi soubor s kodem a skonci, kdyz vraci token.
+ *
+ * @param token Ukazatel na token do ktereho se ulozi value.
+ * @param source_file Ukazatel na soubor s kodem.
+ * @return vraci intovou hodnotu, ktera reprezentuje zda nastal error nebo vse probehlo v poradku.
+ */
 int get_token(Token *, FILE *);
 
 #endif

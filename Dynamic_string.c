@@ -1,8 +1,14 @@
+/**
+ * Projekt: IFJ2021
+ *
+ * @brief Implementace dynamickeho stringu pro ukladani v scanneru
+ *
+ * @author Tony Pham xphamt00@stud.fit.vutbr.cz
+ * @author Vít Janeček xjanec30@stud.fit.vutbr.cz
+ */
 
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
 #include "Dynamic_string.h"
 
 #define DYN_STR_LEN 8
