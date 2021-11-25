@@ -72,7 +72,7 @@ typedef struct {
 
 void SLL_Param_Init(SLList_Param *listParam);
 
-void SLL_Param_Insert(SLList_Param *listParam, Data_type_local type, Dynamic_string *stringName);
+void SLL_Param_Insert(SLList_Param *listParam, Data_type_local type, Dynamic_string *stringName, bst_node_t *tree);
 
 void SLL_Param_Dispose(SLList_Param *listParam);
 
@@ -84,9 +84,9 @@ void SLL_Return_Dispose(SLList_Return *listReturn);
 
 void bst_init(bst_node_t **tree);
 
-bool bst_search(bst_node_t *tree, Dynamic_string *string);
+bool bst_search(bst_node_t *tree, bst_node_t *findNode, Dynamic_string *string);
 
-void bst_insert(bst_node_t **tree, Dynamic_string *string, Table_data_func_t *dataFunc, Table_data_var_t *dataVar, bool isFnc);
+void bst_insert(bst_node_t **tree, Dynamic_string *string, bool isFnc);
 
 void bst_dispose(bst_node_t **tree);
 
@@ -102,12 +102,12 @@ void SLL_Frame_DeleteGlobal(SLList_Frame *listFrame);
 
 bst_node_t *search_Iden(Dynamic_string *, SLList_Frame *listFrame);
 
-Table_data_func_t *getDataF(bst_node_t *, SLList_Frame *listFrame);
+Table_data_func_t *getDataF(bst_node_t *tree);
 
-Table_data_var_t *getDataV(bst_node_t *, SLList_Frame *listFrame);
+Table_data_var_t *getDataV(bst_node_t *tree);
 
-void setDataF(Table_data_func_t *dataFunc, SLList_Param *listParam, SLList_Return *listReturn, bool);
+void setDataF(bst_node_t *tree, SLList_Param *listParam, SLList_Return *listReturn, bool);
 
-void setDataV(Table_data_var_t *dataVar, Data_type_local type, bool init, bool used);
+void setDataV(bst_node_t *tree, Data_type_local type, bool init, bool used);
 
 #endif
