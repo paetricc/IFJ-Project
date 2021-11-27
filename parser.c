@@ -287,8 +287,45 @@ int params_dec2(Token *token, FILE *sourceFile) {
  * @return Typ erroru generovany analyzou
 */
 int return_type(Token *token, FILE *sourceFile) {
-  // TODO
-  return ERROR_PASSED;
+  int error;
+
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+  if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+    return error;
+
+  // rozvetveni na ruzna pravidla podle hodnoty tokenu
+  switch(token->ID) {
+    case TOKEN_ID_CLN: // ':'
+    break;
+
+    case TOKEN_ID_KEYWORD: // global nebo function
+      if(token->Value.keyword == KEYWORD_GLOBAL || token->Value.keyword == KEYWORD_FUNCTION) {
+        // vratim cteni pred keyword, aby ho mohl znovu precist volajici
+        fsetpos(sourceFile, &lastReadPos);
+        return ERROR_PASSED; // aplikace pravidla 12
+      }
+      else { // prijate keyword nelze pouzit - pravidlo neexistuje
+        return ERROR_SYNTAX;
+      }
+
+    case TOKEN_ID_EOF: // konec souboru
+      // vratim cteni pred keyword, aby ho mohl znovu precist volajici
+      fsetpos(sourceFile, &lastReadPos);
+      return ERROR_PASSED; // aplikace pravidla 12
+
+    case TOKEN_ID_ID: // id_var
+      // vratim cteni pred keyword, aby ho mohl znovu precist volajici
+      fsetpos(sourceFile, &lastReadPos);
+      return ERROR_PASSED; // aplikace pravidla 12
+
+    default: // pro token zadne pravidlo neexistuje
+      return ERROR_SYNTAX;
+  }
+
+  return data_type(token, sourceFile); // aplikace pravidla 11
 }
 
 
