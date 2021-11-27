@@ -91,21 +91,19 @@ int program(Token *token, FILE *sourceFile) {
       else { // prijate keyword nelze pouzit - pravidlo neexistuje
         return ERROR_SYNTAX;
       }
-    break;
 
     case TOKEN_ID_ID: // id_fnc
       //TODO potrebuju symtable
       Node *idFce = search(token->Value.string->str);
       if (idFce == NULL) // id takove funkce neexistuje
         return ERROR_SYNTAX;
-      if(!isVar(idFce) && isDeclared(idFce)) { // id_fnce
+      else if(!isVar(idFce) && isDeclared(idFce)) { // id_fnce
         error = fnc_call(token, sourceFile); // aplikace pravidla 3
         if(error)
           return error;
       }
       else // id_var neni dovoleno => error
         return ERROR_SYNTAX;
-    break;
 
     case TOKEN_ID_EOF: // konec souboru - syntaxe je korektni, muze se ukoncit
       return ERROR_PASSED; // aplikace pravidla 5
@@ -220,7 +218,6 @@ int params_dec(Token *token, FILE *sourceFile) {
       // vratim cteni pred zavorku, aby ji mohl precist volajici
       fsetpos(sourceFile, &lastReadPos);
       return ERROR_PASSED; // aplikace pravidla 7
-    break;
 
     case TOKEN_ID_KEYWORD: // integer, number nebo string
       if(token->Value.keyword == KEYWORD_INTEGER || token->Value.keyword == KEYWORD_NUMBER ||
