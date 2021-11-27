@@ -1,3 +1,11 @@
+/**
+ * Projekt: IFJ2021
+ * 
+ * @brief Implementace top-down syntakticke anylzy.
+ *
+ * @author Šimon Vacek xvacek10@stud.fit.vutbr.cz
+*/
+
 #include "scanner.h"
 #include "parser.h"
 #include "error.h"
