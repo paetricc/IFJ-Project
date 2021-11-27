@@ -36,26 +36,25 @@ int get_non_white_token(Token *token, FILE *sourceFile) {
 */
 int start(Token *token, FILE *sourceFile) {
   int error;
+	// require
   if((error = get_non_white_token(token, sourceFile)))
 	  // lexikalni nebo kompilatorova chyba
     return error;
 
-	// require
 	if(token->ID != TOKEN_ID_KEYWORD)
 		return ERROR_SYNTAX;
   else if(token->Value.keyword != KEYWORD_REQUIRE)
 		return ERROR_SYNTAX;
 
+	// "ifj21"
   if((error = get_non_white_token(token, sourceFile)))
 	  // lexikalni nebo kompilatorova chyba
     return error;
 
-	// "ifj21"
 	if(token->ID != TOKEN_ID_FSTR)
 		return ERROR_SYNTAX;
 	else if(strcmp(token->Value.string->str, "\"ifj21\""))
 		return ERROR_SYNTAX;
-
   // vse korektni - uplatnuju pravidlo a rozsiruju dalsi neterminal
   return program(token, sourceFile); // aplikace pravidla 1
 }
@@ -118,6 +117,112 @@ int program(Token *token, FILE *sourceFile) {
   return program(token, sourceFile);
 } //program
 
+
+/**
+ * @brief Neterminal fnc_dec.
+ *
+ * Implementuje pravidlo 6.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int fnc_dec(Token *token, FILE *sourceFile) {
+  // token global byl prijaty o uroven vyse => pokracuju dale
+  int error;
+
+  // id_fnc
+  if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+    return error;
+
+  if(token->ID != TOKEN_ID_ID)
+    return ERROR_SYNTAX;
+  // TODO pridat tento identifikator do symtable
+  symTable_Add_Fnc(token->Value.string->str);
+
+  
+  // :
+  if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+    return error;
+
+  if(token->ID != TOKEN_ID_CLN)
+    return ERROR_SYNTAX;
+
+
+  // function
+  if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+    return error;
+
+  if(token->ID != TOKEN_ID_KEYWORD)
+    return ERROR_SYNTAX;
+  else if(token->Value.keyword != KEYWORD_FUNCTION)
+    return ERROR_SYNTAX;
+
+  
+  // (
+  if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+    return error;
+
+  if(token->ID != TOKEN_ID_LBR)
+    return ERROR_SYNTAX;
+
+
+  // rozvinuti neterminalu params_dec
+  if((error = params_dec(token, sourceFile)))
+    return error;
+
+
+  // )
+  if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+    return error;
+
+  if(token->ID != TOKEN_ID_RBR)
+    return ERROR_SYNTAX;
+
+
+  // rozvinuti neterminalu return_type
+  if((error = return_type(token, sourceFile)))
+    return error;
+  
+  return ERROR_PASSED;
+} // fnc_dec
+
+
+/**
+ * @brief Neterminal params_dec.
+ *
+ * Implementuje pravidla 8,9.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int params_dec(Token *token, FILE *sourceFile) {
+  // TODO
+  return ERROR_PASSED;
+}
+
+
+/**
+ * @brief Neterminal return_type.
+ *
+ * Implementuje pravidla 12,13.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int return_type(Token *token, FILE *sourceFile) {
+  // TODO
+  return ERROR_PASSED;
+}
+
+
 /**
  * @brief Parser
  *
@@ -135,4 +240,4 @@ int parser(FILE *sourceFile) {
 
   free(token);
 	return error;
-}   
+} 
