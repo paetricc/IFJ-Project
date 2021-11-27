@@ -217,7 +217,7 @@ int params_dec(Token *token, FILE *sourceFile) {
   // rozvetveni na ruzna pravidla podle hodnoty tokenu
   switch(token->ID) {
     case TOKEN_ID_RBR: // )
-      // vratim cteni pred zavorku, aby ho mohl precist volajici
+      // vratim cteni pred zavorku, aby ji mohl precist volajici
       fsetpos(sourceFile, &lastReadPos);
       return ERROR_PASSED; // aplikace pravidla 7
     break;
@@ -239,7 +239,8 @@ int params_dec(Token *token, FILE *sourceFile) {
   }
 
   return params_dec2(token, sourceFile);
-}
+} // params_dec
+
 
 /**
  * @brief Neterminal params_dec2.
@@ -251,8 +252,29 @@ int params_dec(Token *token, FILE *sourceFile) {
  * @return Typ erroru generovany analyzou
 */
 int params_dec2(Token *token, FILE *sourceFile) {
-  // TODO
-  return ERROR_PASSED;
+  int error;
+
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+  if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+    return error;
+
+  if(token->ID == TOKEN_ID_RBR) { // ')'
+    // vratim cteni pred zavorku, aby ji mohl precist volajici
+    fsetpos(sourceFile, &lastReadPos);
+    return ERROR_PASSED; // aplikace pravidla 9
+  }
+  else if(token->ID == TOKEN_ID_CMA) { // ','
+    if((error = data_type(token, sourceFile))) // aplikace pravidla 10
+      return error;
+  }
+  else {
+    return ERROR_SYNTAX;
+  }
+
+  return params_dec2(token, sourceFile);
 }
 
 /**
