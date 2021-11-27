@@ -88,9 +88,10 @@ int program(Token *token, FILE *sourceFile) {
         if(error)
           return error;
       }
-      else { // prijate keyword nelze pouzit - pravidlo neexistuje
+      else { // private keyword nelze pouzit - pravidlo neexistuje
         return ERROR_SYNTAX;
       }
+    break;
 
     case TOKEN_ID_ID: // id_fnc
       //TODO potrebuju symtable
@@ -104,6 +105,7 @@ int program(Token *token, FILE *sourceFile) {
       }
       else // id_var neni dovoleno => error
         return ERROR_SYNTAX;
+      break;
 
     case TOKEN_ID_EOF: // konec souboru - syntaxe je korektni, muze se ukoncit
       return ERROR_PASSED; // aplikace pravidla 5
@@ -223,6 +225,9 @@ int params_dec(Token *token, FILE *sourceFile) {
       if(token->Value.keyword == KEYWORD_INTEGER || token->Value.keyword == KEYWORD_NUMBER ||
               token->Value.keyword == KEYWORD_STRING) {
 
+        // vratim cteni pred keyword, aby ji mohl precist volany
+        fsetpos(sourceFile, &lastReadPos);
+
         // rozvinuti neterminalu data_type
         if((error = data_type(token, sourceFile))) // aplikace pravidla 8
           return error;
@@ -337,7 +342,7 @@ int return_type(Token *token, FILE *sourceFile) {
 */
 int data_type(Token *token, FILE *sourceFile) {
   int error;
-  if((error = get_token(token, sourceFile)))
+  if((error = get_non_white_token(token, sourceFile)))
 	  // lexikalni nebo kompilatorova chyba
     return error;
   
