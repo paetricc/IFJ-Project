@@ -277,7 +277,7 @@ int params_dec2(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal return_type.
  *
- * Implementuje pravidla 12,13.
+ * Implementuje pravidla 11, 12.
  *
  * @param token Token, ktery bude naplni scanner
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -323,8 +323,40 @@ int return_type(Token *token, FILE *sourceFile) {
   }
 
   return data_type(token, sourceFile); // aplikace pravidla 11
-}
+} // return_type
 
+
+/**
+ * @brief Neterminal data_type.
+ *
+ * Implementuje pravidel 13, 14, 15.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int data_type(Token *token, FILE *sourceFile) {
+  int error;
+  if((error = get_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+    return error;
+  
+  if(token->ID != TOKEN_ID_KEYWORD) // nevalidni token
+    return ERROR_SYNTAX;
+
+  // rozvetveni na ruzna pravidla podle hodnoty tokenu
+  switch(token->Value.keyword) {
+    case KEYWORD_INTEGER: // aplikace pravidla 13
+    case KEYWORD_NUMBER: // aplikace pravidla 14
+    case KEYWORD_STRING: // aplikace pravidla 15
+    break;
+
+    default:
+      return ERROR_SYNTAX; // nevalidni klicove slovo
+  }
+
+  return ERROR_PASSED;
+}
 
 /**
  * @brief Parser
