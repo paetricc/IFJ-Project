@@ -804,6 +804,75 @@ int var_def(Token *token, FILE *sourceFile) {
 
 
 /**
+ * @brief Neterminal return.
+ *
+ * Implementuje pravidlo 34.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int return_(Token *token, FILE *sourceFile) {
+  int error;
+
+	// return
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID != TOKEN_ID_KEYWORD)
+		return ERROR_SYNTAX;
+	else if(token->Value.keyword != KEYWORD_RETURN)
+		return ERROR_SYNTAX;
+
+	// TODO volani synt analyzy shora dolu pro vyhodnoceni vyrazu
+	/*if((error = botttomUp(token, sourceFile, AST)))
+		return error;
+	*/
+
+	return ERROR_PASSED;
+}
+
+
+/**
+ * @brief Neterminal return_void.
+ *
+ * Implementuje pravidlo 35 a 36.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int return_void(Token *token, FILE *sourceFile) {
+  int error;
+	
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID != TOKEN_ID_KEYWORD) // pro token neexistuje pravidlo
+		return ERROR_SYNTAX;
+	
+	if(token->Value.keyword == KEYWORD_END) {	// end
+		// nastavim cteni pred end, aby si ji precetl volajici
+		fsetpos(sourceFile, &lastReadPos);
+		return ERROR_PASSED; // aplikace pravidla 36
+	}
+	else if(token->Value.keyword == KEYWORD_RETURN) {
+		// aplikace pravidla 35
+	}
+	else { // pro prijaty token neexistuje pravidlo
+		return ERROR_SYNTAX;
+	}
+
+	return ERROR_PASSED;
+}
+
+/**
  * @brief Parser
  *
  * @param sourceFile Zdrojovy soubor cteny scannerem
