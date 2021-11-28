@@ -601,6 +601,7 @@ int fnc_head(Token *token, FILE *sourceFile) {
 
 	// id_fnc
 	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
 		return error;
 	if(token->ID != TOKEN_ID_ID)
 		return ERROR_SYNTAX;
@@ -609,6 +610,7 @@ int fnc_head(Token *token, FILE *sourceFile) {
 
 	// '('
 	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
 		return error;
 	if(token->ID != TOKEN_ID_LBR)
 		return ERROR_SYNTAX;
@@ -621,6 +623,7 @@ int fnc_head(Token *token, FILE *sourceFile) {
 
 	// ')'
 	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
 		return error;
 	if(token->ID != TOKEN_ID_RBR)
 		return ERROR_SYNTAX;
@@ -644,6 +647,7 @@ int fnc_def2(Token *token, FILE *sourceFile) {
   fgetpos(sourceFile, &lastReadPos);
 
 	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
 		return error;
 
 	// ':'
@@ -686,6 +690,125 @@ int fnc_def2(Token *token, FILE *sourceFile) {
 		
 	return ERROR_PASSED;
 } // fnc_def2
+
+
+/**
+ * @brief Neterminal params_def.
+ *
+ * Implementuje pravidlo 29 a 30.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int params_def(Token *token, FILE *sourceFile) {
+  int error;
+	
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID == TOKEN_ID_RBR) { // ')'
+		// nastavim cteni pred zavorku, aby si ji precetl volajici
+		fsetpos(sourceFile, &lastReadPos);
+		return ERROR_PASSED; // aplikace pravidla 29
+	}
+	else if(token->ID == TOKEN_ID_ID) { // id_var
+		// nastavim cteni pred identifikator, aby si ho precetl volany
+		fsetpos(sourceFile, &lastReadPos);
+	}
+	else
+		return ERROR_SYNTAX; // pro tento token neexistuje pravidlo
+
+	// rozsireni neterminalu var_def
+	if((error = var_def(token, sourceFile))) // aplikace pravidla 30
+		return error;
+
+	// rozsireni neterminalu params_def2
+	return params_def2(token, sourceFile);
+}
+
+
+/**
+ * @brief Neterminal params_def2.
+ *
+ * Implementuje pravidlo 31 a 32.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int params_def2(Token *token, FILE *sourceFile) {
+  int error;
+	
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID == TOKEN_ID_RBR) { // ')'
+		// nastavim cteni pred zavorku, aby si ji precetl volajici
+		fsetpos(sourceFile, &lastReadPos);
+		return ERROR_PASSED; // aplikace pravidla 31
+	}
+	else if(token->ID == TOKEN_ID_CMA){
+		// aplikace pravidla 32
+		// (hned za koncem podminky)
+	}
+	else { // pro tento token neexistuje pravidlo
+		return ERROR_SYNTAX;
+	}
+
+	// rozvinuti neterminalu var_def
+	if((error = var_def(token, sourceFile)))
+		return error;
+	
+	// znovu rozvinuti neterminalu params_def2
+	return params_def2(token, sourceFile);
+}
+
+
+/**
+ * @brief Neterminal var_def.
+ *
+ * Implementuje pravidlo 33.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int var_def(Token *token, FILE *sourceFile) {
+  int error;
+
+	// id_var
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID != TOKEN_ID_ID)
+		return ERROR_SYNTAX;
+	
+	// TODO zpracovani identifikatoru pomoci symtable
+
+
+	// ':'
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID != TOKEN_ID_CLN)
+		return ERROR_SYNTAX;
+
+	// rozvinuti neterminalu data_type
+	return data_type(token, sourceFile);
+}
 
 
 /**
