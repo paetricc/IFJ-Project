@@ -550,6 +550,42 @@ int value_last(Token *token, FILE *sourceFile) {
 
 
 /**
+ * @brief Neterminal fnc_def.
+ *
+ * Implementuje pravidlo 25.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int fnc_def(Token *token, FILE *sourceFile) {
+  // token function byl prijaty o uroven vyse => pokracuju dale
+  // aplikuju pravidlo 25
+  int error;
+
+  // rozvinuti neterminalu fnc_head
+	if((error = fnc_head(token, sourceFile)))
+		return error;
+
+	// rozvinuti neterminalu fnc_def2
+	if((error = fnc_def2(token, sourceFile)))
+		return error;
+
+  // end
+  if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+    return error;
+
+  if(token->ID != TOKEN_ID_KEYWORD)
+    return ERROR_SYNTAX;
+	else if(token->Value.keyword != KEYWORD_END)
+		return ERROR_SYNTAX;
+	
+	return ERROR_PASSED;
+}
+
+
+/**
  * @brief Parser
  *
  * @param sourceFile Zdrojovy soubor cteny scannerem
