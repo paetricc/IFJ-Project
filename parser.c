@@ -619,6 +619,8 @@ int fnc_head(Token *token, FILE *sourceFile) {
 		return error;
 	if(token->ID != TOKEN_ID_RBR)
 		return ERROR_SYNTAX;
+
+	return ERROR_PASSED;
 }
 
 
@@ -649,7 +651,7 @@ int fnc_def2(Token *token, FILE *sourceFile) {
 			return error;
 		
 		// rozvinuti neterminalu fnc_body
-		if((error = data_type(token, sourceFile)))
+		if((error = fnc_body(token, sourceFile)))
 			return error;
 		
 		// rozvinuti neterminalu return
@@ -664,10 +666,13 @@ int fnc_def2(Token *token, FILE *sourceFile) {
 				case KEYWORD_RETURN:
 				case KEYWORD_END:
 					// nastavim cteni pred token, aby si ho mohl znovu precist volajici
-					fsetpos(sourceFile, &lastReadPos);
 
 					// rozvinuti neterminalu fnc_body
 					if((error = fnc_body(token, sourceFile))) // aplikace pravidla 27
+						return error;
+
+					// rozvinuti neterminalu return_void
+					if((error = return_void(token, sourceFile)))
 						return error;
 				break;
 
@@ -890,3 +895,6 @@ int parser(FILE *sourceFile) {
   free(token);
 	return error;
 } 
+int fnc_body(Token *token, FILE *sourceFile) {
+	return 0;
+}
