@@ -103,16 +103,9 @@ int program(Token *token, FILE *sourceFile) {
     break;
 
     case TOKEN_ID_ID: // id_fnc
-      //TODO potrebuju symtable
-      Node *idFce = search(token->Value.string->str);
-      if (idFce == NULL) // id takove funkce neexistuje
-        return ERROR_SYNTAX;
-      else if(!isVar(idFce) && isDefined(idFce)) { // id_fnce
+      //TODO zpracovani identifikatoru pomoci symytable
         if((error = fnc_call(token, sourceFile))) // aplikace pravidla 3
           return error;
-      }
-      else // id_var neni dovoleno => error
-        return ERROR_SYNTAX;
       break;
 
     case TOKEN_ID_EOF: // konec souboru - syntaxe je korektni, muze se ukoncit
@@ -148,9 +141,8 @@ int fnc_dec(Token *token, FILE *sourceFile) {
 
   if(token->ID != TOKEN_ID_ID)
     return ERROR_SYNTAX;
-  // TODO pridat tento identifikator do symtable
-  symTable_Add_Fnc(token->Value.string->str);
 
+  // TODO zpracovani identifikatoru pomoci symtable
   
   // ':'
   if((error = get_non_white_token(token, sourceFile)))
@@ -520,7 +512,7 @@ int value_last(Token *token, FILE *sourceFile) {
 
 	switch(token->ID) {
 		case TOKEN_ID_ID: // id_var
-			// TODO osetrit pomoci tabulky symbolu
+			// TODO osetrit pomoci symtable
 		break;
 
 		case TOKEN_ID_INT0:
@@ -605,7 +597,7 @@ int fnc_head(Token *token, FILE *sourceFile) {
 		return error;
 	if(token->ID != TOKEN_ID_ID)
 		return ERROR_SYNTAX;
-	// TODO zpracovat identifikator funkce tabulkou symbolu
+	// TODO zpracovat identifikator funkce symtable
 
 
 	// '('
