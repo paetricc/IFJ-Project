@@ -586,6 +586,109 @@ int fnc_def(Token *token, FILE *sourceFile) {
 
 
 /**
+ * @brief Neterminal fnc_head.
+ *
+ * Implementuje pravidlo 26.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int fnc_head(Token *token, FILE *sourceFile) {
+  // token function byl prijaty o uroven vyse => pokracuju dale
+  // aplikuju pravidlo 25
+  int error;
+
+	// id_fnc
+	if((error = get_non_white_token(token, sourceFile)))
+		return error;
+	if(token->ID != TOKEN_ID_ID)
+		return ERROR_SYNTAX;
+	// TODO zpracovat identifikator funkce tabulkou symbolu
+
+
+	// '('
+	if((error = get_non_white_token(token, sourceFile)))
+		return error;
+	if(token->ID != TOKEN_ID_LBR)
+		return ERROR_SYNTAX;
+
+	
+	// rozvinu neterminal params_def
+	if((error = params_def(token, sourceFile)))
+		return error;
+
+
+	// ')'
+	if((error = get_non_white_token(token, sourceFile)))
+		return error;
+	if(token->ID != TOKEN_ID_RBR)
+		return ERROR_SYNTAX;
+}
+
+
+/**
+ * @brief Neterminal fnc_def2.
+ *
+ * Implementuje pravidlo 27 a 28.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int fnc_def2(Token *token, FILE *sourceFile) {
+  int error;
+	
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+
+	if((error = get_non_white_token(token, sourceFile)))
+		return error;
+
+	// ':'
+	if(token->ID == TOKEN_ID_CLN) { // aplikace pravidla 28
+		// rozvinuti neterminalu data_type
+		if((error = data_type(token, sourceFile)))
+			return error;
+		
+		// rozvinuti neterminalu fnc_body
+		if((error = data_type(token, sourceFile)))
+			return error;
+		
+		// rozvinuti neterminalu return
+		if((error = return_(token, sourceFile)))
+			return error;
+	}
+	else { // id_fce, id_var, local, if, while, return nebo end
+		if(token->ID == TOKEN_ID_ID || token->ID == TOKEN_ID_KEYWORD) {
+			switch(token->Value.keyword) {
+				case KEYWORD_IF:
+				case KEYWORD_WHILE:
+				case KEYWORD_RETURN:
+				case KEYWORD_END:
+					// nastavim cteni pred token, aby si ho mohl znovu precist volajici
+					fsetpos(sourceFile, &lastReadPos);
+
+					// rozvinuti neterminalu fnc_body
+					if((error = fnc_body(token, sourceFile))) // aplikace pravidla 27
+						return error;
+				break;
+
+				default: // pro tento token neexistuje pravidlo
+					return ERROR_SYNTAX;
+			}
+		}
+		else { // pro tento token neexistuje pravidlo
+			return ERROR_SYNTAX;
+		}
+	}
+		
+	return ERROR_PASSED;
+} // fnc_def2
+
+
+/**
  * @brief Parser
  *
  * @param sourceFile Zdrojovy soubor cteny scannerem
