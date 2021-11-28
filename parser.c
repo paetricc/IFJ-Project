@@ -108,8 +108,7 @@ int program(Token *token, FILE *sourceFile) {
       if (idFce == NULL) // id takove funkce neexistuje
         return ERROR_SYNTAX;
       else if(!isVar(idFce) && isDefined(idFce)) { // id_fnce
-        error = fnc_call(token, sourceFile); // aplikace pravidla 3
-        if(error)
+        if((error = fnc_call(token, sourceFile))) // aplikace pravidla 3
           return error;
       }
       else // id_var neni dovoleno => error
@@ -429,20 +428,125 @@ int value(Token *token, FILE *sourceFile) {
   fgetpos(sourceFile, &lastReadPos);
 
   if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
     return error;
 
-  if(token->ID == TOKEN_ID_RBR) { // ')'
+	switch(token->ID) {
+		case TOKEN_ID_RBR: // ')'
     // nasteveni cteni pred zavorku, aby si ji precetl volajici
-    fsetpos(sourceFile, &lastReadPos);
-    return ERROR_PASSED; // aplikace pravidla 17
-  }
-  else if(token->ID == TOKEN_ID_ID) {
-    //TODO pomoci symtable osetrit id_var
-  }
-  else if(/*hodnota*/) {
-  }
+    	fsetpos(sourceFile, &lastReadPos);
+	    return ERROR_PASSED; // aplikace pravidla 17
 
+		case TOKEN_ID_ID: // id_var
+		case TOKEN_ID_INT0:
+		case TOKEN_ID_HEX2:
+		case TOKEN_ID_INT:
+		case TOKEN_ID_ZERO: // int_value
+		case TOKEN_ID_DHEX2:
+		case TOKEN_ID_HEXP3:
+		case TOKEN_ID_DBL2:
+		case TOKEN_ID_EXP3: // num_value
+		case TOKEN_ID_FSTR: // str_value
+    	// nasteveni cteni pred hodnotu, aby si ji precetl volany
+			fsetpos(sourceFile, &lastReadPos);
+			value_last(token, sourceFile); // aplikace pravidla 18
+		break;
+
+		default:
+			return ERROR_SYNTAX;
+	}
+
+	return value2(token, sourceFile);
+} // value
+
+
+/**
+ * @brief Neterminal value2.
+ *
+ * Implementuje pravidla 19 a 20.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int value2(Token *token, FILE *sourceFile) {
+  int error;
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+
+  if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+    return error;
+
+	if(token->ID == TOKEN_ID_RBR) { // ')'
+		// vratim cteni pred zavorku, aby si ji precetl volajici
+		fsetpos(sourceFile, &lastReadPos);
+		return ERROR_PASSED; // aplikace pravidla 20
+	}
+	else if(token->ID == TOKEN_ID_CMA) { // ','
+		// aplikace pravidla 19
+	}
+	else { // pro token zadne pravidlo neexistuje
+		return ERROR_SYNTAX;
+	}
+
+	// rozvinuti neterminalu value_last
+	if((error = value_last(token, sourceFile)))
+		return error;
+
+	return value2(token, sourceFile);
 }
+
+
+/**
+ * @brief Neterminal value_last.
+ *
+ * Implementuje pravidla  21, 22, 23, 24.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int value_last(Token *token, FILE *sourceFile) {
+  int error;
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+
+  if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+    return error;
+
+	switch(token->ID) {
+		case TOKEN_ID_ID: // id_var
+			// TODO osetrit pomoci tabulky symbolu
+		break;
+
+		case TOKEN_ID_INT0:
+		case TOKEN_ID_HEX2:
+		case TOKEN_ID_INT:
+		case TOKEN_ID_ZERO: // int_value
+			// TODO aplikace pravidla 22
+		break;
+
+		case TOKEN_ID_DHEX2:
+		case TOKEN_ID_HEXP3:
+		case TOKEN_ID_DBL2:
+		case TOKEN_ID_EXP3: // num_value
+			// TODO aplikace pravidla 23
+		break;
+
+		case TOKEN_ID_FSTR: // str_value
+    	//TODO aplikace pravidla 24
+		break;
+
+		default: // pro token zadne pravidlo neexistuje
+			return ERROR_SYNTAX;
+	}
+
+	return ERROR_PASSED;
+} // value_last
 
 
 /**
