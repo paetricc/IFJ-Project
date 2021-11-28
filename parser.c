@@ -79,6 +79,7 @@ int start(Token *token, FILE *sourceFile) {
 */
 int program(Token *token, FILE *sourceFile) {
   int error;
+
   if((error = get_non_white_token(token, sourceFile)))
 	  // lexikalni nebo kompilatorova chyba
     return error;
@@ -106,7 +107,7 @@ int program(Token *token, FILE *sourceFile) {
       Node *idFce = search(token->Value.string->str);
       if (idFce == NULL) // id takove funkce neexistuje
         return ERROR_SYNTAX;
-      else if(!isVar(idFce) && isDeclared(idFce)) { // id_fnce
+      else if(!isVar(idFce) && isDefined(idFce)) { // id_fnce
         error = fnc_call(token, sourceFile); // aplikace pravidla 3
         if(error)
           return error;
@@ -370,6 +371,79 @@ int data_type(Token *token, FILE *sourceFile) {
 
   return ERROR_PASSED;
 }
+
+
+/**
+ * @brief Neterminal fnc_call.
+ *
+ * Implementuje pravidlo 16.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int fnc_call(Token *token, FILE *sourceFile) {
+  // token s id funkce byl prijaty a zpracovany o uroven vyse => pokracuju dale
+  // aplikuju pravidlo 16
+  int error;
+
+  // '('
+  if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+    return error;
+
+  if(token->ID != TOKEN_ID_LBR)
+    return ERROR_SYNTAX;
+
+  
+  // rozvinuti neterminalu value
+  if((error = value(token, sourceFile)))
+    return error;
+
+
+  // ')'
+  if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+    return error;
+
+  if(token->ID != TOKEN_ID_RBR)
+    return ERROR_SYNTAX;
+
+  return ERROR_PASSED;
+}
+
+
+/**
+ * @brief Neterminal value.
+ *
+ * Implementuje pravidla 17 a 18.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int value(Token *token, FILE *sourceFile) {
+  int error;
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+
+  if((error = get_non_white_token(token, sourceFile)))
+    return error;
+
+  if(token->ID == TOKEN_ID_RBR) { // ')'
+    // nasteveni cteni pred zavorku, aby si ji precetl volajici
+    fsetpos(sourceFile, &lastReadPos);
+    return ERROR_PASSED; // aplikace pravidla 17
+  }
+  else if(token->ID == TOKEN_ID_ID) {
+    //TODO pomoci symtable osetrit id_var
+  }
+  else if(/*hodnota*/) {
+  }
+
+}
+
 
 /**
  * @brief Parser
