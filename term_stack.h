@@ -16,7 +16,7 @@
 #define PUSH_ERR 1
 
 typedef enum{EXP, R, I, E, USD,
-    ADD, SUB, MUL, DIV, DIV2, RBR, LBR, ID, LEN, DDOT, LT, GT, LTE, GTE, EQ, NEQ
+    ADD, SUB, MUL, DIV, DIV2, LBR, RBR, ID, LEN, DDOT, LT, GT, LTE, GTE, EQ, NEQ
 } TermsAndNonTerms;
 
 typedef struct TermStackElement{
