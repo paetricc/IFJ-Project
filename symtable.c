@@ -155,7 +155,7 @@ void bst_insert(bst_node_t **tree, Dynamic_string *string, bool isFnc) {
 }
 
 void bst_dispose(bst_node_t **tree){
-    if (*tree != NULL){                         //dokud srom neni prazdny
+    if (*tree != NULL){                         //dokud strom neni prazdny
         bst_dispose(&((*tree)->left));                  //rekurzivne se zavola pro levy podstrom
         bst_dispose(&((*tree)->right));                 //rekurzivne se zavola pro pravy podstrom
         if ((*tree)->isFnc){
@@ -199,9 +199,7 @@ void SLL_Frame_Insert(SLList_Frame *listFrame){
     if (nElemPtr == NULL){
         return;
     }
-    bst_node_t **tree = malloc(sizeof (bst_node_t));
-    bst_init(tree);
-    nElemPtr->node = *tree;         //nahraje data
+    bst_init(&(nElemPtr->node));
     if (listFrame->globalElement == NULL){
         nElemPtr->previousElement = NULL;
         listFrame->globalElement = nElemPtr;
@@ -218,6 +216,7 @@ void SLL_Frame_Insert(SLList_Frame *listFrame){
 
 void SLL_Frame_Delete(SLList_Frame *listFrame){
     bool isfrstLastElement = false;
+
     if (listFrame->TopLocalElement != NULL){     //jestli existuje posledni prvek
         bst_dispose(&(listFrame->TopLocalElement->node));
         SLLElementPtr_Frame elemPtr;
