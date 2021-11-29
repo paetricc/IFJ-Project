@@ -877,6 +877,72 @@ int return_void(Token *token, FILE *sourceFile) {
 	return ERROR_PASSED;
 }
 
+
+/**
+ * @brief Neterminal fnc_body.
+ *
+ * Implementuje pravidlo 37, 38 a 39.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int fnc_body(Token *token, FILE *sourceFile) {
+  int error;
+	
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID == TOKEN_ID_KEYWORD) { // local, if nebo while
+		switch(token->Value.keyword) {
+			case KEYWORD_LOCAL: // local
+				// vratim cteni pred local, aby si ho precetl volany
+				fsetpos(sourceFile, &lastReadPos);
+
+				// rozvinu neterminal statement
+				if((error = statement(token, sourceFile))) // aplikace pravidla 39
+					return error;
+
+			break;
+
+			case KEYWORD_IF: // if
+				// rozvinu neterminal if
+				if((error = if_(token, sourceFile))) // aplikace pravidla 37
+					return error;
+			break;
+
+
+			case KEYWORD_WHILE: // while
+				// rozvinu neterminal while
+				if((error = loop(token, sourceFile))) // aplikace pravidla 38
+					return error;
+			break;
+
+			default: // pro keyword neexistuje pravidlo
+				return ERROR_SYNTAX;
+		}
+	}
+	else if(token->ID == TOKEN_ID_ID) {
+		// vratim cteni pred identifikator, aby si ho precetl volany
+		fsetpos(sourceFile, &lastReadPos);
+				
+		// rozvinu neterminal statement
+		if((error = statement(token, sourceFile))) // aplikace pravidla 39
+			return error;
+	}
+	else { // pro prijaty token neexistuje pravidlo
+		return ERROR_SYNTAX;
+	}
+	
+	return fnc_body2(token, sourceFile);
+} // fnc_body
+
+
 /**
  * @brief Parser
  *
