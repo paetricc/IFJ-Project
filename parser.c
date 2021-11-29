@@ -943,6 +943,66 @@ int fnc_body(Token *token, FILE *sourceFile) {
 } // fnc_body
 
 
+
+/**
+ * @brief Neterminal fnc_body2.
+ *
+ * Implementuje pravidlo 40 a 41.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int fnc_body2(Token *token, FILE *sourceFile) {
+  int error;
+
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID == TOKEN_ID_KEYWORD) { // local, if, while, return nebo end
+		switch(token->Value.keyword) {
+			case KEYWORD_LOCAL: // local
+			case KEYWORD_IF: // if
+			case KEYWORD_WHILE: // while
+				// vratim cteni pred keyword, aby si ho precetl volany
+				fsetpos(sourceFile, &lastReadPos);
+
+				// aplikace pravidla 41
+			break;
+
+			case KEYWORD_END:
+			case KEYWORD_RETURN:
+				// vratim cteni pred keyword, aby si ho precetl volajici
+				fsetpos(sourceFile, &lastReadPos);
+
+				//aplikace pravidla 40
+				return ERROR_PASSED;
+
+
+			default: // pro keyword neexistuje pravidlo
+				return ERROR_SYNTAX;
+		}
+	}
+	else if(token->ID == TOKEN_ID_ID) {
+		// vratim cteni pred identifikator, aby si ho precetl volany
+		fsetpos(sourceFile, &lastReadPos);
+
+		// aplikace pravidla 41
+	}
+	else { // pro prijaty token neexistuje pravidlo
+		return ERROR_SYNTAX;
+	}
+
+	return fnc_body(token, sourceFile);
+} // fnc_body2
+
+
+
 /**
  * @brief Parser
  *
