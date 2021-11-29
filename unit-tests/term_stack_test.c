@@ -1,4 +1,5 @@
-#include "term_stack.h"
+#include "../term_stack.h"
+#include "../term_stack.c"
 #include <stdlib.h>
 
 TermStack *stack;

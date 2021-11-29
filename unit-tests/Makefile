@@ -2,10 +2,13 @@ CC=gcc
 CFLAGS= -std=c99 -pedantic -Wall -Wextra -g
 NAME=scanner
 
-.PHONY: scanner-test clean
+.PHONY: termstack_test scanner-test clean
 
 scanner-test:
-	$(CC) $(FLAGS) *.c -o $(NAME)-test
+	$(CC) $(FLAGS) scanner-test.c -o $(NAME)-test
+
+term_stack_test:
+	$(CC) $(FLAGS) term_stack_test.c -o term_stack_test
 
 run1: scanner-test
 	@./scanner-test < test1.in > current-test1.output
@@ -16,6 +19,11 @@ run3: scanner-test
 	@./scanner-test < test3.in > current-test3.output
 	@diff -su current-test3.output test3.output
 	@rm current-test3.output
+
+run4: term_stack_test
+	@./term_stack_test > current-term_stack_test.output
+	@diff -su current-term_stack_test.output term_stack_test.output
+	@rm current-term_stack_test.output
 
 clean:
 	-rm -f *.o $(NAME)-test current-test1.output current-test3.output
