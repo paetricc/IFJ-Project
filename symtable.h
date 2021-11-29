@@ -16,23 +16,23 @@ typedef struct SLLElement_Param {
     Data_type type;
     Dynamic_string *name;
     /** Ukazatel na předcházející prvek seznamu. */
-    struct SLLElement_Param *previousElement;
+    struct SLLElement_Param *nextElement;
 } *SLLElementPtr_Param;
 
 typedef struct {
     /** Ukazatel na první prvek seznamu. */
-    SLLElementPtr_Param topElement;
+    SLLElementPtr_Param firstElement;
 } SLList_Param;
 
 typedef struct SLLElement_Return {
     Data_type type;
     /** Ukazatel na předcházející prvek seznamu. */
-    struct SLLElement_Return *previousElement;
+    struct SLLElement_Return *nextElement;
 } *SLLElementPtr_Return;
 
 typedef struct {
     /** Ukazatel na první prvek seznamu. */
-    SLLElementPtr_Return topElement;
+    SLLElementPtr_Return firstElement;
 } SLList_Return;
 
 typedef struct Table_data_var{

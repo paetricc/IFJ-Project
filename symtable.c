@@ -6,7 +6,7 @@
 #include "symtable.h"
 
 void SLL_Param_Init(SLList_Param *listParam){
-    listParam->topElement = NULL;
+    listParam->firstElement = NULL;
 }
 
 void SLL_Param_Insert(Data_type type, Dynamic_string *stringName, bst_node_t *tree){
@@ -18,28 +18,32 @@ void SLL_Param_Insert(Data_type type, Dynamic_string *stringName, bst_node_t *tr
     nElemPtr->type = type;
     nElemPtr->name = string1;
     nElemPtr->name->str = stringName->str;
-    if (tree->funcData->paramList->topElement == NULL) {
-        nElemPtr->previousElement = NULL;
-        tree->funcData->paramList->topElement = nElemPtr;
+    if (tree->funcData->paramList->firstElement == NULL) {
+        nElemPtr->nextElement = NULL;
+        tree->funcData->paramList->firstElement = nElemPtr;
     } else {
-        nElemPtr->previousElement = tree->funcData->paramList->topElement;          //prenastavi ukazatele
-        tree->funcData->paramList->topElement = nElemPtr;
+        SLLElementPtr_Param elemPtr = tree->funcData->paramList->firstElement;
+        while (elemPtr->nextElement != NULL){
+            elemPtr = elemPtr->nextElement;
+        }
+        nElemPtr->nextElement = NULL;
+        elemPtr->nextElement = nElemPtr;
     }
 }
 
 void SLL_Param_Dispose(SLList_Param *listParam){
-    while (listParam->topElement != NULL){                     //dokud prvni element neni NULL
+    while (listParam->firstElement != NULL){                     //dokud prvni element neni NULL
         SLLElementPtr_Param elemPtr;
-        free(listParam->topElement->name);
-        elemPtr = listParam->topElement;                       //pomocny ukazatel ukazuje na 1. prvek
-        listParam->topElement = listParam->topElement->previousElement;       //prvni se posune na dalsi
+        free(listParam->firstElement->name);
+        elemPtr = listParam->firstElement;                       //pomocny ukazatel ukazuje na 1. prvek
+        listParam->firstElement = listParam->firstElement->nextElement;       //prvni se posune na dalsi
         free(elemPtr);          //smaze prvni prvek
     }
-    listParam->topElement = NULL;
+    listParam->firstElement = NULL;
 }
 
 void SLL_Return_Init(SLList_Return *listReturn){
-    listReturn->topElement = NULL;
+    listReturn->firstElement = NULL;
 }
 
 void SLL_Return_Insert(Data_type type, bst_node_t *tree){
@@ -48,23 +52,27 @@ void SLL_Return_Insert(Data_type type, bst_node_t *tree){
         return;
     }
     nElemPtr->type = type;
-    if (tree->funcData->returnList->topElement == NULL) {
-        nElemPtr->previousElement = NULL;
-        tree->funcData->returnList->topElement = nElemPtr;
+    if (tree->funcData->returnList->firstElement == NULL) {
+        nElemPtr->nextElement = NULL;
+        tree->funcData->returnList->firstElement = nElemPtr;
     } else{
-        nElemPtr->previousElement = tree->funcData->returnList->topElement;          //prenastavi ukazatele
-        tree->funcData->returnList->topElement = nElemPtr;
+        SLLElementPtr_Return elemPtr = tree->funcData->returnList->firstElement;
+        while (elemPtr->nextElement != NULL){
+            elemPtr = elemPtr->nextElement;
+        }
+        nElemPtr->nextElement = NULL;
+        elemPtr->nextElement = nElemPtr;
     }
 }
 
 void SLL_Return_Dispose(SLList_Return *listReturn){
-    while (listReturn->topElement != NULL){                     //dokud prvni element neni NULL
+    while (listReturn->firstElement != NULL){                     //dokud prvni element neni NULL
         SLLElementPtr_Return elemPtr;
-        elemPtr = listReturn->topElement;                       //pomocny ukazatel ukazuje na 1. prvek
-        listReturn->topElement = listReturn->topElement->previousElement;       //prvni se posune na dalsi
+        elemPtr = listReturn->firstElement;
+        listReturn->firstElement = listReturn->firstElement->nextElement;       //prvni se posune na dalsi
         free(elemPtr);          //smaze prvni prvek
     }
-    listReturn->topElement = NULL;
+    listReturn->firstElement = NULL;
 }
 
 void setDataV(bst_node_t *tree, Data_type type, bool init, bool used){
@@ -147,7 +155,7 @@ void bst_insert(bst_node_t **tree, Dynamic_string *string, bool isFnc) {
 }
 
 void bst_dispose(bst_node_t **tree){
-    if (*tree != NULL){                         //dokud srom neni prazdny
+    if (*tree != NULL){                         //dokud strom neni prazdny
         bst_dispose(&((*tree)->left));                  //rekurzivne se zavola pro levy podstrom
         bst_dispose(&((*tree)->right));                 //rekurzivne se zavola pro pravy podstrom
         if ((*tree)->isFnc){
@@ -164,8 +172,8 @@ void bst_dispose(bst_node_t **tree){
             (*tree)->varData = NULL;
         }
         free((*tree)->name);
-        free(*tree);                                    //smaze uzel
-        *tree = NULL;                                   //inicializuje strom
+        free(*tree);
+        *tree = NULL;//inicializuje strom
     } else{
         return;
     }
@@ -191,9 +199,7 @@ void SLL_Frame_Insert(SLList_Frame *listFrame){
     if (nElemPtr == NULL){
         return;
     }
-    bst_node_t *tree = malloc(sizeof (bst_node_t));
-    bst_init(&tree);
-    nElemPtr->node = tree;         //nahraje data
+    bst_init(&(nElemPtr->node));
     if (listFrame->globalElement == NULL){
         nElemPtr->previousElement = NULL;
         listFrame->globalElement = nElemPtr;
@@ -210,6 +216,7 @@ void SLL_Frame_Insert(SLList_Frame *listFrame){
 
 void SLL_Frame_Delete(SLList_Frame *listFrame){
     bool isfrstLastElement = false;
+
     if (listFrame->TopLocalElement != NULL){     //jestli existuje posledni prvek
         bst_dispose(&(listFrame->TopLocalElement->node));
         SLLElementPtr_Frame elemPtr;
@@ -228,7 +235,6 @@ void SLL_Frame_Delete(SLList_Frame *listFrame){
 void SLL_Frame_DeleteGlobal(SLList_Frame *listFrame){
     if (listFrame->TopLocalElement == NULL && listFrame->globalElement != NULL){     //jestli existuje posledni prvek
         bst_dispose(&(listFrame->globalElement->node));
-        //listFrame->globalElement->node = NULL;
         free(listFrame->globalElement);          //uvolni global
         listFrame->globalElement = NULL;
         listFrame->TopLocalElement = NULL;
