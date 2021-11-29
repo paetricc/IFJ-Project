@@ -10,10 +10,10 @@ typedef enum {
     TYPE_INTEGER,
     TYPE_NUMBER,
     TYPE_STRING,
-}Data_type_local;
+}Data_type;
 
 typedef struct SLLElement_Param {
-    Data_type_local type;
+    Data_type type;
     Dynamic_string *name;
     /** Ukazatel na předcházející prvek seznamu. */
     struct SLLElement_Param *previousElement;
@@ -21,22 +21,22 @@ typedef struct SLLElement_Param {
 
 typedef struct {
     /** Ukazatel na první prvek seznamu. */
-    SLLElementPtr_Param lastElement;
+    SLLElementPtr_Param topElement;
 } SLList_Param;
 
 typedef struct SLLElement_Return {
-    Data_type_local type;
+    Data_type type;
     /** Ukazatel na předcházející prvek seznamu. */
     struct SLLElement_Return *previousElement;
 } *SLLElementPtr_Return;
 
 typedef struct {
     /** Ukazatel na první prvek seznamu. */
-    SLLElementPtr_Return lastElement;
+    SLLElementPtr_Return topElement;
 } SLList_Return;
 
 typedef struct Table_data_var{
-    Data_type_local type;
+    Data_type type;
     bool init;
     bool used;
 }Table_data_var_t;
@@ -63,51 +63,57 @@ typedef struct SLLElement_Frame {
 } *SLLElementPtr_Frame;
 
 typedef struct {
-    /** Ukazatel na první prvek seznamu. */
-    SLLElementPtr_Frame lastElement;
-    /** Ukazatel na aktuální prvek seznamu. */
+    /** Ukazatel na posledni prvek seznamu. */
+    SLLElementPtr_Frame TopLocalElement;
+    /** Ukazatel na global prvek seznamu. */
     SLLElementPtr_Frame globalElement;
 } SLList_Frame;
 
 
-void SLL_Param_Init(SLList_Param *listParam);
+void SLL_Param_Init(SLList_Param *listParam); //done
 
-void SLL_Param_Insert(SLList_Param *listParam, Data_type_local type, Dynamic_string *stringName, bst_node_t *tree);
+void SLL_Param_Insert(Data_type type, Dynamic_string *stringName, bst_node_t *tree); //done
 
-void SLL_Param_Dispose(SLList_Param *listParam);
+void SLL_Param_Dispose(SLList_Param *listParam);//<-----------------------------------------------------------------
 
-void SLL_Return_Init(SLList_Return *listReturn);
+void SLL_Return_Init(SLList_Return *listReturn); //done
 
-void SLL_Return_Insert(SLList_Return *listReturn, Data_type_local type);
+void SLL_Return_Insert(Data_type type, bst_node_t *tree); //done
 
-void SLL_Return_Dispose(SLList_Return *listReturn);
+void SLL_Return_Dispose(SLList_Return *listReturn);//<--------------------------------------------------------------
 
-void bst_init(bst_node_t **tree);
+void bst_init(bst_node_t **tree); //done
 
-bool bst_search(bst_node_t *tree, bst_node_t *findNode, Dynamic_string *string);
+bst_node_t *bst_search(bst_node_t *tree, Dynamic_string *string); //done
 
-void bst_insert(bst_node_t **tree, Dynamic_string *string, bool isFnc);
+void bst_insert(bst_node_t **tree, Dynamic_string *string, bool isFnc); //done
 
-void bst_dispose(bst_node_t **tree);
+void bst_dispose(bst_node_t **tree);//<-----------------------------------------------------------------------------
 
-void SLL_Frame_Init(SLList_Frame *listFrame);
+void bst_preorder(bst_node_t *tree);
 
-void SLL_Frame_Insert(SLList_Frame *listFrame, bst_node_t *tree);
+void SLL_Frame_Init(SLList_Frame *listFrame); //done
 
-void SLL_Frame_Dispose(SLList_Frame *listFrame);
+void SLL_Frame_Insert(SLList_Frame *listFrame); //done
 
-void SLL_Frame_Delete(SLList_Frame *listFrame);
+void SLL_Frame_Dispose(SLList_Frame *listFrame);//<-----------------------------------------------------------------
 
-void SLL_Frame_DeleteGlobal(SLList_Frame *listFrame);
+void SLL_Frame_Delete(SLList_Frame *listFrame);//<------------------------------------------------------------------
 
-bst_node_t *search_Iden(Dynamic_string *, SLList_Frame *listFrame);
+void SLL_Frame_DeleteGlobal(SLList_Frame *listFrame);//<------------------------------------------------------------
 
-Table_data_func_t *getDataF(bst_node_t *tree);
+bst_node_t *search_Iden(Dynamic_string *, SLList_Frame *listFrame); //done
 
-Table_data_var_t *getDataV(bst_node_t *tree);
+void setDataF(bst_node_t *tree, bool); //done
 
-void setDataF(bst_node_t *tree, SLList_Param *listParam, SLList_Return *listReturn, bool);
+void setDataV(bst_node_t *tree, Data_type type, bool init, bool used); //done
 
-void setDataV(bst_node_t *tree, Data_type_local type, bool init, bool used);
+bool isFnc(bst_node_t *tree); // -jestli je to funkce nebo var
+bool isDefFnc(bst_node_t *tree); //-jestli je na uzlu, danna fce defin
+bool isInitVar(bst_node_t *tree); // -jestli je na uzlu, danna fce defin
+bool isUsedVar(bst_node_t *tree); //-jestli je na uzlu, danna fce defin
+Data_type typeVar(bst_node_t *tree); //- vrati typ promene
+
+//nejake funkce na vraceni hodnoty parametru a returnu
 
 #endif
