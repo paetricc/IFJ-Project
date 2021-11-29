@@ -658,31 +658,31 @@ int fnc_def2(Token *token, FILE *sourceFile) {
 		if((error = return_(token, sourceFile)))
 			return error;
 	}
-	else { // id_fce, id_var, local, if, while, return nebo end
-		if(token->ID == TOKEN_ID_ID || token->ID == TOKEN_ID_KEYWORD) {
+	else { // id_fce nebo id_var 
+		// aplikace pravidla 27
+
+		if(token->ID == TOKEN_ID_ID) {
+			// korektni zadani
+		}
+		else if(token->ID == TOKEN_ID_KEYWORD) { // local, if, while, return nebo end
 			switch(token->Value.keyword) {
 				case KEYWORD_IF:
 				case KEYWORD_WHILE:
 				case KEYWORD_RETURN:
 				case KEYWORD_END:
-					// nastavim cteni pred token, aby si ho mohl znovu precist volajici
-
-					// rozvinuti neterminalu fnc_body
-					if((error = fnc_body(token, sourceFile))) // aplikace pravidla 27
-						return error;
-
-					// rozvinuti neterminalu return_void
-					if((error = return_void(token, sourceFile)))
-						return error;
+					// korektni zadani
 				break;
 
-				default: // pro tento token neexistuje pravidlo
+				default: // pro tento keyword neexistuje pravidlo
 					return ERROR_SYNTAX;
 			}
 		}
 		else { // pro tento token neexistuje pravidlo
 			return ERROR_SYNTAX;
 		}
+
+			// vraceni cteni pred identifikator/ keyword, aby si to precetl volajici
+			fsetpos(sourceFile, &lastReadPos);
 	}
 		
 	return ERROR_PASSED;
@@ -895,6 +895,3 @@ int parser(FILE *sourceFile) {
   free(token);
 	return error;
 } 
-int fnc_body(Token *token, FILE *sourceFile) {
-	return 0;
-}
