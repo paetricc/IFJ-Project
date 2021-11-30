@@ -26,7 +26,6 @@ int var_def(Token *, FILE *);
 int return_(Token *, FILE *);
 int return_void(Token *, FILE *);
 int fnc_body(Token *, FILE *);
-int fnc_body2(Token *, FILE *);
 int statement(Token *, FILE *);
 int var_dec(Token *, FILE *);
 int var_dec_init(Token *, FILE *);
