@@ -1235,6 +1235,58 @@ int loop(Token *token, FILE *sourceFile) {
 
 
 /**
+ * @brief Neterminal statements
+ *
+ * Implementuje pravidlo 51 a 52.
+ *
+ * @param token Token, ktery bude naplnen scannerem
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int statements(Token *token, FILE *sourceFile) {
+  int error;
+
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID == TOKEN_ID_ID) { // id_var nebo id_fce
+		// nastavim cteni pred identifikator, aby si ho precetl volany
+		fsetpos(sourceFile, &lastReadPos);
+	}
+	else if(token->ID == TOKEN_ID_KEYWORD) {
+		switch(token->Value.keyword) { // end, else nebo local
+			case KEYWORD_ELSE:
+			case KEYWORD_END:
+				// nastavim cteni pred keyword, aby si to precetl volajici
+				fsetpos(sourceFile, &lastReadPos);
+				return ERROR_PASSED;
+
+			case KEYWORD_LOCAL:
+				// nastavim cteni pred keyword, aby si to precetl volajici
+				fsetpos(sourceFile, &lastReadPos);
+			break;
+
+			default: // pro prijaty token neexistuje pravidlo
+				return ERROR_SYNTAX;
+		}
+	}
+	else // pro prijaty token neexistuje zadne pravidlo
+		return ERROR_SYNTAX;
+
+	// rozvinuti neterminalu statement
+	if((error = statement(token, sourceFile)))
+		return error;
+
+	return statements(token, sourceFile);
+}
+
+
+/**
  * @brief Parser
  *
  * @param sourceFile Zdrojovy soubor cteny scannerem
