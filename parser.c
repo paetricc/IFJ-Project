@@ -755,7 +755,7 @@ int params_def2(Token *token, FILE *sourceFile) {
 		fsetpos(sourceFile, &lastReadPos);
 		return ERROR_PASSED; // aplikace pravidla 31
 	}
-	else if(token->ID == TOKEN_ID_CMA){
+	else if(token->ID == TOKEN_ID_CMA){ // ','
 		// aplikace pravidla 32
 		// (hned za koncem podminky)
 	}
@@ -1002,6 +1002,88 @@ int fnc_body2(Token *token, FILE *sourceFile) {
 } // fnc_body2
 
 
+/**
+ * @brief Neterminal statement.
+ *
+ * Implementuje pravidlo  42, 43 a 44.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int statement(Token *token, FILE *sourceFile) {
+  int error;
+
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID == TOKEN_ID_KEYWORD) { // local
+		// aplikace pravidla 43
+		if((error = var_dec(token, sourceFile)))
+			return error;
+	}
+	else if(token->ID == TOKEN_ID_ID) { // id_var nebo id_fnc
+		// TODO pomoci tabulky symbolu rozlisit id_var a id_fnc
+		// 
+	}
+	else // pro prijaty token neexistuje pravidlo
+		return ERROR_SYNTAX;
+
+	return ERROR_PASSED;
+}
+
+
+/**
+ * @brief Neterminal var_dec.
+ *
+ * Implementuje pravidlo 45.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int var_dec(Token *token, FILE *sourceFile) {
+	// aplikace pravidla 45
+
+  int error;
+	// local bylo uz precteno volajicim
+
+	// rozvinuti neterminalu var_def
+	if((error = var_def(token, sourceFile)))
+		return error;
+	
+	// rozvinuti neterminalu var_dec_init
+	return var_dec_init(token, sourceFile);
+}
+
+
+/**
+ * @brief Neterminal var_dec_init.
+ *
+ * Implementuje pravidlo 46 a 47.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int var_dec_init(Token *token, FILE *sourceFile) {
+  int error;
+
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+
+}
 
 /**
  * @brief Parser
