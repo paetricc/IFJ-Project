@@ -1041,7 +1041,7 @@ int var_dec_init(Token *token, FILE *sourceFile) {
 			return error;
 
 			// rozvinuti neteminalu var_dec_init2
-		return var_dec_init2(token, sourceFile);
+		return var_assign(token, sourceFile);
 	}
 	else if(token->ID == TOKEN_ID_KEYWORD) { // local, if, while, return nebo end
 		switch(token->Value.keyword) {
@@ -1093,7 +1093,7 @@ int var_assign(Token *token, FILE *sourceFile) {
 
 
 	switch(token->ID) {
-		case TOKEN_ID_ID: // id_var nebo if_fce
+		case TOKEN_ID_ID: // id_var nebo var_fce
 			// TODO rozlisit identifikator funkce od promenne pomoci symtable
 			// pro id_fce aplikace pravidla 48 => fnc_call()
 			// pro id_var aplikace pravidla 47 => fsetpos(), expr()
@@ -1125,6 +1125,167 @@ int var_assign(Token *token, FILE *sourceFile) {
 	return ERROR_PASSED;
 } // var_assign
 
+
+/**
+ * @brief Neterminal if
+ *
+ * Implementuje pravidlo 49.
+ *
+ * @param token Token, ktery bude naplnen scannerem
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int if_(Token *token, FILE *sourceFile) {
+  int error;
+	// token if byl precten o uroven vyse => pokracuju dal
+	// aplikace pravidla 49
+
+	// TODO expr zavola bottom up analyzu
+
+	// then
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID != TOKEN_ID_KEYWORD)
+		return ERROR_SYNTAX;
+	else if(token->Value.keyword != KEYWORD_THEN)
+		return ERROR_SYNTAX;
+
+
+	// rozvinu neterminal statements
+	if((error = statements(token, sourceFile)))
+		return error;
+
+
+	// else
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID != TOKEN_ID_KEYWORD)
+		return ERROR_SYNTAX;
+	else if(token->Value.keyword != KEYWORD_ELSE)
+		return ERROR_SYNTAX;
+
+
+	// rozvinu neterminal statements
+	if((error = statements(token, sourceFile)))
+		return error;
+
+
+	// end
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID != TOKEN_ID_KEYWORD)
+		return ERROR_SYNTAX;
+	else if(token->Value.keyword != KEYWORD_END)
+		return ERROR_SYNTAX;
+
+	return ERROR_PASSED;
+}
+
+
+/**
+ * @brief Neterminal loop
+ *
+ * Implementuje pravidlo 50.
+ *
+ * @param token Token, ktery bude naplnen scannerem
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int loop(Token *token, FILE *sourceFile) {
+  int error;
+	// token while byl precten o uroven vyse => pokracuju dal
+	// aplikace pravidla 50
+
+	// TODO expr zavola bottom up analyzu
+
+	// do
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID != TOKEN_ID_KEYWORD)
+		return ERROR_SYNTAX;
+	else if(token->Value.keyword != KEYWORD_DO)
+		return ERROR_SYNTAX;
+
+
+	// rozvinu neterminal statements
+	if((error = statements(token, sourceFile)))
+		return error;
+
+
+	// end
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID != TOKEN_ID_KEYWORD)
+		return ERROR_SYNTAX;
+	else if(token->Value.keyword != KEYWORD_END)
+		return ERROR_SYNTAX;
+
+	return ERROR_PASSED;
+}
+
+
+/**
+ * @brief Neterminal statements
+ *
+ * Implementuje pravidlo 51 a 52.
+ *
+ * @param token Token, ktery bude naplnen scannerem
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int statements(Token *token, FILE *sourceFile) {
+  int error;
+
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID == TOKEN_ID_ID) { // id_var nebo id_fce
+		// nastavim cteni pred identifikator, aby si ho precetl volany
+		fsetpos(sourceFile, &lastReadPos);
+	}
+	else if(token->ID == TOKEN_ID_KEYWORD) {
+		switch(token->Value.keyword) { // end, else nebo local
+			case KEYWORD_ELSE:
+			case KEYWORD_END:
+				// nastavim cteni pred keyword, aby si to precetl volajici
+				fsetpos(sourceFile, &lastReadPos);
+				return ERROR_PASSED;
+
+			case KEYWORD_LOCAL:
+				// nastavim cteni pred keyword, aby si to precetl volajici
+				fsetpos(sourceFile, &lastReadPos);
+			break;
+
+			default: // pro prijaty token neexistuje pravidlo
+				return ERROR_SYNTAX;
+		}
+	}
+	else // pro prijaty token neexistuje zadne pravidlo
+		return ERROR_SYNTAX;
+
+	// rozvinuti neterminalu statement
+	if((error = statement(token, sourceFile)))
+		return error;
+
+	return statements(token, sourceFile);
+}
+
+
 /**
  * @brief Parser
  *
@@ -1140,6 +1301,7 @@ int parser(FILE *sourceFile) {
 	// volani prvniho pravidla a nahrazovani prvniho neterminalu
 	int error = start(token, sourceFile);
 
+	free(token->Value.string);
   free(token);
 	return error;
 } 
