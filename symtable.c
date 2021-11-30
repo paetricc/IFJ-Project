@@ -9,11 +9,11 @@ void SLL_Param_Init(SLList_Param *listParam){
     listParam->firstElement = NULL;
 }
 
-void SLL_Param_Insert(Data_type type, Dynamic_string *stringName, bst_node_t *tree){
+int SLL_Param_Insert(Data_type type, Dynamic_string *stringName, bst_node_t *tree){
     SLLElementPtr_Param nElemPtr = (SLLElementPtr_Param)malloc(sizeof(struct SLLElement_Param));  //naalokuje prostor pro pridavany prvek
     Dynamic_string *string1 = (Dynamic_string *)malloc(sizeof(Dynamic_string));
     if (nElemPtr == NULL){
-        return;
+        return ERROR_COMPILER;
     }
     nElemPtr->type = type;
     nElemPtr->name = string1;
@@ -29,6 +29,7 @@ void SLL_Param_Insert(Data_type type, Dynamic_string *stringName, bst_node_t *tr
         nElemPtr->nextElement = NULL;
         elemPtr->nextElement = nElemPtr;
     }
+    return ERROR_PASSED;
 }
 
 void SLL_Param_Dispose(SLList_Param *listParam){
@@ -46,10 +47,10 @@ void SLL_Return_Init(SLList_Return *listReturn){
     listReturn->firstElement = NULL;
 }
 
-void SLL_Return_Insert(Data_type type, bst_node_t *tree){
+int SLL_Return_Insert(Data_type type, bst_node_t *tree){
     SLLElementPtr_Return nElemPtr = (SLLElementPtr_Return)malloc(sizeof(struct SLLElement_Return));  //naalokuje prostor pro pridavany prvek
     if (nElemPtr == NULL){
-        return;
+        return ERROR_COMPILER;
     }
     nElemPtr->type = type;
     if (tree->funcData->returnList->firstElement == NULL) {
@@ -63,6 +64,7 @@ void SLL_Return_Insert(Data_type type, bst_node_t *tree){
         nElemPtr->nextElement = NULL;
         elemPtr->nextElement = nElemPtr;
     }
+    return ERROR_PASSED;
 }
 
 void SLL_Return_Dispose(SLList_Return *listReturn){
@@ -110,24 +112,24 @@ bst_node_t *bst_search(bst_node_t *tree, Dynamic_string *string) {
     }
 }
 
-void bst_insert(bst_node_t **tree, Dynamic_string *string, bool isFnc) {
+int bst_insert(bst_node_t **tree, Dynamic_string *string, bool isFnc) {
     if (*tree != NULL){                                         //dokud nedosel nakonec
         if ((strcmp((*tree)->name->str, string->str)) == 0){//pokud jsou klice stejne, nahraje hodnotu a vrati true
-            //error
-            return;
+            return ERROR_SEM_UNDEFINED;
         } else{
+            int error;
             if ((strcmp((*tree)->name->str, string->str)) > 0){
-                bst_insert(&((*tree)->left), string, isFnc);       //pokud je klic mensi, rekurzivne se zavola pro levy podstrom
-                return;
+                error = bst_insert(&((*tree)->left), string, isFnc);//pokud je klic mensi, rekurzivne se zavola pro levy podstrom
+                return (error == ERROR_PASSED) ? ERROR_PASSED : ERROR_COMPILER;
             } else{
-                bst_insert(&((*tree)->right), string, isFnc);      //pokud je klic vetsi, rekurzivne se zavola pro pravy podstrom
-                return;
+                error = bst_insert(&((*tree)->right), string, isFnc);      //pokud je klic vetsi, rekurzivne se zavola pro pravy podstrom
+                return (error == ERROR_PASSED) ? ERROR_PASSED : ERROR_COMPILER;
             }
         }
     } else{                                                     //pokud je strom prazdny
         *tree = malloc(sizeof(bst_node_t));                     //vytvoreni mista pro novy uzel
         if (*tree == NULL){
-            return;
+            return ERROR_COMPILER;
         } else{
             Dynamic_string *string1 = (Dynamic_string *)malloc(sizeof(Dynamic_string));
             (*tree)->name = string1;
@@ -149,7 +151,7 @@ void bst_insert(bst_node_t **tree, Dynamic_string *string, bool isFnc) {
             }
             (*tree)->left = NULL;
             (*tree)->right = NULL;
-            return;
+            return ERROR_PASSED;
         }
     }
 }
@@ -194,10 +196,10 @@ void SLL_Frame_Init(SLList_Frame *listFrame){
     listFrame->globalElement = NULL;
 }
 
-void SLL_Frame_Insert(SLList_Frame *listFrame){
+int SLL_Frame_Insert(SLList_Frame *listFrame){
     SLLElementPtr_Frame nElemPtr = (SLLElementPtr_Frame)malloc(sizeof(struct SLLElement_Frame));  //naalokuje prostor pro pridavany prvek
     if (nElemPtr == NULL){
-        return;
+        return ERROR_COMPILER;
     }
     bst_init(&(nElemPtr->node));
     if (listFrame->globalElement == NULL){
@@ -212,6 +214,7 @@ void SLL_Frame_Insert(SLList_Frame *listFrame){
             listFrame->TopLocalElement = nElemPtr;
         }
     }
+    return ERROR_PASSED;
 }
 
 void SLL_Frame_Delete(SLList_Frame *listFrame){
@@ -230,7 +233,6 @@ void SLL_Frame_Delete(SLList_Frame *listFrame){
             listFrame->TopLocalElement = NULL;
         }
     }
-    return;
 }
 void SLL_Frame_DeleteGlobal(SLList_Frame *listFrame){
     if (listFrame->TopLocalElement == NULL && listFrame->globalElement != NULL){     //jestli existuje posledni prvek
@@ -239,7 +241,6 @@ void SLL_Frame_DeleteGlobal(SLList_Frame *listFrame){
         listFrame->globalElement = NULL;
         listFrame->TopLocalElement = NULL;
     }
-    return;
 }
 
 void SLL_Frame_Dispose(SLList_Frame *listFrame){

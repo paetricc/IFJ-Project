@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "Dynamic_string.h"
+#include "error.h"
 
 typedef enum {
     TYPE_UNDEFINED,
@@ -72,13 +73,13 @@ typedef struct {
 
 void SLL_Param_Init(SLList_Param *listParam); //done
 
-void SLL_Param_Insert(Data_type type, Dynamic_string *stringName, bst_node_t *tree); //done
+int SLL_Param_Insert(Data_type type, Dynamic_string *stringName, bst_node_t *tree); //done
 
 void SLL_Param_Dispose(SLList_Param *listParam);//<-----------------------------------------------------------------
 
 void SLL_Return_Init(SLList_Return *listReturn); //done
 
-void SLL_Return_Insert(Data_type type, bst_node_t *tree); //done
+int SLL_Return_Insert(Data_type type, bst_node_t *tree); //done
 
 void SLL_Return_Dispose(SLList_Return *listReturn);//<--------------------------------------------------------------
 
@@ -86,7 +87,7 @@ void bst_init(bst_node_t **tree); //done
 
 bst_node_t *bst_search(bst_node_t *tree, Dynamic_string *string); //done
 
-void bst_insert(bst_node_t **tree, Dynamic_string *string, bool isFnc); //done
+int bst_insert(bst_node_t **tree, Dynamic_string *string, bool isFnc); //done
 
 void bst_dispose(bst_node_t **tree);//<-----------------------------------------------------------------------------
 
@@ -94,7 +95,7 @@ void bst_preorder(bst_node_t *tree);
 
 void SLL_Frame_Init(SLList_Frame *listFrame); //done
 
-void SLL_Frame_Insert(SLList_Frame *listFrame); //done
+int SLL_Frame_Insert(SLList_Frame *listFrame); //done
 
 void SLL_Frame_Dispose(SLList_Frame *listFrame);//<-----------------------------------------------------------------
 
