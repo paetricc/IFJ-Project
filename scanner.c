@@ -35,7 +35,7 @@ void conversion_Int(Dynamic_string *str, Token *token){
  */
  
 void conversion_Double(Dynamic_string *str, Token *token){
-    token->Value.Double = atof(str->str);
+    token->Value.Double = strtod(str->str, NULL);
 }
 
 /**
@@ -131,42 +131,34 @@ int get_token(Token *token, FILE *source_file ) {
                             token->ID = TOKEN_ID_TAB;
                             DS_Free(ptr_Str);
                             return ERROR_PASSED;
-                            break;
                         case ':':
                             token->ID = TOKEN_ID_CLN;
                             DS_Free(ptr_Str);
                             return ERROR_PASSED;
-                            break;
                         case '\n':
                             token->ID = TOKEN_ID_EOL;
                             DS_Free(ptr_Str);
                             return ERROR_PASSED;
-                            break;
                         case ',':
                             token->ID = TOKEN_ID_CMA;
                             DS_Free(ptr_Str);
                             return ERROR_PASSED;
-                            break;
                         case ' ':
                             token->ID = TOKEN_ID_SPACE;
                             DS_Free(ptr_Str);
                             return ERROR_PASSED;
-                            break;
                         case ')':
                             token->ID = TOKEN_ID_RBR;
                             DS_Free(ptr_Str);
                             return ERROR_PASSED;
-                            break;
                         case '(':
                             token->ID = TOKEN_ID_LBR;
                             DS_Free(ptr_Str);
                             return ERROR_PASSED;
-                            break;
                         case '+':
                             token->ID = TOKEN_ID_ADD;
                             DS_Free(ptr_Str);
                             return ERROR_PASSED;
-                            break;
                         case '-':
                             state = STATE_SUB;
                             break;
@@ -174,7 +166,6 @@ int get_token(Token *token, FILE *source_file ) {
                             token->ID = TOKEN_ID_MUL;
                             DS_Free(ptr_Str);
                             return ERROR_PASSED;
-                            break;
                         case '/':
                             state = STATE_DIV;
                             break;
@@ -311,7 +302,6 @@ int get_token(Token *token, FILE *source_file ) {
                         ungetc(c, source_file);
                         return ERROR_PASSED;
                     }
-                    break;
                 case STATE_NEQ:
                     if (c == '=') {
                         token->ID = TOKEN_ID_NEQ2;
@@ -332,7 +322,6 @@ int get_token(Token *token, FILE *source_file ) {
                         ungetc(c, source_file);
                         return ERROR_PASSED;
                     }
-                    break;
                 case STATE_GT:
                     if (c == '=') {
                         token->ID = TOKEN_ID_GTE;
@@ -344,7 +333,6 @@ int get_token(Token *token, FILE *source_file ) {
                         ungetc(c, source_file);
                         return ERROR_PASSED;
                     }
-                    break;
                 case STATE_ASSIGN:
                     if (c == '=') {
                         token->ID = TOKEN_ID_EQ;
@@ -356,7 +344,6 @@ int get_token(Token *token, FILE *source_file ) {
                         ungetc(c, source_file);
                         return ERROR_PASSED;
                     }
-                    break;
                 case STATE_STR:
                     if (c == '"') {
                         token->ID = TOKEN_ID_FSTR;
