@@ -1042,11 +1042,21 @@ int statement(Token *token, FILE *sourceFile) {
 			return error;
 	}
 	else if(token->ID == TOKEN_ID_ID) { // id_var nebo id_fnc
-		// TODO pomoci tabulky symbolu rozlisit id_var a id_fnc
-		// aplikace pravidla 42 a 43
+		// najdu uzel identifikatoru
+		bst_node *id_node = search_Iden(token->Value.string, symTable);
 
-		// vratim cteni pred identifikator, aby si ho precetl volany
-		fsetpos(sourceFile, &lastReadPos);
+		// zjistim, jestli existuje
+		if(id_node == NULL)
+			return ERROR_SEM_UNDEFINED;
+		if(isFnc(id_node)) { // id_fnc
+			// vratim cteni pred identifikator, aby si ho precetl volany
+			fsetpos(sourceFile, &lastReadPos);
+			// rozsirim neterminal fnc_call
+			return fnc_call(token, sourceFile);
+		}
+		else { // id_var
+			// TODO
+		}
 	}
 	else // pro prijaty token neexistuje pravidlo
 		return ERROR_SYNTAX;
