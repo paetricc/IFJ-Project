@@ -1041,7 +1041,7 @@ int var_dec_init(Token *token, FILE *sourceFile) {
 			return error;
 
 			// rozvinuti neteminalu var_dec_init2
-		return var_dec_init2(token, sourceFile);
+		return var_assign(token, sourceFile);
 	}
 	else if(token->ID == TOKEN_ID_KEYWORD) { // local, if, while, return nebo end
 		switch(token->Value.keyword) {
