@@ -73,7 +73,7 @@ int start(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidla 2, 3, 4, 5.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -125,7 +125,7 @@ int program(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidlo 6.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -200,7 +200,7 @@ int fnc_dec(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidla 7,8.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -249,7 +249,7 @@ int params_dec(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidla 9, 10.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -284,7 +284,7 @@ int params_dec2(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidla 11, 12.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -336,7 +336,7 @@ int return_type(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidel 13, 14, 15.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -369,7 +369,7 @@ int data_type(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidlo 16.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -409,7 +409,7 @@ int fnc_call(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidla 17 a 18.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -457,7 +457,7 @@ int value(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidla 19 a 20.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -496,7 +496,7 @@ int value2(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidla  21, 22, 23, 24.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -546,7 +546,7 @@ int value_last(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidlo 25.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -582,7 +582,7 @@ int fnc_def(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidlo 26.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -629,7 +629,7 @@ int fnc_head(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidlo 27 a 28.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -694,7 +694,7 @@ int fnc_def2(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidlo 29 a 30.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -735,7 +735,7 @@ int params_def(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidlo 31 a 32.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -777,7 +777,7 @@ int params_def2(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidlo 33.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -813,7 +813,7 @@ int var_def(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidlo 34.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -844,7 +844,7 @@ int return_(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidlo 35 a 36.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -883,7 +883,7 @@ int return_void(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidlo 37, 38, 39 a 40.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -956,7 +956,7 @@ int fnc_body(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidlo 41, 42 a 43.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -995,7 +995,7 @@ int statement(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidlo 44.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -1019,7 +1019,7 @@ int var_dec(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidlo 45 a 46.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
@@ -1076,7 +1076,7 @@ int var_dec_init(Token *token, FILE *sourceFile) {
  *
  * Implementuje pravidlo 47 a 48.
  *
- * @param token Token, ktery bude naplni scanner
+ * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
