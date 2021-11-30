@@ -174,7 +174,7 @@ int fnc_dec(Token *token, FILE *sourceFile) {
   if(token->ID != TOKEN_ID_ID)
     return ERROR_SYNTAX;
 
-	// overeni, zda nebyla funkce uz definovana
+	// overeni, zda nebyla funkce uz deklarovana nebo definovana
 	if(search_Iden(token->Value.string, symTable) != NULL)
 		return ERROR_SEM_UNDEFINED;
 	// pridani id_fnc do symtable
@@ -624,6 +624,9 @@ int fnc_def(Token *token, FILE *sourceFile) {
     return ERROR_SYNTAX;
 	else if(token->Value.keyword != KEYWORD_END)
 		return ERROR_SYNTAX;
+
+	// odeberu ramec funkce
+	SLL_Frame_Delete(symTable);
 	
 	return ERROR_PASSED;
 }
@@ -649,8 +652,15 @@ int fnc_head(Token *token, FILE *sourceFile) {
 		return error;
 	if(token->ID != TOKEN_ID_ID)
 		return ERROR_SYNTAX;
-	// TODO zpracovat identifikator funkce symtable
 
+	// overeni, zda nebyla funkce uz deklarovana nebo definovana
+	if(search_Iden(token->Value.string, symTable) != NULL)
+		return ERROR_SEM_UNDEFINED;
+	// pridani id_fnc do symtable
+	bst_insert(&(symTable->globalElement->node), token->Value.string, true);
+
+	// vytvoreni noveho ramce pro funkci
+	SLL_Frame_Insert(symTable);
 
 	// '('
 	if((error = get_non_white_token(token, sourceFile)))
@@ -844,7 +854,11 @@ int var_def(Token *token, FILE *sourceFile) {
 	if(token->ID != TOKEN_ID_ID)
 		return ERROR_SYNTAX;
 	
-	// TODO zpracovani identifikatoru pomoci symtable
+	// overeni, ze identifikator zatim neexistuje
+	if(search_Iden(token->Value.string, symTable) != NULL)
+		return ERROR_SEM_UNDEFINED;
+	// vlozeni identifikatoru do symtable
+	bst_insert(&(symTable->TopLocalElement->node), token->Value.string, false);
 
 
 	// ':'
