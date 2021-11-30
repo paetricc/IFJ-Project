@@ -1036,14 +1036,12 @@ int statement(Token *token, FILE *sourceFile) {
 	  // lexikalni nebo kompilatorova chyba
 		return error;
 
-	if(token->ID == TOKEN_ID_KEYWORD) { // local
+	if(token->ID == TOKEN_ID_KEYWORD) // local
 		// rozvinuti neterminalu var_dec
-		if((error = var_dec(token, sourceFile))) // aplikace pravidla 41
-			return error;
-	}
+		return var_dec(token, sourceFile); // aplikace pravidla 41
 	else if(token->ID == TOKEN_ID_ID) { // id_var nebo id_fnc
 		// najdu uzel identifikatoru
-		bst_node *id_node = search_Iden(token->Value.string, symTable);
+		bst_node_t *id_node = search_Iden(token->Value.string, symTable);
 
 		// zjistim, jestli existuje
 		if(id_node == NULL)
@@ -1052,16 +1050,25 @@ int statement(Token *token, FILE *sourceFile) {
 			// vratim cteni pred identifikator, aby si ho precetl volany
 			fsetpos(sourceFile, &lastReadPos);
 			// rozsirim neterminal fnc_call
-			return fnc_call(token, sourceFile);
+			return fnc_call(token, sourceFile); // aplikace pravidla 43
 		}
 		else { // id_var
-			// TODO
+			// aplikace pravidla 42
 		}
 	}
 	else // pro prijaty token neexistuje pravidlo
 		return ERROR_SYNTAX;
 
-	return ERROR_PASSED;
+	// z podminek pokracuje dal uz jen pravidlo 42
+	// '='
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+	else if(token->ID != TOKEN_ID_ASSIGN)
+		return ERROR_SYNTAX;
+
+	// rozvinu neterminal var_assign
+	return var_assign(token, sourceFile);
 }
 
 
@@ -1231,11 +1238,15 @@ int if_(Token *token, FILE *sourceFile) {
 	else if(token->Value.keyword != KEYWORD_THEN)
 		return ERROR_SYNTAX;
 
+	// vytvorim ramec pro blok if
+	SLL_Frame_Insert(symTable);
 
 	// rozvinu neterminal statements
 	if((error = statements(token, sourceFile)))
 		return error;
 
+	// odstranim ramec pro blok if
+	SLL_Frame_Delete(symTable);
 
 	// else
 	if((error = get_non_white_token(token, sourceFile)))
@@ -1247,11 +1258,15 @@ int if_(Token *token, FILE *sourceFile) {
 	else if(token->Value.keyword != KEYWORD_ELSE)
 		return ERROR_SYNTAX;
 
+	// vytvorim ramec pro blok else
+	SLL_Frame_Insert(symTable);
 
 	// rozvinu neterminal statements
 	if((error = statements(token, sourceFile)))
 		return error;
 
+	// odstranim ramec pro blok else
+	SLL_Frame_Delete(symTable);
 
 	// end
 	if((error = get_non_white_token(token, sourceFile)))
@@ -1264,7 +1279,7 @@ int if_(Token *token, FILE *sourceFile) {
 		return ERROR_SYNTAX;
 
 	return ERROR_PASSED;
-}
+} // if_
 
 
 /**
@@ -1295,11 +1310,15 @@ int loop(Token *token, FILE *sourceFile) {
 	else if(token->Value.keyword != KEYWORD_DO)
 		return ERROR_SYNTAX;
 
+	// vytvorim ramec pro blok do
+	SLL_Frame_Insert(symTable);
 
 	// rozvinu neterminal statements
 	if((error = statements(token, sourceFile)))
 		return error;
 
+	// vytvorim ramec pro blok do
+	SLL_Frame_Delete(symTable);
 
 	// end
 	if((error = get_non_white_token(token, sourceFile)))
@@ -1312,7 +1331,7 @@ int loop(Token *token, FILE *sourceFile) {
 		return ERROR_SYNTAX;
 
 	return ERROR_PASSED;
-}
+} // loop
 
 
 /**
