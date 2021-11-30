@@ -19,6 +19,7 @@
 typedef struct {
     char *str;
     unsigned int length;
+    unsigned int alloc;
 } Dynamic_string;
 
 /**
