@@ -1,6 +1,5 @@
 #include "term_stack.h"
 #include "error.h"
-#include "./scanner-test.h"
 
 TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token_ID );
 

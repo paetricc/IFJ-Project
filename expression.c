@@ -9,6 +9,9 @@
 #include "expression.h"
 #include <stdlib.h>
 
+// jezdec udavajici skutecnou pozici v ctenem souboru
+fpos_t last_read_pos;
+
 static TermsAndNonTerms p_table[17][17] =
 {       /* $  +  -  *  /  // (  )  i  #  .. <  >  <= >= == ~= */ 
 /*  $ */ {-1, R, R, R, R, R, R,-1, R, R, R, I, I, I, I, I, I },
@@ -78,7 +81,6 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token_ID token_ID ) {
         break;*/
     default:
         return USD;
-        break;
     }
 }
 
@@ -183,6 +185,7 @@ void stackPrint( TermStack *stack ) {
  */
 void skipNonPrintChar(Token *token, FILE *file) {
     do {
+        fgetpos(file, &last_read_pos);
         get_token(token, file);
     } while (token->ID == TOKEN_ID_SPACE || token->ID == TOKEN_ID_TAB);
 }
@@ -229,7 +232,6 @@ int checkRulesAndApply( TermStack *stack ) {
     } else {
         return ERROR_SYNTAX;
     }
-    return ERROR_SYNTAX;
 }
 
 /**
@@ -304,5 +306,6 @@ int exprSyntaxCheck(Token *token, FILE *file) {
     } while( vstup != USD  || !SA_isOK(stack)); // opakuji dokud vstup neni $ a dokud muzu redukovat
     //uvolnim pamet zasobniku
     TermStack_dispose(stack);
+    fsetpos(file, &last_read_pos);
     return ERROR_PASSED;
 }
