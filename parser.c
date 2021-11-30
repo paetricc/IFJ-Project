@@ -1093,7 +1093,7 @@ int var_assign(Token *token, FILE *sourceFile) {
 
 
 	switch(token->ID) {
-		case TOKEN_ID_ID: // id_var nebo if_fce
+		case TOKEN_ID_ID: // id_var nebo var_fce
 			// TODO rozlisit identifikator funkce od promenne pomoci symtable
 			// pro id_fce aplikace pravidla 48 => fnc_call()
 			// pro id_var aplikace pravidla 47 => fsetpos(), expr()
@@ -1124,6 +1124,115 @@ int var_assign(Token *token, FILE *sourceFile) {
 
 	return ERROR_PASSED;
 } // var_assign
+
+
+/**
+ * @brief Neterminal if
+ *
+ * Implementuje pravidlo 49.
+ *
+ * @param token Token, ktery bude naplnen scannerem
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int if_(Token *token, FILE *sourceFile) {
+  int error;
+	// token if byl precten o uroven vyse => pokracuju dal
+	// aplikace pravidla 49
+
+	// TODO expr zavola bottom up analyzu
+
+	// then
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID != TOKEN_ID_KEYWORD)
+		return ERROR_SYNTAX;
+	else if(token->Value.keyword != KEYWORD_THEN)
+		return ERROR_SYNTAX;
+
+
+	// rozvinu neterminal statements
+	if((error = statements(token, sourceFile)))
+		return error;
+
+
+	// else
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID != TOKEN_ID_KEYWORD)
+		return ERROR_SYNTAX;
+	else if(token->Value.keyword != KEYWORD_ELSE)
+		return ERROR_SYNTAX;
+
+
+	// rozvinu neterminal statements
+	if((error = statements(token, sourceFile)))
+		return error;
+
+
+	// end
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID != TOKEN_ID_KEYWORD)
+		return ERROR_SYNTAX;
+	else if(token->Value.keyword != KEYWORD_END)
+		return ERROR_SYNTAX;
+
+	return ERROR_PASSED;
+}
+
+
+/**
+ * @brief Neterminal loop
+ *
+ * Implementuje pravidlo 50.
+ *
+ * @param token Token, ktery bude naplnen scannerem
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int loop(Token *token, FILE *sourceFile) {
+  int error;
+	// token while byl precten o uroven vyse => pokracuju dal
+	// aplikace pravidla 50
+
+	// TODO expr zavola bottom up analyzu
+
+	// do
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID != TOKEN_ID_KEYWORD)
+		return ERROR_SYNTAX;
+	else if(token->Value.keyword != KEYWORD_DO)
+		return ERROR_SYNTAX;
+
+
+	// rozvinu neterminal statements
+	if((error = statements(token, sourceFile)))
+		return error;
+
+
+	// end
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+	if(token->ID != TOKEN_ID_KEYWORD)
+		return ERROR_SYNTAX;
+	else if(token->Value.keyword != KEYWORD_END)
+		return ERROR_SYNTAX;
+
+	return ERROR_PASSED;
+}
+
 
 /**
  * @brief Parser
