@@ -954,7 +954,7 @@ int fnc_body(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal statement.
  *
- * Implementuje pravidlo  42, 43 a 44.
+ * Implementuje pravidlo 41, 42 a 43.
  *
  * @param token Token, ktery bude naplni scanner
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -972,13 +972,16 @@ int statement(Token *token, FILE *sourceFile) {
 		return error;
 
 	if(token->ID == TOKEN_ID_KEYWORD) { // local
-		// aplikace pravidla 43
-		if((error = var_dec(token, sourceFile)))
+		// rozvinuti neterminalu var_dec
+		if((error = var_dec(token, sourceFile))) // aplikace pravidla 41
 			return error;
 	}
 	else if(token->ID == TOKEN_ID_ID) { // id_var nebo id_fnc
 		// TODO pomoci tabulky symbolu rozlisit id_var a id_fnc
-		// 
+		// aplikace pravidla 42 a 43
+
+		// vratim cteni pred identifikator, aby si ho precetl volany
+		fsetpos(sourceFile, &lastReadPos);
 	}
 	else // pro prijaty token neexistuje pravidlo
 		return ERROR_SYNTAX;
@@ -990,14 +993,14 @@ int statement(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal var_dec.
  *
- * Implementuje pravidlo 45.
+ * Implementuje pravidlo 44.
  *
  * @param token Token, ktery bude naplni scanner
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
 int var_dec(Token *token, FILE *sourceFile) {
-	// aplikace pravidla 45
+	// aplikace pravidla 44
 
   int error;
 	// local bylo uz precteno volajicim
@@ -1014,7 +1017,7 @@ int var_dec(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal var_dec_init.
  *
- * Implementuje pravidlo 46 a 47.
+ * Implementuje pravidlo 45 a 46.
  *
  * @param token Token, ktery bude naplni scanner
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -1031,8 +1034,98 @@ int var_dec_init(Token *token, FILE *sourceFile) {
 	  // lexikalni nebo kompilatorova chyba
 		return error;
 
+	if(token->ID == TOKEN_ID_ASSIGN) { // '='
+		// aplikace pravidla 45
+		if((error = get_non_white_token(token, sourceFile)))
+			// lexikalni nebo kompilatorova chyba
+			return error;
 
+			// rozvinuti neteminalu var_dec_init2
+		return var_dec_init2(token, sourceFile);
+	}
+	else if(token->ID == TOKEN_ID_KEYWORD) { // local, if, while, return nebo end
+		switch(token->Value.keyword) {
+			case KEYWORD_LOCAL:
+			case KEYWORD_IF:
+			case KEYWORD_WHILE:
+			case KEYWORD_RETURN:
+			case KEYWORD_END:
+				// aplikace pravidla 46
+			break;
+
+			default: // prot tento keyword neexisuje pravidlo
+				return ERROR_SYNTAX;
+		}
+	}
+	else if(token->ID == TOKEN_ID_ID) { // id_var nebo id_fce
+		// aplikace pravidla 46
+	}
+	else {
+		// pro tento token neexistuje pravidlo
+		return ERROR_SYNTAX;
+	}
+
+	// vratim cteni pred identifikator, aby si ho precetl volany
+	fsetpos(sourceFile, &lastReadPos);
+	return ERROR_PASSED;
 }
+
+
+/**
+ * @brief Neterminal var_dec_init2.
+ *
+ * Implementuje pravidlo 47 a 48.
+ *
+ * @param token Token, ktery bude naplni scanner
+ * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @return Typ erroru generovany analyzou
+*/
+int var_dec_init2(Token *token, FILE *sourceFile) {
+  int error;
+
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
+
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+
+
+	switch(token->ID) {
+		case TOKEN_ID_ID: // id_var nebo if_fce
+			// TODO rozlisit identifikator funkce od promenne pomoci symtable
+			// pro id_fce aplikace pravidla 48 => fnc_call()
+			// pro id_var aplikace pravidla 47 => fsetpos(), expr()
+
+		break;
+
+		case TOKEN_ID_RBR: // ')'
+		case TOKEN_ID_LEN: // '#'
+		case TOKEN_ID_INT0:
+		case TOKEN_ID_HEX2:
+		case TOKEN_ID_INT:
+		case TOKEN_ID_ZERO: // integer
+		case TOKEN_ID_DHEX2:
+		case TOKEN_ID_HEXP3:
+		case TOKEN_ID_DBL2:
+		case TOKEN_ID_EXP3: // number
+		case TOKEN_ID_FSTR: // string
+			// vratim cteni pred token, aby si ho precetl volany
+			fsetpos(sourceFile, &lastReadPos);
+
+			//aplikace pravidla 47
+			//TODO zavolat bottom up
+		break;
+
+		default: // pro tento token neexistuje pravidlo
+			return ERROR_PASSED;
+	}
+
+	return ERROR_PASSED;
+} // var_dec_init2
+
+
 
 /**
  * @brief Parser
