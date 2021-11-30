@@ -1072,7 +1072,7 @@ int var_dec_init(Token *token, FILE *sourceFile) {
 
 
 /**
- * @brief Neterminal var_dec_init2.
+ * @brief Neterminal var_assign.
  *
  * Implementuje pravidlo 47 a 48.
  *
@@ -1080,7 +1080,7 @@ int var_dec_init(Token *token, FILE *sourceFile) {
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
-int var_dec_init2(Token *token, FILE *sourceFile) {
+int var_assign(Token *token, FILE *sourceFile) {
   int error;
 
   // promenne pro pripadne vraceni cteni pred zavorkovy token
@@ -1123,9 +1123,7 @@ int var_dec_init2(Token *token, FILE *sourceFile) {
 	}
 
 	return ERROR_PASSED;
-} // var_dec_init2
-
-
+} // var_assign
 
 /**
  * @brief Parser
