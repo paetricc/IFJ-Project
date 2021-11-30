@@ -22,9 +22,9 @@
  */
 void conversion_Int(Dynamic_string *str, Token *token){
     char *ptr;
-    int value = (token->ID == TOKEN_ID_INT || token->ID == TOKEN_ID_INT0) ? 
-    strtol(str->str,&ptr,10) : strtol(str->str,&ptr,16);
-    token->Value.Integer = value;
+    long value = (token->ID == TOKEN_ID_INT || token->ID == TOKEN_ID_INT0) ?
+                strtol(str->str,&ptr,10) : strtol(str->str,&ptr,16);
+    token->Value.Integer = (int)value;
 }
 
 /**
@@ -33,7 +33,7 @@ void conversion_Int(Dynamic_string *str, Token *token){
  * @param str Ukazatel na string k prevedeni.
  * @param token Ukazatel na token do ktereho se ulozi prevedeny double.
  */
- 
+
 void conversion_Double(Dynamic_string *str, Token *token){
     token->Value.Double = strtod(str->str, NULL);
 }
@@ -67,8 +67,8 @@ void HexaDecimal(char const *name, Token *res) {
     double tmp = 0;
     while(WholeNumberPart-- != 1) exp = exp * 16;
     for (int i = 2; name[i] != '\0'; i++) {
-        if(name[i] == '.') continue; 
-        int shift  = 0;
+        if(name[i] == '.') continue;
+        int shift;
         if ( name[i] >= 65 && name[i] <= 70 ) {
             shift = name[i] - 55;
         } else if ( name[i] >= 97  && name[i] <= 102 ) {
@@ -117,10 +117,8 @@ void KW_ID_Cmp(Dynamic_string *str, Token *token){
 
 int get_token(Token *token, FILE *source_file ) {
     Dynamic_string *ptr_Str = (Dynamic_string *)malloc(sizeof(Dynamic_string));
-
-    if (!(DS_Init(ptr_Str))) {
-        return ERROR_COMPILER;
-    }
+    if (!(DS_Init(ptr_Str))) return ERROR_COMPILER;
+    
         char c;
         int state = STATE_START;
         while (((c = (char) getc(source_file)) != EOF) || (state == STATE_STR)) {
@@ -184,9 +182,7 @@ int get_token(Token *token, FILE *source_file ) {
                         case '"':
                             if (!(DS_Add_Tester(ptr_Str, c))) {return ERROR_COMPILER;}
                             token->Value.string = (Dynamic_string *)malloc(sizeof(Dynamic_string));
-                            if (!(DS_Init(token->Value.string))) {
-                                return ERROR_COMPILER;
-                            }
+                            if (!(DS_Init(token->Value.string))) return ERROR_COMPILER;
                             state = STATE_STR;
                             break;
                         case '0':
@@ -354,10 +350,10 @@ int get_token(Token *token, FILE *source_file ) {
                     } else if (c == '\\') {
                         if (!(DS_Add_Tester(ptr_Str, c))) {return ERROR_COMPILER;}
                         state = STATE_STR2;
-                    } else if ((c >= 32 && c != '"') || (c >= 32 && c != '\\')) {
+                    } else if (c >= 32) {
                         if (!(DS_Add_Tester(ptr_Str, c))) {return ERROR_COMPILER;}
                         state = STATE_STR;
-                    }else if (c == '\n'){
+                    } else if (c == '\n'){
                         if (!(DS_Add_Tester(ptr_Str, c))) {return ERROR_COMPILER;}
                         state = STATE_STR;
                     } else {
