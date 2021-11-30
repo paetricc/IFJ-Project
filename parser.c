@@ -6,11 +6,14 @@
  * @author Šimon Vacek xvacek10@stud.fit.vutbr.cz
 */
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "scanner.h"
 #include "parser.h"
 #include "error.h"
-#include <stdlib.h>
-#include <string.h>
+#include "symtable.h"
+#include "expression.h"
 
 /**
  * @brief Nacita tokeny dokud je v nich nektery bily znak, nebo az se narazi na EOF.
@@ -830,10 +833,9 @@ int return_(Token *token, FILE *sourceFile) {
 	else if(token->Value.keyword != KEYWORD_RETURN)
 		return ERROR_SYNTAX;
 
-	// TODO volani synt analyzy shora dolu pro vyhodnoceni vyrazu
-	/*if((error = botttomUp(token, sourceFile, AST)))
+	// volani bottom-up SA (rozsireni neterminalu expr)
+	if((error = exprSyntaxCheck(token, sourceFile)))
 		return error;
-	*/
 
 	return ERROR_PASSED;
 }
@@ -1115,7 +1117,9 @@ int var_assign(Token *token, FILE *sourceFile) {
 			fsetpos(sourceFile, &lastReadPos);
 
 			//aplikace pravidla 47
-			//TODO zavolat bottom up
+			// volani bottom-up SA (rozsireni neterminalu expr)
+			if((error = exprSyntaxCheck(token, sourceFile)))
+				return error;
 		break;
 
 		default: // pro tento token neexistuje pravidlo
@@ -1140,7 +1144,9 @@ int if_(Token *token, FILE *sourceFile) {
 	// token if byl precten o uroven vyse => pokracuju dal
 	// aplikace pravidla 49
 
-	// TODO expr zavola bottom up analyzu
+	// volani bottom-up SA (rozsireni neterminalu expr)
+	if((error = exprSyntaxCheck(token, sourceFile)))
+		return error;
 
 	// then
 	if((error = get_non_white_token(token, sourceFile)))
@@ -1202,7 +1208,9 @@ int loop(Token *token, FILE *sourceFile) {
 	// token while byl precten o uroven vyse => pokracuju dal
 	// aplikace pravidla 50
 
-	// TODO expr zavola bottom up analyzu
+	// volani bottom-up SA (rozsireni neterminalu expr)
+	if((error = exprSyntaxCheck(token, sourceFile)))
+		return error;
 
 	// do
 	if((error = get_non_white_token(token, sourceFile)))
