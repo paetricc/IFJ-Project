@@ -1301,6 +1301,7 @@ int parser(FILE *sourceFile) {
 	// volani prvniho pravidla a nahrazovani prvniho neterminalu
 	int error = start(token, sourceFile);
 
+	free(token->Value.string);
   free(token);
 	return error;
 } 
