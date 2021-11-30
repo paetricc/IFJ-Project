@@ -102,8 +102,8 @@ void fnc_princtElementData( TermStackElementPtr ptr ) {
 }
 
 int main() {
-    printf("Zasobnik mplementovany jednosmerne vazanym sezname\n");
-    printf("--------------------------------------------------\n");
+    printf("Zasobnik implementovany jednosmerne vazanym seznamem\n");
+    printf("----------------------------------------------------\n");
 
     int i = 1;
     stack = (TermStack *) malloc(sizeof(TermStack));
@@ -144,7 +144,7 @@ int main() {
     stackPrint(stack);
 
     printf("[TEST%02d] Vlozeni terminalu na vrchol zasobniku\n", i++);
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
     TermStack_push(stack, USD);
     stackPrint(stack);
 
@@ -177,7 +177,7 @@ int main() {
     stackPrint(stack);
 
     printf("[TEST%02d] Vlozeni nekolika hodnot\n", i++);
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
     TermStack_push(stack, USD);
     TermStack_push(stack, R);
     TermStack_push(stack, EXP);

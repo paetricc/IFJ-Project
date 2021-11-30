@@ -1,5 +1,5 @@
-Zasobnik mplementovany jednosmerne vazanym sezname
---------------------------------------------------
+Zasobnik implementovany jednosmerne vazanym seznamem
+----------------------------------------------------
 [TEST01] Inicializace zasobniku
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 --- TOP ----
@@ -29,7 +29,7 @@ Zasobnik neni prazdny
 --- TOP ----
 -- BOTTOM --
 [TEST08] Vlozeni terminalu na vrchol zasobniku
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 --- TOP ----
      $
 -- BOTTOM --
@@ -61,11 +61,10 @@ Na spodku zasobniku je dolar
 -- BOTTOM --
 [TEST13] Simulace slozitejsi redukce s chybou
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Stack error: REDUCE
 --- TOP ----
 -- BOTTOM --
 [TEST14] Vlozeni nekolika hodnot
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 --- TOP ----
      i
      ←

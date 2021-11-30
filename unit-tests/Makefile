@@ -26,4 +26,4 @@ run4: term_stack_test
 	@rm current-term_stack_test.output
 
 clean:
-	-rm -f *.o $(NAME)-test current-test1.output current-test3.output
+	-rm -f *.o $(NAME)-test term_stack_test current-test1.output current-test3.output
