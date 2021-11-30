@@ -20,7 +20,7 @@ bool DS_Init(Dynamic_string *string){
     }
     string->length = 0;
     string->str[string->length] = '\0';
-    string->alloc = 0;
+    string->alloc = DYN_STR_LEN;
     return true;
 
 }
