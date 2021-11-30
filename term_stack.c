@@ -1,7 +1,15 @@
+/**
+ * Projekt: IFJ2021
+ *
+ * @brief Zasobnik pro terminaly a neterminaly
+ * 
+ * @details Zasobnik je implementovany jednosmerne vazanym seznamem
+ *
+ * @author Tomáš Bártů xbartu11@stud.fit.vutbr.cz
+ */
+
 #include "term_stack.h"
 #include <stdlib.h>
-
-//TODO rozmyslet co se se zakomentovanymi vecmi
 
 /**
  * @brief Pro vnitrni testovani chyb zasobniku
@@ -26,7 +34,7 @@ void TermStack_error( int error ) {
     if (error <= 0 || error > SERR) {
         error = 0;
     }
-    printf("%s\n", ERRORS[error]);
+    fprintf(stderr ,"%s\n", ERRORS[error]);
 }
 
 

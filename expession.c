@@ -1,3 +1,11 @@
+/**
+ * Projekt: IFJ2021
+ *
+ * @brief Syntaktická analýza zdola nahoru
+ *
+ * @author Tomáš Bártů xbartu11@stud.fit.vutbr.cz
+ */
+
 #include "expression.h"
 #include <stdlib.h>
 
@@ -11,7 +19,7 @@ static TermsAndNonTerms p_table[17][17] =
 /* // */ { I, I, I, I, I, I, R, I, R, R, I, I, I, I, I, I, I },
 /*  ( */ {-1, R, R, R, R, R, R, E, R, R, R, R, R, R, R, R, R },
 /*  ) */ { I, I, I, I, I, I,-1, I,-1,-1, I, I, I, I, I, I, I },
-/*  i */ { I, I, I, I, I, I,-1, I, R, R, I, I, I, I, I, I, I },
+/*  i */ { I, I, I, I, I, I,-1, I, H, R, I, I, I, I, I, I, I },
 /*  # */ { I, I, I, I, I, I, R,-1, R,-1, I, I, I, I, I, I, I },
 /* .. */ { I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
 /*  < */ { I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
@@ -74,6 +82,12 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token_ID token_ID ) {
     }
 }
 
+
+/**
+ * @brief Pomocna funkce pro lepsi vizualizaci dat na zasobniku
+ * 
+ * @param data Ukazatel na prvek v zasobniku
+ */
 void termPrint(struct TermStackElement *data) {
     switch (data->data)
     {
@@ -145,6 +159,11 @@ void termPrint(struct TermStackElement *data) {
     }
 }
 
+/**
+ * @brief Pomocna funkce pro vypis zasobniku
+ * 
+ * @param stack Ukazatel na strukturu jednosmerne vazaneho seznamu
+ */
 void stackPrint( TermStack *stack ) {
     struct TermStackElement *tmp = stack->topElement;
     printf("--- TOP ----");
@@ -156,12 +175,24 @@ void stackPrint( TermStack *stack ) {
     printf("\n-- BOTTOM --\n");
 }
 
+/**
+ * @brief Preskoci netisknutelne znaku
+ * 
+ * @param token Struktura tokenu
+ * @param file Ukazatel na zdrojovy soubor
+ */
 void skipNonPrintChar(Token *token, FILE *file) {
     do {
         get_token(token, file);
     } while (token->ID == TOKEN_ID_SPACE || token->ID == TOKEN_ID_TAB);
 }
 
+/**
+ * @brief Gramaticka pravidla
+ * 
+ * @param stack Ukazatel na strukturu jednosmerne vazaneho seznamu
+ * @return int Typ erroru generovany analyzou
+ */
 int checkRulesAndApply( TermStack *stack ) {
     TermStackElementPtr ptr = NULL;
     TermStack_top(stack, &ptr);
@@ -196,51 +227,82 @@ int checkRulesAndApply( TermStack *stack ) {
     } else if (ptr->data == EXP && ptr->previousElement->data == LEN) {   
         TermStack_applyReduce(stack);
     } else {
-        return ERROR_SEM_ASSIGN;
+        return ERROR_SYNTAX;
     }
+    return ERROR_SYNTAX;
 }
 
+/**
+ * @brief Simulace terminalu $ na vstup
+ * 
+ * @param stack Ukazatel na strukturu jednosmerne vazaneho seznamu
+ * @return int Logickou jednicku pokud zasobnik od dna vypadata takto: {|$|E|} jinak vraci logickou nulu
+ */
 int SA_isOK(TermStack *stack) {
     struct TermStackElement *tmp = NULL;
     TermStack_top(stack, &tmp);
     return (tmp->data == EXP && tmp->previousElement->data == USD && tmp->previousElement->previousElement == NULL) ? 1 : 0;
 }
 
+/**
+ * @brief Syntakticka kontrola vyrazu
+ * 
+ * @param token Struktura tokenu
+ * @param file Ukazatel na zdrojovy soubor
+ * @return int Typ erroru generovany analyzou
+ */
 int exprSyntaxCheck(Token *token, FILE *file) {
-
+    // pridelim pamet zasobniku
     TermStack *stack = (TermStack *) malloc(sizeof(TermStack));
+    if(!stack) return ERROR_COMPILER;
     TermStack_init(stack);
+    // vlozim $
     TermStack_push(stack, USD);
 
-    TermsAndNonTerms ID_of_Term;
     struct TermStackElement *top = NULL;
     int error = 0;
 
     skipNonPrintChar(token, file);
+    // prevedu si token->ID na terminal ci neterminal
     TermsAndNonTerms vstup = convertTokenType_To_TermsAndNonTerms(token->ID);
 
     do {
         TermStack_firstTermPtr(stack, &top);
+        // podle pravidla v tabulce rozhodnu co budu delat
         switch (p_table[(top->data-4)][vstup-4]) {
+        // terminaly jsou si rovny
         case E:
             TermStack_push(stack, vstup);
             skipNonPrintChar(token, file);
             vstup = convertTokenType_To_TermsAndNonTerms(token->ID);
             break;
+        // vlozim znak redukce
         case R:
             TermStack_insertReduce(stack, top);
             TermStack_push(stack, vstup);
             skipNonPrintChar(token, file);
             vstup = convertTokenType_To_TermsAndNonTerms(token->ID);
             break;
+        // zredukuju po nejblizsi znak redukce
         case I:
             error = checkRulesAndApply(stack);
-            if(error == ERROR_SEM_ASSIGN) return ERROR_SEM_ASSIGN;
+            // neexistije pro redukci pravidlo
+            if(error == ERROR_SYNTAX) {
+                TermStack_dispose(stack);
+                return ERROR_SYNTAX;
+            }
             break;
+        // vyhodnotim co se jde a predam rizeni zpet top-down analyze
+        case H:
+            vstup = USD;
+            break;
+        // chybovy stav
         default:
-            return ERROR_SEM_ASSIGN;
+            TermStack_dispose(stack);
+            return ERROR_SYNTAX;
         }
-    } while( vstup != USD  || !SA_isOK(stack));
+    } while( vstup != USD  || !SA_isOK(stack)); // opakuji dokud vstup neni $ a dokud muzu redukovat
+    //uvolnim pamet zasobniku
     TermStack_dispose(stack);
     return ERROR_PASSED;
 }
