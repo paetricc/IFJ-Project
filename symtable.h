@@ -7,7 +7,7 @@
 #include "error.h"
 
 /**
- * @enum Typy prommenych.
+ * @enum Typy promennych.
  */
 typedef enum {
     TYPE_UNDEFINED,
@@ -54,10 +54,10 @@ typedef struct {
 } SLList_Return;
 
 /**
- * @struct Struktura reprezentujici data pro prommene v BVS.
+ * @struct Struktura reprezentujici data pro promenne v BVS.
  */
 typedef struct Table_data_var{
-    /** Data pro prommenou. */
+    /** Data pro promennou. */
     Data_type type;
     bool init;
     bool used;
@@ -82,7 +82,7 @@ typedef struct bst_node{
     /** Data pro uzel*/
     Dynamic_string *name;
     bool isFnc;
-    /** Ukazatel na structuru dat pro prommenou*/
+    /** Ukazatel na structuru dat pro promennou*/
     struct Table_data_var *varData;
     /** Ukazatel na structuru dat pro funkci*/
     struct Table_data_func *funcData;

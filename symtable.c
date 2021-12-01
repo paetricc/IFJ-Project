@@ -120,12 +120,14 @@ void SLL_Return_Dispose(SLList_Return *listReturn){
 }
 
 /**
- * Funkce pro nahrani dat do struktury pro data prommene.
- *
+ * Funkce pro nahrani dat do struktury pro data promenne
+ * .
+ *promenna
  * @param tree Ukazatel na uzel, do ktereho se nahravaji hodnoty.
- * @param type Hodnota typu prommene.
- * @param init Hodnota, zdali byla prommena inicializovana.
- * @param used Hodnota, zdali byla prommena pouzita.
+ * @param type Hodnota typu promenne
+ * .
+ * @param init Hodnota, zdali byla promenna inicializovana.
+ * @param used Hodnota, zdali byla promenna pouzita.
  */
 void setDataV(bst_node_t *tree, Data_type type, bool init, bool used){
     tree->varData->type = type;
@@ -185,7 +187,7 @@ bst_node_t *bst_search(bst_node_t *tree, Dynamic_string *string) {
  *
  * @param tree Ukazatel na koren Binarniho vyhledavaciho stromu.
  * @param string Ukazatel na DS, kde je jmeno noveho uzlu.
- * @param isFnc Hodnota, zdali je to uzel pro funkci nebo pro prommenou.
+ * @param isFnc Hodnota, zdali je to uzel pro funkci nebo pro promennou.
  * @return Vraci ERROR_PASSED, jestlize se pridani povedlo, jinak ERROR_COMPILER
  */
  int bst_insert(bst_node_t **tree, Dynamic_string *string, bool isFnc) {
@@ -222,8 +224,10 @@ bst_node_t *bst_search(bst_node_t *tree, Dynamic_string *string) {
                 (*tree)->funcData->returnList = listReturn;
                 (*tree)->varData = NULL;                                            //ukazatel na nepotrebnou strukturu nastavi na null
             } else{
-                Table_data_var_t *dataVar = malloc(sizeof(Table_data_var_t));   //naalokuje strukturu s daty pro prommene
-                (*tree)->varData = dataVar;                 //nastavi ukazatel na strukturu s daty pro prommene
+                Table_data_var_t *dataVar = malloc(sizeof(Table_data_var_t));   //naalokuje strukturu s daty pro promenne
+
+                (*tree)->varData = dataVar;                 //nastavi ukazatel na strukturu s daty pro promenne
+
                 (*tree)->funcData = NULL;                                       //ukazatel na nepotrebnou strukturu nastavi na null
             }
             (*tree)->left = NULL;
@@ -252,7 +256,7 @@ void bst_dispose(bst_node_t **tree){
             free((*tree)->funcData);            //smaze strukturu s daty pro funkci
             (*tree)->funcData = NULL;
         } else{
-            free((*tree)->varData);             //smaze strukturu s daty pro prommenou
+            free((*tree)->varData);             //smaze strukturu s daty pro promennou
             (*tree)->varData = NULL;
         }
         free((*tree)->name);        //smaze DS se jmenem
@@ -322,7 +326,7 @@ int SLL_Frame_Insert(SLList_Frame *listFrame){
  * @param listFrame Ukazatel na Tabulku symbolu.
  */
  void SLL_Frame_Delete(SLList_Frame *listFrame){
-     //pomocna prommena pro zjisteni posledniho framu
+     //pomocna promenna pro zjisteni posledniho framu
     bool isfrstLastElement = false;
 
     if (listFrame->TopLocalElement != NULL){     //jestli existuje localni prvek
@@ -421,7 +425,8 @@ bst_node_t *search_Iden(Dynamic_string *string, SLList_Frame *listFrame){
 }
 
 /**
- * Funkce pro ziskani dat, jestli je uzel pro funkci nebo pro prommene.
+ * Funkce pro ziskani dat, jestli je uzel pro funkci nebo pro promenne
+ * .
  *
  * @param tree Ukazatel na uzel, ze ktereho je chteno ziskat hodnoty.
  * @return Vraci hodnotu true, jestlize je uzel pro funkci, jinak false.
@@ -443,10 +448,10 @@ bool isDefFnc(bst_node_t *tree){
 }
 
 /**
- * Funkce pro ziskani dat, jestli je prommena inicializovana.
+ * Funkce pro ziskani dat, jestli je promenna inicializovana.
  *
  * @param tree Ukazatel na uzel, ze ktereho je chteno ziskat hodnoty.
- * @return Vraci hodnotu true, jestlize je prommena inicializovana, jinak false.
+ * @return Vraci hodnotu true, jestlize je promenna inicializovana, jinak false.
  */
 bool isInitVar(bst_node_t *tree){
     bool isInitVar = tree->varData->init;
@@ -454,10 +459,10 @@ bool isInitVar(bst_node_t *tree){
 }
 
 /**
- * Funkce pro ziskani dat, jestli je prommena pouzita.
+ * Funkce pro ziskani dat, jestli je promenna pouzita.
  *
  * @param tree Ukazatel na uzel, ze ktereho je chteno ziskat hodnoty.
- * @return Vraci hodnotu true, jestlize je prommena pouzita, jinak false.
+ * @return Vraci hodnotu true, jestlize je promenna pouzita, jinak false.
  */
 bool isUsedVar(bst_node_t *tree) {
     bool isUsedVar = tree->varData->used;
@@ -465,10 +470,12 @@ bool isUsedVar(bst_node_t *tree) {
 }
 
 /**
- * Funkce pro ziskani datoveho typu prommene.
+ * Funkce pro ziskani datoveho typu promenne
+ * .
  *
  * @param tree Ukazatel na uzel, ze ktereho je chteno ziskat hodnoty.
- * @return Vraci hodnotu datoveho typu prommene.
+ * @return Vraci hodnotu datoveho typu promenne
+ * .
  */
 Data_type typeVar(bst_node_t *tree) {
     Data_type typeVar = tree->varData->type;
