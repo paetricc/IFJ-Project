@@ -1178,13 +1178,23 @@ int var_assign(Token *token, FILE *sourceFile) {
 	  // lexikalni nebo kompilatorova chyba
 		return error;
 
-
+    // uzel s pripadnym identifikatorem
+    bst_node_t *id;
 	switch(token->ID) {
 		case TOKEN_ID_ID: // id_var nebo var_fce
 			// TODO rozlisit identifikator funkce od promenne pomoci symtable
 			// pro id_fce aplikace pravidla 48 => fnc_call()
 			// pro id_var aplikace pravidla 47 => fsetpos(), expr()
 
+            id = search_Iden(token->Value.string, symTable);
+            // nastaveni cteni pred identifikator, aby si to precetl volany
+            fsetpos(sourceFile, &lastReadPos);
+            if(id == NULL) // identifikator neexistuje
+                return ERROR_SEM_UNDEFINED;
+            else if(isFnc(id)) // id_fnc
+                fnc_call(token, sourceFile);
+            else // id_var
+                exprSyntaxCheck(token, sourceFile);
 		break;
 
 		case TOKEN_ID_RBR: // ')'
