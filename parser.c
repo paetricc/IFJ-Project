@@ -181,6 +181,7 @@ int fnc_dec(Token *token, FILE *sourceFile) {
 		return ERROR_SEM_UNDEFINED;
 	// pridani id_fnc do symtable
 	bst_insert(&(symTable->globalElement->node), token->Value.string, true);
+
   
   // ':'
   if((error = get_non_white_token(token, sourceFile)))
@@ -437,7 +438,7 @@ int fnc_call(Token *token, FILE *sourceFile) {
   if(token->ID != TOKEN_ID_LBR)
     return ERROR_SYNTAX;
 
-  
+
   // rozvinuti neterminalu value
   if((error = value(token, sourceFile)))
     return error;
@@ -656,11 +657,16 @@ int fnc_head(Token *token, FILE *sourceFile) {
 		return ERROR_SYNTAX;
 
 	// overeni, zda nebyla funkce uz deklarovana nebo definovana
-	if(search_Iden(token->Value.string, symTable) != NULL)
-		return ERROR_SEM_UNDEFINED;
-	// pridani id_fnc do symtable
-	bst_insert(&(symTable->globalElement->node), token->Value.string, true);
+    bst_node_t *idFnc = search_Iden(token->Value.string, symTable);
 
+    if(idFnc == NULL)
+        bst_insert(&(symTable->globalElement->node), token->Value.string, true);
+    else if(!isDefFnc(idFnc)) {
+        setDataF(idFnc, true);
+    }
+    else {
+        return ERROR_SEM_UNDEFINED;
+    }
 
 	// '('
 	if((error = get_non_white_token(token, sourceFile)))
@@ -1403,7 +1409,7 @@ int parser(FILE *sourceFile) {
 	// volani prvniho pravidla a nahrazovani prvniho neterminalu
 	int error = start(token, sourceFile);
 
-	free(token->Value.string);
+	// TODO free(token->Value.string);
     free(token);
 	return error;
 } 
