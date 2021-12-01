@@ -77,6 +77,15 @@ int start(Token *token, FILE *sourceFile) {
 	else if(strcmp(token->Value.string->str, "\"ifj21\""))
 		return ERROR_SYNTAX;
 
+    // nainicializovani symtable
+    symTable = (SLList_Frame *) malloc(sizeof(SLList_Frame));
+    SLL_Frame_Init(symTable);
+
+    if(symTable == NULL)
+        return ERROR_COMPILER;
+    // vytvoreni globalniho ramce
+    SLL_Frame_Insert(symTable);
+
   // vse korektni - uplatnuju pravidlo a rozsiruju dalsi neterminal
   error = program(token, sourceFile); // aplikace pravidla 1
 
@@ -98,13 +107,6 @@ int start(Token *token, FILE *sourceFile) {
 int program(Token *token, FILE *sourceFile) {
   int error;
 
-	// nainicializovani symtable
-	SLL_Frame_Init(symTable);
-	symTable = (SLList_Frame *) malloc(sizeof(SLList_Frame));
-	if(symTable == NULL)
-		return ERROR_COMPILER;
-	// vytvoreni globalniho ramce
-	SLL_Frame_Insert(symTable);
 
 
   // promenne pro pripadne vraceni cteni pred zavorkovy token
@@ -621,9 +623,9 @@ int fnc_def(Token *token, FILE *sourceFile) {
     return error;
 
   if(token->ID != TOKEN_ID_KEYWORD)
-    return ERROR_SYNTAX;
-	else if(token->Value.keyword != KEYWORD_END)
-		return ERROR_SYNTAX;
+      return ERROR_SYNTAX;
+  else if(token->Value.keyword != KEYWORD_END)
+      return ERROR_SYNTAX;
 
 	// odeberu ramec funkce
 	SLL_Frame_Delete(symTable);
@@ -659,8 +661,6 @@ int fnc_head(Token *token, FILE *sourceFile) {
 	// pridani id_fnc do symtable
 	bst_insert(&(symTable->globalElement->node), token->Value.string, true);
 
-	// vytvoreni noveho ramce pro funkci
-	SLL_Frame_Insert(symTable);
 
 	// '('
 	if((error = get_non_white_token(token, sourceFile)))
@@ -669,7 +669,9 @@ int fnc_head(Token *token, FILE *sourceFile) {
 	if(token->ID != TOKEN_ID_LBR)
 		return ERROR_SYNTAX;
 
-	
+    // vytvoreni noveho ramce pro funkci
+    SLL_Frame_Insert(symTable);
+
 	// rozvinu neterminal params_def
 	if((error = params_def(token, sourceFile)))
 		return error;
@@ -1402,6 +1404,6 @@ int parser(FILE *sourceFile) {
 	int error = start(token, sourceFile);
 
 	free(token->Value.string);
-  free(token);
+    free(token);
 	return error;
 } 
