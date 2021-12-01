@@ -6,11 +6,23 @@
  * @author Šimon Vacek xvacek10@stud.fit.vutbr.cz
 */
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "scanner.h"
 #include "parser.h"
 #include "error.h"
-#include <stdlib.h>
-#include <string.h>
+#include "symtable.h"
+#include "expression.h"
+
+
+/**
+ * @brief Tabulka symbolu
+ *
+ * Implemenotvana hybridem seznamu a zasobniku.
+ */
+SLList_Frame *symTable;
+
 
 /**
  * @brief Nacita tokeny dokud je v nich nektery bily znak, nebo az se narazi na EOF.
@@ -64,8 +76,14 @@ int start(Token *token, FILE *sourceFile) {
 		return ERROR_SYNTAX;
 	else if(strcmp(token->Value.string->str, "\"ifj21\""))
 		return ERROR_SYNTAX;
+
   // vse korektni - uplatnuju pravidlo a rozsiruju dalsi neterminal
-  return program(token, sourceFile); // aplikace pravidla 1
+  error = program(token, sourceFile); // aplikace pravidla 1
+
+	// uvoleni symTable
+	SLL_Frame_Dispose(symTable);
+	free(symTable);
+	return error;
 }
 
 /**
@@ -79,6 +97,19 @@ int start(Token *token, FILE *sourceFile) {
 */
 int program(Token *token, FILE *sourceFile) {
   int error;
+
+	// nainicializovani symtable
+	SLL_Frame_Init(symTable);
+	symTable = (SLList_Frame *) malloc(sizeof(SLList_Frame));
+	if(symTable == NULL)
+		return ERROR_COMPILER;
+	// vytvoreni globalniho ramce
+	SLL_Frame_Insert(symTable);
+
+
+  // promenne pro pripadne vraceni cteni pred zavorkovy token
+  fpos_t lastReadPos;
+  fgetpos(sourceFile, &lastReadPos);
 
   if((error = get_non_white_token(token, sourceFile)))
 	  // lexikalni nebo kompilatorova chyba
@@ -103,10 +134,11 @@ int program(Token *token, FILE *sourceFile) {
     break;
 
     case TOKEN_ID_ID: // id_fnc
-      //TODO zpracovani identifikatoru pomoci symytable
-        if((error = fnc_call(token, sourceFile))) // aplikace pravidla 3
-          return error;
-      break;
+			// nastaveni cteni pred identifikator, aby si to precetl volany
+			fsetpos(sourceFile, &lastReadPos);
+			if((error = fnc_call(token, sourceFile))) // aplikace pravidla 3
+				return error;
+    break;
 
     case TOKEN_ID_EOF: // konec souboru - syntaxe je korektni, muze se ukoncit
       return ERROR_PASSED; // aplikace pravidla 5
@@ -142,7 +174,11 @@ int fnc_dec(Token *token, FILE *sourceFile) {
   if(token->ID != TOKEN_ID_ID)
     return ERROR_SYNTAX;
 
-  // TODO zpracovani identifikatoru pomoci symtable
+	// overeni, zda nebyla funkce uz deklarovana nebo definovana
+	if(search_Iden(token->Value.string, symTable) != NULL)
+		return ERROR_SEM_UNDEFINED;
+	// pridani id_fnc do symtable
+	bst_insert(&(symTable->globalElement->node), token->Value.string, true);
   
   // ':'
   if((error = get_non_white_token(token, sourceFile)))
@@ -374,9 +410,22 @@ int data_type(Token *token, FILE *sourceFile) {
  * @return Typ erroru generovany analyzou
 */
 int fnc_call(Token *token, FILE *sourceFile) {
-  // token s id funkce byl prijaty a zpracovany o uroven vyse => pokracuju dale
   // aplikuju pravidlo 16
   int error;
+
+  // id_fnc
+  if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+    return error;
+
+  if(token->ID != TOKEN_ID_ID)
+    return ERROR_SYNTAX;
+
+	// vyhledani id_fnc v symtable
+	if(search_Iden(token->Value.string, symTable) == NULL)
+		return ERROR_SEM_UNDEFINED;
+	//TODO nize se musi do symtable ulozit i parametry a dalsi srandy
+	// k tomu budu ale potrebovat znat bud id_fnc, nebo mit ukazatel na jeji uzel
 
   // '('
   if((error = get_non_white_token(token, sourceFile)))
@@ -512,7 +561,10 @@ int value_last(Token *token, FILE *sourceFile) {
 
 	switch(token->ID) {
 		case TOKEN_ID_ID: // id_var
-			// TODO osetrit pomoci symtable
+			// TODO aplikace pravidla 21
+			// overim, ze jde o id_fnc a ne id_var
+			if(isFnc(search_Iden(token->Value.string, symTable)))
+				return ERROR_SYNTAX;
 		break;
 
 		case TOKEN_ID_INT0:
@@ -572,6 +624,9 @@ int fnc_def(Token *token, FILE *sourceFile) {
     return ERROR_SYNTAX;
 	else if(token->Value.keyword != KEYWORD_END)
 		return ERROR_SYNTAX;
+
+	// odeberu ramec funkce
+	SLL_Frame_Delete(symTable);
 	
 	return ERROR_PASSED;
 }
@@ -597,8 +652,15 @@ int fnc_head(Token *token, FILE *sourceFile) {
 		return error;
 	if(token->ID != TOKEN_ID_ID)
 		return ERROR_SYNTAX;
-	// TODO zpracovat identifikator funkce symtable
 
+	// overeni, zda nebyla funkce uz deklarovana nebo definovana
+	if(search_Iden(token->Value.string, symTable) != NULL)
+		return ERROR_SEM_UNDEFINED;
+	// pridani id_fnc do symtable
+	bst_insert(&(symTable->globalElement->node), token->Value.string, true);
+
+	// vytvoreni noveho ramce pro funkci
+	SLL_Frame_Insert(symTable);
 
 	// '('
 	if((error = get_non_white_token(token, sourceFile)))
@@ -792,7 +854,11 @@ int var_def(Token *token, FILE *sourceFile) {
 	if(token->ID != TOKEN_ID_ID)
 		return ERROR_SYNTAX;
 	
-	// TODO zpracovani identifikatoru pomoci symtable
+	// overeni, ze identifikator zatim neexistuje
+	if(search_Iden(token->Value.string, symTable) != NULL)
+		return ERROR_SEM_UNDEFINED;
+	// vlozeni identifikatoru do symtable
+	bst_insert(&(symTable->TopLocalElement->node), token->Value.string, false);
 
 
 	// ':'
@@ -830,10 +896,9 @@ int return_(Token *token, FILE *sourceFile) {
 	else if(token->Value.keyword != KEYWORD_RETURN)
 		return ERROR_SYNTAX;
 
-	// TODO volani synt analyzy shora dolu pro vyhodnoceni vyrazu
-	/*if((error = botttomUp(token, sourceFile, AST)))
+	// volani bottom-up SA (rozsireni neterminalu expr)
+	if((error = exprSyntaxCheck(token, sourceFile)))
 		return error;
-	*/
 
 	return ERROR_PASSED;
 }
@@ -971,22 +1036,39 @@ int statement(Token *token, FILE *sourceFile) {
 	  // lexikalni nebo kompilatorova chyba
 		return error;
 
-	if(token->ID == TOKEN_ID_KEYWORD) { // local
+	if(token->ID == TOKEN_ID_KEYWORD) // local
 		// rozvinuti neterminalu var_dec
-		if((error = var_dec(token, sourceFile))) // aplikace pravidla 41
-			return error;
-	}
+		return var_dec(token, sourceFile); // aplikace pravidla 41
 	else if(token->ID == TOKEN_ID_ID) { // id_var nebo id_fnc
-		// TODO pomoci tabulky symbolu rozlisit id_var a id_fnc
-		// aplikace pravidla 42 a 43
+		// najdu uzel identifikatoru
+		bst_node_t *id_node = search_Iden(token->Value.string, symTable);
 
-		// vratim cteni pred identifikator, aby si ho precetl volany
-		fsetpos(sourceFile, &lastReadPos);
+		// zjistim, jestli existuje
+		if(id_node == NULL)
+			return ERROR_SEM_UNDEFINED;
+		if(isFnc(id_node)) { // id_fnc
+			// vratim cteni pred identifikator, aby si ho precetl volany
+			fsetpos(sourceFile, &lastReadPos);
+			// rozsirim neterminal fnc_call
+			return fnc_call(token, sourceFile); // aplikace pravidla 43
+		}
+		else { // id_var
+			// aplikace pravidla 42
+		}
 	}
 	else // pro prijaty token neexistuje pravidlo
 		return ERROR_SYNTAX;
 
-	return ERROR_PASSED;
+	// z podminek pokracuje dal uz jen pravidlo 42
+	// '='
+	if((error = get_non_white_token(token, sourceFile)))
+	  // lexikalni nebo kompilatorova chyba
+		return error;
+	else if(token->ID != TOKEN_ID_ASSIGN)
+		return ERROR_SYNTAX;
+
+	// rozvinu neterminal var_assign
+	return var_assign(token, sourceFile);
 }
 
 
@@ -1115,7 +1197,9 @@ int var_assign(Token *token, FILE *sourceFile) {
 			fsetpos(sourceFile, &lastReadPos);
 
 			//aplikace pravidla 47
-			//TODO zavolat bottom up
+			// volani bottom-up SA (rozsireni neterminalu expr)
+			if((error = exprSyntaxCheck(token, sourceFile)))
+				return error;
 		break;
 
 		default: // pro tento token neexistuje pravidlo
@@ -1140,7 +1224,9 @@ int if_(Token *token, FILE *sourceFile) {
 	// token if byl precten o uroven vyse => pokracuju dal
 	// aplikace pravidla 49
 
-	// TODO expr zavola bottom up analyzu
+	// volani bottom-up SA (rozsireni neterminalu expr)
+	if((error = exprSyntaxCheck(token, sourceFile)))
+		return error;
 
 	// then
 	if((error = get_non_white_token(token, sourceFile)))
@@ -1152,11 +1238,15 @@ int if_(Token *token, FILE *sourceFile) {
 	else if(token->Value.keyword != KEYWORD_THEN)
 		return ERROR_SYNTAX;
 
+	// vytvorim ramec pro blok if
+	SLL_Frame_Insert(symTable);
 
 	// rozvinu neterminal statements
 	if((error = statements(token, sourceFile)))
 		return error;
 
+	// odstranim ramec pro blok if
+	SLL_Frame_Delete(symTable);
 
 	// else
 	if((error = get_non_white_token(token, sourceFile)))
@@ -1168,11 +1258,15 @@ int if_(Token *token, FILE *sourceFile) {
 	else if(token->Value.keyword != KEYWORD_ELSE)
 		return ERROR_SYNTAX;
 
+	// vytvorim ramec pro blok else
+	SLL_Frame_Insert(symTable);
 
 	// rozvinu neterminal statements
 	if((error = statements(token, sourceFile)))
 		return error;
 
+	// odstranim ramec pro blok else
+	SLL_Frame_Delete(symTable);
 
 	// end
 	if((error = get_non_white_token(token, sourceFile)))
@@ -1185,7 +1279,7 @@ int if_(Token *token, FILE *sourceFile) {
 		return ERROR_SYNTAX;
 
 	return ERROR_PASSED;
-}
+} // if_
 
 
 /**
@@ -1202,7 +1296,9 @@ int loop(Token *token, FILE *sourceFile) {
 	// token while byl precten o uroven vyse => pokracuju dal
 	// aplikace pravidla 50
 
-	// TODO expr zavola bottom up analyzu
+	// volani bottom-up SA (rozsireni neterminalu expr)
+	if((error = exprSyntaxCheck(token, sourceFile)))
+		return error;
 
 	// do
 	if((error = get_non_white_token(token, sourceFile)))
@@ -1214,11 +1310,15 @@ int loop(Token *token, FILE *sourceFile) {
 	else if(token->Value.keyword != KEYWORD_DO)
 		return ERROR_SYNTAX;
 
+	// vytvorim ramec pro blok do
+	SLL_Frame_Insert(symTable);
 
 	// rozvinu neterminal statements
 	if((error = statements(token, sourceFile)))
 		return error;
 
+	// vytvorim ramec pro blok do
+	SLL_Frame_Delete(symTable);
 
 	// end
 	if((error = get_non_white_token(token, sourceFile)))
@@ -1231,7 +1331,7 @@ int loop(Token *token, FILE *sourceFile) {
 		return ERROR_SYNTAX;
 
 	return ERROR_PASSED;
-}
+} // loop
 
 
 /**
