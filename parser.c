@@ -1093,7 +1093,7 @@ int var_dec(Token *token, FILE *sourceFile) {
 	// aplikace pravidla 44
 
   int error;
-	// local bylo uz precteno volajicim
+  // local bylo uz precteno volajicim
 
 	// rozvinuti neterminalu var_def
 	if((error = var_def(token, sourceFile)))
@@ -1126,11 +1126,8 @@ int var_dec_init(Token *token, FILE *sourceFile) {
 
 	if(token->ID == TOKEN_ID_ASSIGN) { // '='
 		// aplikace pravidla 45
-		if((error = get_non_white_token(token, sourceFile)))
-			// lexikalni nebo kompilatorova chyba
-			return error;
 
-			// rozvinuti neteminalu var_dec_init2
+        // rozvinuti neteminalu var_assign
 		return var_assign(token, sourceFile);
 	}
 	else if(token->ID == TOKEN_ID_KEYWORD) { // local, if, while, return nebo end
