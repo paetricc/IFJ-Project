@@ -9,7 +9,6 @@
  */
 
 #include "term_stack.h"
-#include <stdlib.h>
 
 /**
  * @brief Pro vnitrni testovani chyb zasobniku

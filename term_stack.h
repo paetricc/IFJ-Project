@@ -2,6 +2,7 @@
 #define __TERM_STACK__
 
 #include "scanner.h"
+#include <stdlib.h>
 
 #define SERR 5
 

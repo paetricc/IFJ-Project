@@ -13,6 +13,11 @@
 
 #include <stdio.h>
 #include "Dynamic_string.h"
+#include "error.h"
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
 /**
  * Stavy scanneru
  */

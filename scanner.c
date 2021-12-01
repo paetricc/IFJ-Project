@@ -8,11 +8,7 @@
  * @author Vít Janeček xjanec30@stud.fit.vutbr.cz
  */
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
 #include "scanner.h"
-#include "error.h"
 
 /**
  * Funkce prevede string na int a ulozi ho do tokenu.
