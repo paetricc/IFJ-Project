@@ -1,3 +1,11 @@
+/**
+ * Projekt: IFJ2021
+ *
+ * @brief Implementace Tabulky symbolu.
+ *
+ * @author Vít Janeček xjanec30@stud.fit.vutbr.cz
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
@@ -5,33 +13,51 @@
 
 #include "symtable.h"
 
+/**
+ * Funkce pro inicializaci seznamu parametru.
+ *
+ * @param listParam Ukazatel na seznam parametru.
+ */
 void SLL_Param_Init(SLList_Param *listParam){
     listParam->firstElement = NULL;
 }
 
+/**
+ * Funkce pro pridani prvku do seznamu parametru.
+ *
+ * @param type Datovy typ pridavaneho parametru.
+ * @param stringName Ukazatel na DS, kde je jmeno pridavaneho parametru.
+ * @param tree Ukazatel na dany uzel, ve kterem je seznam parametru, do ktereho chceme pridavat prvek.
+ * @return Vraci ERROR_PASSED, jestlize se pridani povedlo, jinak ERROR_COMPILER.
+ */
 int SLL_Param_Insert(Data_type type, Dynamic_string *stringName, bst_node_t *tree){
     SLLElementPtr_Param nElemPtr = (SLLElementPtr_Param)malloc(sizeof(struct SLLElement_Param));  //naalokuje prostor pro pridavany prvek
-    Dynamic_string *string1 = (Dynamic_string *)malloc(sizeof(Dynamic_string));
-    if (nElemPtr == NULL){
-        return ERROR_COMPILER;
+    Dynamic_string *string1 = (Dynamic_string *)malloc(sizeof(Dynamic_string));     //naalokuje DS
+    if (nElemPtr == NULL || string1 == NULL){
+        return ERROR_COMPILER;          //pokud se malloc nepovedl
     }
-    nElemPtr->type = type;
+    nElemPtr->type = type;                      //nahraje do pomocne
     nElemPtr->name = string1;
     nElemPtr->name->str = stringName->str;
-    if (tree->funcData->paramList->firstElement == NULL) {
+    if (tree->funcData->paramList->firstElement == NULL) {                      //pokud je to prvni prvek
         nElemPtr->nextElement = NULL;
         tree->funcData->paramList->firstElement = nElemPtr;
     } else {
         SLLElementPtr_Param elemPtr = tree->funcData->paramList->firstElement;
-        while (elemPtr->nextElement != NULL){
+        while (elemPtr->nextElement != NULL){                                   //jinak se dostane az na konec seznamu
             elemPtr = elemPtr->nextElement;
         }
         nElemPtr->nextElement = NULL;
-        elemPtr->nextElement = nElemPtr;
+        elemPtr->nextElement = nElemPtr;                        //prida prvek na konec seznamu
     }
     return ERROR_PASSED;
 }
 
+/**
+ * Funkce pro celkove smazani seznamu parametru.
+ *
+ * @param listParam Ukazatel na seznam parametru.
+ */
 void SLL_Param_Dispose(SLList_Param *listParam){
     while (listParam->firstElement != NULL){                     //dokud prvni element neni NULL
         SLLElementPtr_Param elemPtr;
@@ -43,111 +69,162 @@ void SLL_Param_Dispose(SLList_Param *listParam){
     listParam->firstElement = NULL;
 }
 
+/**
+ * Funkce pro inicializaci seznamu navratovych typu.
+ *
+ * @param listReturn Ukazatel na seznam navratovych typu.
+ */
 void SLL_Return_Init(SLList_Return *listReturn){
     listReturn->firstElement = NULL;
 }
 
+/**
+ * Funkce pro pridani prvku do seznamu navratovych typu.
+ * @param type Datovy typ pridavaneho navratoveho typu.
+ * @param tree Ukazatel na dany uzel, ve kterem je seznam navratovych typu, do ktereho chceme pridavat prvek.
+ * @return Vraci ERROR_PASSED, jestlize se pridani povedlo, jinak ERROR_COMPILER.
+ */
 int SLL_Return_Insert(Data_type type, bst_node_t *tree){
     SLLElementPtr_Return nElemPtr = (SLLElementPtr_Return)malloc(sizeof(struct SLLElement_Return));  //naalokuje prostor pro pridavany prvek
     if (nElemPtr == NULL){
-        return ERROR_COMPILER;
+        return ERROR_COMPILER;      //pokud se malloc nepovedl
     }
     nElemPtr->type = type;
-    if (tree->funcData->returnList->firstElement == NULL) {
+    if (tree->funcData->returnList->firstElement == NULL) {         //pokud je to prvni prvek
         nElemPtr->nextElement = NULL;
         tree->funcData->returnList->firstElement = nElemPtr;
     } else{
         SLLElementPtr_Return elemPtr = tree->funcData->returnList->firstElement;
-        while (elemPtr->nextElement != NULL){
+        while (elemPtr->nextElement != NULL){                                       //jinak se dostane az na konec seznamu
             elemPtr = elemPtr->nextElement;
         }
         nElemPtr->nextElement = NULL;
-        elemPtr->nextElement = nElemPtr;
+        elemPtr->nextElement = nElemPtr;                    //prida prvek na konec seznamu
     }
     return ERROR_PASSED;
 }
 
+/**
+ * Funkce pro celkove smazani seznamu navratovych typu.
+ *
+ * @param listReturn Ukazatel na seznam navratovych typu.
+ */
 void SLL_Return_Dispose(SLList_Return *listReturn){
     while (listReturn->firstElement != NULL){                     //dokud prvni element neni NULL
         SLLElementPtr_Return elemPtr;
-        elemPtr = listReturn->firstElement;
+        elemPtr = listReturn->firstElement;                         //pomocny ukazatel ukazuje na 1. prvek
         listReturn->firstElement = listReturn->firstElement->nextElement;       //prvni se posune na dalsi
         free(elemPtr);          //smaze prvni prvek
     }
     listReturn->firstElement = NULL;
 }
 
+/**
+ * Funkce pro nahrani dat do struktury pro data prommene.
+ *
+ * @param tree Ukazatel na uzel, do ktereho se nahravaji hodnoty.
+ * @param type Hodnota typu prommene.
+ * @param init Hodnota, zdali byla prommena inicializovana.
+ * @param used Hodnota, zdali byla prommena pouzita.
+ */
 void setDataV(bst_node_t *tree, Data_type type, bool init, bool used){
     tree->varData->type = type;
     tree->varData->init = init;
     tree->varData->used = used;
 }
 
+/**
+ * Funkce pro nahrani dat do struktury pro data funkce.
+ *
+ * @param tree Ukazatel na uzel, do ktereho se nahravaji hodnoty.
+ * @param def Hodnota, zdali byla funkce definovana.
+ */
 void setDataF(bst_node_t *tree, bool def){
     tree->funcData->def = def;
 }
 
+/**
+ * Funkce pro inicializaci Binarniho vyhledavaciho stromu.
+ *
+ * @param tree Ukazatel na koren BVS.
+ */
 void bst_init(bst_node_t **tree) {
     *tree = NULL;
 }
 
+/**
+ * Funkce pro vyhledani uzlu v BVS podle zadaneho jmena.
+ *
+ * @param tree Ukazatel na koren Binarniho vyhledavaciho stromu.
+ * @param string Ukazatel na DS, kde je jmeno hledaneho uzlu.
+ * @return Vraci ukazatel na nalezeny ukazatel, jinak NULL.
+ */
 bst_node_t *bst_search(bst_node_t *tree, Dynamic_string *string) {
     bst_node_t *findNode = NULL;
     if (tree != NULL){                                               //dokud nedosel nakonec
-        if ((strcmp(tree->name->str, string->str)) == 0){//pokud jsou klice stejne, nahraje hodnotu a vrati true
+        if ((strcmp(tree->name->str, string->str)) == 0){       //pokud jsou jmena stejne, vrati ukazatel
             findNode = tree;
             return findNode;
         } else{
-            if ((strcmp(tree->name->str, string->str)) > 0){
+            if ((strcmp(tree->name->str, string->str)) > 0){        //pokud je ASCII hodnota jmena mensi, rekurzivne se zavola pro levy podstrom
                 findNode = bst_search(tree->left, string);
-                return findNode;          //pokud je klic mensi, rekurzivne se zavola pro levy podstrom
+                return findNode;
             } else{
-                findNode = bst_search(tree->right, string);         //pokud je klic vetsi, rekurzivne se zavola pro pravy podstrom
+                findNode = bst_search(tree->right, string);         //pokud ASCII hodnota jmena vetsi, rekurzivne se zavola pro pravy podstrom
                 return findNode;
             }
         }
     } else{
         findNode = NULL;
-        return findNode;                                               // jestli nenasel
+        return findNode;                                               // jestli nenasel, vrati NULL
     }
 }
 
-int bst_insert(bst_node_t **tree, Dynamic_string *string, bool isFnc) {
+/**
+ * Funkce pro pridani uzlu v BVS podle zadaneho jmena.
+ *
+ * @param tree Ukazatel na koren Binarniho vyhledavaciho stromu.
+ * @param string Ukazatel na DS, kde je jmeno noveho uzlu.
+ * @param isFnc Hodnota, zdali je to uzel pro funkci nebo pro prommenou.
+ * @return Vraci ERROR_PASSED, jestlize se pridani povedlo, jinak ERROR_COMPILER
+ */
+ int bst_insert(bst_node_t **tree, Dynamic_string *string, bool isFnc) {
     if (*tree != NULL){                                         //dokud nedosel nakonec
-        if ((strcmp((*tree)->name->str, string->str)) == 0){//pokud jsou klice stejne, nahraje hodnotu a vrati true
+        if ((strcmp((*tree)->name->str, string->str)) == 0){        //pokud jsou jmena stejne, vrati error
             return ERROR_SEM_UNDEFINED;
         } else{
             int error;
             if ((strcmp((*tree)->name->str, string->str)) > 0){
-                error = bst_insert(&((*tree)->left), string, isFnc);//pokud je klic mensi, rekurzivne se zavola pro levy podstrom
+                error = bst_insert(&((*tree)->left), string, isFnc);                //pokud je ASCII hodnota jmena mensi, rekurzivne se zavola pro levy podstrom
                 return (error == ERROR_PASSED) ? ERROR_PASSED : ERROR_COMPILER;
             } else{
-                error = bst_insert(&((*tree)->right), string, isFnc);      //pokud je klic vetsi, rekurzivne se zavola pro pravy podstrom
+                error = bst_insert(&((*tree)->right), string, isFnc);               //pokud ASCII hodnota jmena vetsi, rekurzivne se zavola pro pravy podstrom
                 return (error == ERROR_PASSED) ? ERROR_PASSED : ERROR_COMPILER;
             }
         }
     } else{                                                     //pokud je strom prazdny
-        *tree = malloc(sizeof(bst_node_t));                     //vytvoreni mista pro novy uzel
+        *tree = malloc(sizeof(bst_node_t));                         //vytvoreni misto pro novy uzel
         if (*tree == NULL){
-            return ERROR_COMPILER;
+            return ERROR_COMPILER;      //pokud se malloc nepovedl
         } else{
-            Dynamic_string *string1 = (Dynamic_string *)malloc(sizeof(Dynamic_string));
-            (*tree)->name = string1;
+            Dynamic_string *string1 = (Dynamic_string *)malloc(sizeof(Dynamic_string)); //naalokuje DS
+            (*tree)->name = string1;                //nahraj hodnoty
             (*tree)->name->str = string->str;
             (*tree)->isFnc = isFnc;
-            if (isFnc){
-                Table_data_func_t *dataFunc = malloc(sizeof(Table_data_func_t));
-                (*tree)->funcData = dataFunc;
-                SLList_Param *listParam = (SLList_Param *)malloc(sizeof(SLList_Param));
-                SLList_Return *listReturn = (SLList_Return *)malloc(sizeof(SLList_Return));
-                SLL_Param_Init(listParam);
+            if (isFnc){                         //pokud je strom pro funkce
+                Table_data_func_t *dataFunc = malloc(sizeof(Table_data_func_t));    //naalokuje strukturu s daty pro funkci
+                (*tree)->funcData = dataFunc;                   //nastavi ukazatel na structuru s daty pro funkci
+                SLList_Param *listParam = (SLList_Param *)malloc(sizeof(SLList_Param));             //naalokuje seznam paranetru
+                SLList_Return *listReturn = (SLList_Return *)malloc(sizeof(SLList_Return));         //naalokuje seznam navratovych typu
+                SLL_Param_Init(listParam);                                          //inicializuje seznamy
                 SLL_Return_Init(listReturn);
-                (*tree)->funcData->paramList = listParam;
+                (*tree)->funcData->paramList = listParam;                           //nastavi ukazatele na seznamz
                 (*tree)->funcData->returnList = listReturn;
-                (*tree)->varData = NULL;
+                (*tree)->varData = NULL;                                            //ukazatel na nepotrebnou strukturu nastavi na null
             } else{
-                (*tree)->varData = malloc(sizeof(Table_data_var_t));
-                (*tree)->funcData = NULL;
+                Table_data_var_t *dataVar = malloc(sizeof(Table_data_var_t));   //naalokuje strukturu s daty pro prommene
+                (*tree)->varData = dataVar;                 //nastavi ukazatel na strukturu s daty pro prommene
+                (*tree)->funcData = NULL;                                       //ukazatel na nepotrebnou strukturu nastavi na null
             }
             (*tree)->left = NULL;
             (*tree)->right = NULL;
@@ -156,31 +233,41 @@ int bst_insert(bst_node_t **tree, Dynamic_string *string, bool isFnc) {
     }
 }
 
+/**
+ * Funkce pro celkove smazani Binarniho vyhledavaciho stromu.
+ *
+ * @param tree Ukazatel na koren BVS.
+ */
 void bst_dispose(bst_node_t **tree){
     if (*tree != NULL){                         //dokud strom neni prazdny
         bst_dispose(&((*tree)->left));                  //rekurzivne se zavola pro levy podstrom
         bst_dispose(&((*tree)->right));                 //rekurzivne se zavola pro pravy podstrom
-        if ((*tree)->isFnc){
-            SLL_Param_Dispose((*tree)->funcData->paramList);
-            SLL_Return_Dispose((*tree)->funcData->returnList);
-            free((*tree)->funcData->paramList);
+        if ((*tree)->isFnc){                                    //pokud je strom pro funkce
+            SLL_Param_Dispose((*tree)->funcData->paramList);        //smaze seznam paranetru
+            SLL_Return_Dispose((*tree)->funcData->returnList);      //smaze seznam navratovych typu
+            free((*tree)->funcData->paramList);                 //uvolni ukazatele
             free((*tree)->funcData->returnList);
             (*tree)->funcData->returnList = NULL;
             (*tree)->funcData->paramList = NULL;
-            free((*tree)->funcData);
+            free((*tree)->funcData);            //smaze strukturu s daty pro funkci
             (*tree)->funcData = NULL;
         } else{
-            free((*tree)->varData);
+            free((*tree)->varData);             //smaze strukturu s daty pro prommenou
             (*tree)->varData = NULL;
         }
-        free((*tree)->name);
-        free(*tree);
-        *tree = NULL;//inicializuje strom
+        free((*tree)->name);        //smaze DS se jmenem
+        free(*tree);            //smaze uzel
+        *tree = NULL;       //inicializuje strom
     } else{
         return;
     }
 }
 
+/**
+ * Funkce pro prochazeni Binarniho vyhledavaciho stromu.
+ *
+ * @param tree Ukazatel na koren BVS.
+ */
 void bst_preorder(bst_node_t *tree) {
     if (tree != NULL){
         printf("%s\n", tree->name->str);
@@ -191,126 +278,198 @@ void bst_preorder(bst_node_t *tree) {
     }
 }
 
+/**
+ * Funkce pro inicializaci Tabulky symbolu.
+ *
+ * @param listFrame Ukazatel na Tabulku symbolu.
+ */
 void SLL_Frame_Init(SLList_Frame *listFrame){
     listFrame->TopLocalElement = NULL;
     listFrame->globalElement = NULL;
 }
 
+/**
+ * Funkce pro pridani Framu do Tabulky symbolu.
+ *
+ * @param listFrame Ukazatel na Tabulku symbolu.
+ * @return Vraci ERROR_PASSED, jestlize se pridani povedlo, jinak ERROR_COMPILER.
+ */
 int SLL_Frame_Insert(SLList_Frame *listFrame){
-    SLLElementPtr_Frame nElemPtr = (SLLElementPtr_Frame)malloc(sizeof(struct SLLElement_Frame));  //naalokuje prostor pro pridavany prvek
+    SLLElementPtr_Frame nElemPtr = (SLLElementPtr_Frame)malloc(sizeof(struct SLLElement_Frame));  //naalokuje prostor pro pridavany frame
     if (nElemPtr == NULL){
-        return ERROR_COMPILER;
+        return ERROR_COMPILER;      //pokud se malloc nepovedl
     }
-    bst_init(&(nElemPtr->node));
-    if (listFrame->globalElement == NULL){
+    bst_init(&(nElemPtr->node));        //inicializuje BVS
+    if (listFrame->globalElement == NULL){          //pokud jeste neexistuje globalni frame
         nElemPtr->previousElement = NULL;
-        listFrame->globalElement = nElemPtr;
+        listFrame->globalElement = nElemPtr;        //tak ho vytvori
     } else{
-        if (listFrame->TopLocalElement == NULL) {
+        if (listFrame->TopLocalElement == NULL) {                   //pokud jeste neexistuje localni frame
             nElemPtr->previousElement = listFrame->globalElement;
-            listFrame->TopLocalElement = nElemPtr;
+            listFrame->TopLocalElement = nElemPtr;                  //tak ho vytvori
         } else{
-            nElemPtr->previousElement = listFrame->TopLocalElement;          //prenastavi ukazatele
-            listFrame->TopLocalElement = nElemPtr;
+            nElemPtr->previousElement = listFrame->TopLocalElement;    //pokud uz existuje localni frame
+            listFrame->TopLocalElement = nElemPtr;                  //prida ho na konec
         }
     }
     return ERROR_PASSED;
 }
 
-void SLL_Frame_Delete(SLList_Frame *listFrame){
+/**
+ * Funkce pro smazani posledniho lokalniho Framu Tabulky symbolu.
+ * Nesmaze globalni Frame.
+ *
+ * @param listFrame Ukazatel na Tabulku symbolu.
+ */
+ void SLL_Frame_Delete(SLList_Frame *listFrame){
+     //pomocna prommena pro zjisteni posledniho framu
     bool isfrstLastElement = false;
 
-    if (listFrame->TopLocalElement != NULL){     //jestli existuje posledni prvek
-        bst_dispose(&(listFrame->TopLocalElement->node));
+    if (listFrame->TopLocalElement != NULL){     //jestli existuje localni prvek
+        bst_dispose(&(listFrame->TopLocalElement->node));       //smaze BVS
         SLLElementPtr_Frame elemPtr;
-        elemPtr = listFrame->TopLocalElement; //pomocny ukazatel ukazuje na 1. prvek
-        if (listFrame->TopLocalElement->previousElement == listFrame->globalElement){
+        elemPtr = listFrame->TopLocalElement;           //pomocny ukazatel ukazuje na posledni
+        if (listFrame->TopLocalElement->previousElement == listFrame->globalElement){   //jestlize je posledni localni frame
             isfrstLastElement = true;
         }
         listFrame->TopLocalElement = listFrame->TopLocalElement->previousElement;       //prvni se posune na dalsi
-        free(elemPtr);
-        if (isfrstLastElement){
-            listFrame->TopLocalElement = NULL;
+        free(elemPtr);                              //smaze posledni prvek
+        if (isfrstLastElement){                     //jestlize je posledni localni frame
+            listFrame->TopLocalElement = NULL;      //nastavy ukazatel na null
         }
     }
 }
+
+/**
+ * Funkce pro smazani globalniho Framu Tabulky symbolu.
+ * Jestlize existuje jeste nejaky lokalni Frame, nic neprovede.
+ *
+ * @param listFrame Ukazatel na Tabulku symbolu.
+ */
 void SLL_Frame_DeleteGlobal(SLList_Frame *listFrame){
-    if (listFrame->TopLocalElement == NULL && listFrame->globalElement != NULL){     //jestli existuje posledni prvek
-        bst_dispose(&(listFrame->globalElement->node));
-        free(listFrame->globalElement);          //uvolni global
+    if (listFrame->TopLocalElement == NULL && listFrame->globalElement != NULL){     //jestli neexistuje localni frame a globalni ano
+        bst_dispose(&(listFrame->globalElement->node));     //smaze BVS
+        free(listFrame->globalElement);          //smaze globalni frame
         listFrame->globalElement = NULL;
         listFrame->TopLocalElement = NULL;
     }
 }
-
+/**
+ * Funkce pro celkove smazani Tabulky symbolu.
+ *
+ * @param listFrame Ukazatel na Tabulku symbolu.
+ */
 void SLL_Frame_Dispose(SLList_Frame *listFrame){
-    if (listFrame->TopLocalElement != NULL){
-        while (listFrame->TopLocalElement->previousElement != listFrame->globalElement) {//dokud prvni element neni NULL
-            bst_dispose(&(listFrame->TopLocalElement->node));
+    if (listFrame->TopLocalElement != NULL){    //pokud jsou nejake local framy
+        while (listFrame->TopLocalElement->previousElement != listFrame->globalElement) {//dokud nezustal posledni local frame, tak maze framy
+            bst_dispose(&(listFrame->TopLocalElement->node));           //smaze BVS
             SLLElementPtr_Frame elemPtr;
-            elemPtr = listFrame->TopLocalElement;                       //pomocny ukazatel ukazuje na 1. prvek
-            listFrame->TopLocalElement = listFrame->TopLocalElement->previousElement;       //prvni se posune na dalsi
-            free(elemPtr);          //smaze prvni prvek
+            elemPtr = listFrame->TopLocalElement;                       //pomocny ukazatel ukazuje na posledni
+            listFrame->TopLocalElement = listFrame->TopLocalElement->previousElement;       //posledni se posune na predchozi
+            free(elemPtr);          //smaze posledni local frame
         }
-        if (listFrame->TopLocalElement->previousElement == listFrame->globalElement) {
-            bst_dispose(&(listFrame->TopLocalElement->node));
-            free(listFrame->TopLocalElement);
+        if (listFrame->TopLocalElement->previousElement == listFrame->globalElement) { //smaze posledni local frame
+            bst_dispose(&(listFrame->TopLocalElement->node));       //smaze BVS
+            free(listFrame->TopLocalElement);       //smaze posledni local frame
             listFrame->TopLocalElement = NULL;
         }
     }
     if (listFrame->globalElement != NULL) {
-        bst_dispose(&(listFrame->globalElement->node));
-        free(listFrame->globalElement);
+        bst_dispose(&(listFrame->globalElement->node));     //smaze BVS
+        free(listFrame->globalElement);             //smaze global frame
         listFrame->globalElement = NULL;
         listFrame->TopLocalElement = NULL;
     }
 }
 
+/**
+ * Funkce pro vyhledani uzlu v cele Tabulce symbolu podle zadaneho jmena.
+ * Pouziva funkci bst_search().
+ *
+ * @param string Ukazatel na DS, kde je jmeno hledaneho uzlu.
+ * @param listFrame Ukazatel na Tabulku symbolu.
+ * @return Vraci ukazatel na nalezeny ukazatel, jinak NULL.
+ */
 bst_node_t *search_Iden(Dynamic_string *string, SLList_Frame *listFrame){
-
+    //pomocne ukazatele
     SLList_Frame *elemPtr;
     elemPtr = listFrame;
     SLList_Frame *pElemPtr;
     bst_node_t *treePtr;
 
     if (listFrame->TopLocalElement != NULL){
-        while (elemPtr->TopLocalElement->previousElement != elemPtr->globalElement){
+        while (elemPtr->TopLocalElement->previousElement != elemPtr->globalElement){ //hleda v lokalnich framech
             pElemPtr->TopLocalElement = elemPtr->TopLocalElement->previousElement;
-            if((treePtr = bst_search(elemPtr->TopLocalElement->node, string))){
+            if((treePtr = bst_search(elemPtr->TopLocalElement->node, string))){      //prohleda jejich BVS
                 return treePtr;
             } else{
                 elemPtr = pElemPtr;
             }
         }
-        if (elemPtr->TopLocalElement->previousElement == elemPtr->globalElement){
-            if ((treePtr = bst_search(elemPtr->TopLocalElement->node, string))){
+        if (elemPtr->TopLocalElement->previousElement == elemPtr->globalElement){ //hleda v prvnim lokalnim framu
+            if ((treePtr = bst_search(elemPtr->TopLocalElement->node, string))){  //prohleda jeho BVS
                 return treePtr;
             }
         }
     }
-    if(listFrame->globalElement != NULL){
-        if ((treePtr = bst_search(elemPtr->globalElement->node, string))){
+    if(listFrame->globalElement != NULL){                                           //prohleda globalni frame
+        if ((treePtr = bst_search(elemPtr->globalElement->node, string))){          //prohleda jeho BVS
             return treePtr;
         }
     }
-    return NULL;
+    return NULL;            //pokud nenasel ani jeden uzel
 }
+
+/**
+ * Funkce pro ziskani dat, jestli je uzel pro funkci nebo pro prommene.
+ *
+ * @param tree Ukazatel na uzel, ze ktereho je chteno ziskat hodnoty.
+ * @return Vraci hodnotu true, jestlize je uzel pro funkci, jinak false.
+ */
 bool isFnc(bst_node_t *tree){
     bool isFnc = tree->isFnc;
     return isFnc;
 }
+
+/**
+ * Funkce pro ziskani dat, jestli je funkce definovana.
+ *
+ * @param tree Ukazatel na uzel, ze ktereho je chteno ziskat hodnoty.
+ * @return Vraci hodnotu true, jestlize je funkce definovana, jinak false.
+ */
 bool isDefFnc(bst_node_t *tree){
     bool isDefFnc = tree->funcData->def;
     return isDefFnc;
 }
+
+/**
+ * Funkce pro ziskani dat, jestli je prommena inicializovana.
+ *
+ * @param tree Ukazatel na uzel, ze ktereho je chteno ziskat hodnoty.
+ * @return Vraci hodnotu true, jestlize je prommena inicializovana, jinak false.
+ */
 bool isInitVar(bst_node_t *tree){
     bool isInitVar = tree->varData->init;
     return isInitVar;
 }
+
+/**
+ * Funkce pro ziskani dat, jestli je prommena pouzita.
+ *
+ * @param tree Ukazatel na uzel, ze ktereho je chteno ziskat hodnoty.
+ * @return Vraci hodnotu true, jestlize je prommena pouzita, jinak false.
+ */
 bool isUsedVar(bst_node_t *tree) {
     bool isUsedVar = tree->varData->used;
     return isUsedVar;
 }
+
+/**
+ * Funkce pro ziskani datoveho typu prommene.
+ *
+ * @param tree Ukazatel na uzel, ze ktereho je chteno ziskat hodnoty.
+ * @return Vraci hodnotu datoveho typu prommene.
+ */
 Data_type typeVar(bst_node_t *tree) {
     Data_type typeVar = tree->varData->type;
     return typeVar;
