@@ -232,6 +232,7 @@ int checkRulesAndApply( TermStack *stack ) {
     } else {
         return ERROR_SYNTAX;
     }
+    return ERROR_PASSED;
 }
 
 /**
@@ -254,6 +255,7 @@ int SA_isOK(TermStack *stack) {
  * @return int Typ erroru generovany analyzou
  */
 int exprSyntaxCheck(Token *token, FILE *file) {
+    int error;
     // pridelim pamet zasobniku
     TermStack *stack = (TermStack *) malloc(sizeof(TermStack));
     if(!stack) return ERROR_COMPILER;
@@ -262,7 +264,6 @@ int exprSyntaxCheck(Token *token, FILE *file) {
     TermStack_push(stack, USD);
 
     struct TermStackElement *top = NULL;
-    int error = 0;
 
     skipNonPrintChar(token, file);
     // prevedu si token->ID na terminal ci neterminal
