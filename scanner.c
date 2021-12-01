@@ -117,10 +117,15 @@ int get_token(Token *token, FILE *source_file ) {
     
         char c;
         int state = STATE_START;
-        while (((c = (char) getc(source_file)) != EOF) || (state == STATE_STR)) {
+        do {
+            c = (char) getc(source_file);
             switch (state) {
                 case STATE_START:
                     switch (c) {
+                        case EOF:
+                            token->ID = TOKEN_ID_EOF;
+                            DS_Free(ptr_Str);
+                            return ERROR_PASSED;
                         case 9:
                             token->ID = TOKEN_ID_TAB;
                             DS_Free(ptr_Str);
@@ -631,13 +636,12 @@ int get_token(Token *token, FILE *source_file ) {
                     state = STATE_ERROR;
                     break;
             }
+
             if (state == STATE_ERROR) {
                 DS_Free(ptr_Str);
                 return ERROR_LEX;
             }
-        }
+        } while ((c != EOF) || (state == STATE_STR));
 
-        token->ID = TOKEN_ID_EOF;
-        DS_Free(ptr_Str);
         return ERROR_PASSED;
     }

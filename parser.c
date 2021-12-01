@@ -691,7 +691,7 @@ int fnc_head(Token *token, FILE *sourceFile) {
 		return ERROR_SYNTAX;
 
 	return ERROR_PASSED;
-}
+} // fnc_head
 
 
 /**
