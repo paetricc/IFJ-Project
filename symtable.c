@@ -59,14 +59,16 @@ int SLL_Param_Insert(Data_type type, Dynamic_string *stringName, bst_node_t *tre
  * @param listParam Ukazatel na seznam parametru.
  */
 void SLL_Param_Dispose(SLList_Param *listParam){
-    while (listParam->firstElement != NULL){                     //dokud prvni element neni NULL
-        SLLElementPtr_Param elemPtr;
-        free(listParam->firstElement->name);
-        elemPtr = listParam->firstElement;                       //pomocny ukazatel ukazuje na 1. prvek
-        listParam->firstElement = listParam->firstElement->nextElement;       //prvni se posune na dalsi
-        free(elemPtr);          //smaze prvni prvek
+    if (listParam != NULL){
+        while (listParam->firstElement != NULL){                     //dokud prvni element neni NULL
+            SLLElementPtr_Param elemPtr;
+            free(listParam->firstElement->name);
+            elemPtr = listParam->firstElement;                       //pomocny ukazatel ukazuje na 1. prvek
+            listParam->firstElement = listParam->firstElement->nextElement;       //prvni se posune na dalsi
+            free(elemPtr);          //smaze prvni prvek
+        }
+        listParam->firstElement = NULL;
     }
-    listParam->firstElement = NULL;
 }
 
 /**
@@ -110,13 +112,15 @@ int SLL_Return_Insert(Data_type type, bst_node_t *tree){
  * @param listReturn Ukazatel na seznam navratovych typu.
  */
 void SLL_Return_Dispose(SLList_Return *listReturn){
-    while (listReturn->firstElement != NULL){                     //dokud prvni element neni NULL
-        SLLElementPtr_Return elemPtr;
-        elemPtr = listReturn->firstElement;                         //pomocny ukazatel ukazuje na 1. prvek
-        listReturn->firstElement = listReturn->firstElement->nextElement;       //prvni se posune na dalsi
-        free(elemPtr);          //smaze prvni prvek
+    if (listReturn != NULL) {
+        while (listReturn->firstElement != NULL) {                     //dokud prvni element neni NULL
+            SLLElementPtr_Return elemPtr;
+            elemPtr = listReturn->firstElement;                         //pomocny ukazatel ukazuje na 1. prvek
+            listReturn->firstElement = listReturn->firstElement->nextElement;       //prvni se posune na dalsi
+            free(elemPtr);          //smaze prvni prvek
+        }
+        listReturn->firstElement = NULL;
     }
-    listReturn->firstElement = NULL;
 }
 
 /**
@@ -210,24 +214,37 @@ bst_node_t *bst_search(bst_node_t *tree, Dynamic_string *string) {
             return ERROR_COMPILER;      //pokud se malloc nepovedl
         } else{
             Dynamic_string *string1 = (Dynamic_string *)malloc(sizeof(Dynamic_string)); //naalokuje DS
+            if (string1 == NULL) return ERROR_COMPILER;
             (*tree)->name = string1;                //nahraj hodnoty
             (*tree)->name->str = string->str;
             (*tree)->isFnc = isFnc;
             if (isFnc){                         //pokud je strom pro funkce
                 Table_data_func_t *dataFunc = malloc(sizeof(Table_data_func_t));    //naalokuje strukturu s daty pro funkci
+                if (dataFunc == NULL){              //kdyz se nenalokuje
+                    free((*tree)->name);        //smaze DS se jmenem
+                    free(*tree);            //smaze uzel
+                    *tree = NULL;
+                    return ERROR_COMPILER;
+                }
                 (*tree)->funcData = dataFunc;                   //nastavi ukazatel na structuru s daty pro funkci
                 SLList_Param *listParam = (SLList_Param *)malloc(sizeof(SLList_Param));             //naalokuje seznam paranetru
+                if (listParam == NULL) return ERROR_COMPILER;
+                SLL_Param_Init(listParam);                                          //inicializuje seznam
+                (*tree)->funcData->paramList = listParam;                           //nastavi ukazatele na seznamy
                 SLList_Return *listReturn = (SLList_Return *)malloc(sizeof(SLList_Return));         //naalokuje seznam navratovych typu
-                SLL_Param_Init(listParam);                                          //inicializuje seznamy
-                SLL_Return_Init(listReturn);
-                (*tree)->funcData->paramList = listParam;                           //nastavi ukazatele na seznamz
+                if (listReturn == NULL) return ERROR_COMPILER;
+                SLL_Return_Init(listReturn);                                        //inicializuje seznam
                 (*tree)->funcData->returnList = listReturn;
                 (*tree)->varData = NULL;                                            //ukazatel na nepotrebnou strukturu nastavi na null
             } else{
                 Table_data_var_t *dataVar = malloc(sizeof(Table_data_var_t));   //naalokuje strukturu s daty pro promenne
-
+                if (dataVar == NULL) {              //kdyz se nenalokuje
+                    free((*tree)->name);        //smaze DS se jmenem
+                    free(*tree);            //smaze uzel
+                    *tree = NULL;
+                    return ERROR_COMPILER;
+                }
                 (*tree)->varData = dataVar;                 //nastavi ukazatel na strukturu s daty pro promenne
-
                 (*tree)->funcData = NULL;                                       //ukazatel na nepotrebnou strukturu nastavi na null
             }
             (*tree)->left = NULL;
@@ -247,7 +264,7 @@ void bst_dispose(bst_node_t **tree){
         bst_dispose(&((*tree)->left));                  //rekurzivne se zavola pro levy podstrom
         bst_dispose(&((*tree)->right));                 //rekurzivne se zavola pro pravy podstrom
         if ((*tree)->isFnc){                                    //pokud je strom pro funkce
-            SLL_Param_Dispose((*tree)->funcData->paramList);        //smaze seznam paranetru
+            SLL_Param_Dispose((*tree)->funcData->paramList);      //smaze seznam paranetru
             SLL_Return_Dispose((*tree)->funcData->returnList);      //smaze seznam navratovych typu
             free((*tree)->funcData->paramList);                 //uvolni ukazatele
             free((*tree)->funcData->returnList);
@@ -480,4 +497,18 @@ bool isUsedVar(bst_node_t *tree) {
 Data_type typeVar(bst_node_t *tree) {
     Data_type typeVar = tree->varData->type;
     return typeVar;
+}
+
+/**
+ * Funkce pro pridani vestavenych funkci do global Framu.
+ *
+ * @param listFrame Ukazatel na Tabulku symbolu.
+ * @return Vraci ERROR_PASSED, jestlize se pridani povedlo, jinak ERROR_COMPILER.
+ */
+int setBuildInFun(SLList_Frame *listFrame, Dynamic_string *string){
+    bst_node_t *tree;
+    bst_insert(&(listFrame->globalElement->node), string, true);        //prida uzel s vestavenou funkci
+    tree = search_Iden(string, listFrame);
+    setDataF(tree, true);                       //nastavi ji na definovanou
+    return ERROR_PASSED;
 }
