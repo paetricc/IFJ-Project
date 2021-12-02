@@ -476,6 +476,15 @@ int value(Token *token, FILE *sourceFile) {
             fsetpos(sourceFile, &lastReadPos);
             return ERROR_PASSED; // aplikace pravidla 17
 
+        case TOKEN_ID_KEYWORD: // nil
+            if (token->Value.keyword == KEYWORD_NIL) {
+                // nasteveni cteni pred nil, aby si ji precetl volany
+                fsetpos(sourceFile, &lastReadPos);
+                value_last(token, sourceFile); // aplikace pravidla 18
+            }
+            break;
+
+
         case TOKEN_ID_ID: // id_var
         case TOKEN_ID_INT0:
         case TOKEN_ID_HEX2:
@@ -539,7 +548,7 @@ int value2(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal value_last.
  *
- * Implementuje pravidla  21, 22, 23, 24.
+ * Implementuje pravidla  21, 22, 23, 24 a 25.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -578,7 +587,14 @@ int value_last(Token *token, FILE *sourceFile) {
             break;
 
         case TOKEN_ID_FSTR: // str_value
-            //TODO aplikace pravidla 24
+            // TODO aplikace pravidla 24
+            break;
+
+        case TOKEN_ID_KEYWORD: // nil
+            if (token->Value.keyword == KEYWORD_NIL) {
+                // TODO aplikace pravidal 25
+            } else // pro keyword neexistuje pravidlo
+                return ERROR_SYNTAX;
             break;
 
         default: // pro token zadne pravidlo neexistuje
@@ -592,7 +608,7 @@ int value_last(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal fnc_def.
  *
- * Implementuje pravidlo 25.
+ * Implementuje pravidlo 26.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -600,7 +616,7 @@ int value_last(Token *token, FILE *sourceFile) {
 */
 int fnc_def(Token *token, FILE *sourceFile) {
     // token function byl prijaty o uroven vyse => pokracuju dale
-    // aplikuju pravidlo 25
+    // aplikuju pravidlo 26
     int error;
 
     // rozvinuti neterminalu fnc_head
@@ -631,7 +647,7 @@ int fnc_def(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal fnc_head.
  *
- * Implementuje pravidlo 26.
+ * Implementuje pravidlo 27.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -639,7 +655,7 @@ int fnc_def(Token *token, FILE *sourceFile) {
 */
 int fnc_head(Token *token, FILE *sourceFile) {
     // token function byl prijaty o uroven vyse => pokracuju dale
-    // aplikuju pravidlo 25
+    // aplikuju pravidlo 27
     int error;
 
     // id_fnc
@@ -689,7 +705,7 @@ int fnc_head(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal fnc_def2.
  *
- * Implementuje pravidlo 27 a 28.
+ * Implementuje pravidlo 28 a 29.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -707,7 +723,7 @@ int fnc_def2(Token *token, FILE *sourceFile) {
         return error;
 
     // ':'
-    if (token->ID == TOKEN_ID_CLN) { // aplikace pravidla 28
+    if (token->ID == TOKEN_ID_CLN) { // aplikace pravidla 29
         // rozvinuti neterminalu data_type
         if ((error = data_type(token, sourceFile)))
             return error;
@@ -720,7 +736,7 @@ int fnc_def2(Token *token, FILE *sourceFile) {
         if ((error = return_(token, sourceFile)))
             return error;
     } else { // id_fce nebo id_var
-        // aplikace pravidla 27
+        // aplikace pravidla 28
 
         if (token->ID == TOKEN_ID_ID) {
             // korektni zadani
@@ -745,11 +761,11 @@ int fnc_def2(Token *token, FILE *sourceFile) {
         fsetpos(sourceFile, &lastReadPos);
 
         // rozvinuti neterminalu fnc_body
-        if((error = fnc_body(token, sourceFile)))
+        if ((error = fnc_body(token, sourceFile)))
             return error;
 
         // rozvinuti neterminalu return_void
-        if((error = return_void(token, sourceFile)))
+        if ((error = return_void(token, sourceFile)))
             return error;
     }
 
@@ -760,7 +776,7 @@ int fnc_def2(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal params_def.
  *
- * Implementuje pravidlo 29 a 30.
+ * Implementuje pravidlo 30 a 31.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -780,7 +796,7 @@ int params_def(Token *token, FILE *sourceFile) {
     if (token->ID == TOKEN_ID_RBR) { // ')'
         // nastavim cteni pred zavorku, aby si ji precetl volajici
         fsetpos(sourceFile, &lastReadPos);
-        return ERROR_PASSED; // aplikace pravidla 29
+        return ERROR_PASSED; // aplikace pravidla 30
     } else if (token->ID == TOKEN_ID_ID) { // id_var
         // nastavim cteni pred identifikator, aby si ho precetl volany
         fsetpos(sourceFile, &lastReadPos);
@@ -788,7 +804,7 @@ int params_def(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX; // pro tento token neexistuje pravidlo
 
     // rozsireni neterminalu var_def
-    if ((error = var_def(token, sourceFile))) // aplikace pravidla 30
+    if ((error = var_def(token, sourceFile))) // aplikace pravidla 31
         return error;
 
     // rozsireni neterminalu params_def2
@@ -799,7 +815,7 @@ int params_def(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal params_def2.
  *
- * Implementuje pravidlo 31 a 32.
+ * Implementuje pravidlo 32 a 33.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -819,9 +835,9 @@ int params_def2(Token *token, FILE *sourceFile) {
     if (token->ID == TOKEN_ID_RBR) { // ')'
         // nastavim cteni pred zavorku, aby si ji precetl volajici
         fsetpos(sourceFile, &lastReadPos);
-        return ERROR_PASSED; // aplikace pravidla 31
+        return ERROR_PASSED; // aplikace pravidla 32
     } else if (token->ID == TOKEN_ID_CMA) { // ','
-        // aplikace pravidla 32
+        // aplikace pravidla 33
         // (hned za koncem podminky)
     } else { // pro tento token neexistuje pravidlo
         return ERROR_SYNTAX;
@@ -839,7 +855,7 @@ int params_def2(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal var_def.
  *
- * Implementuje pravidlo 33.
+ * Implementuje pravidlo 34.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -847,6 +863,7 @@ int params_def2(Token *token, FILE *sourceFile) {
 */
 int var_def(Token *token, FILE *sourceFile) {
     int error;
+    // aplikace pravidla 34
 
     // id_var
     if ((error = get_non_white_token(token, sourceFile)))
@@ -879,7 +896,7 @@ int var_def(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal return.
  *
- * Implementuje pravidlo 34.
+ * Implementuje pravidlo 35.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -887,6 +904,7 @@ int var_def(Token *token, FILE *sourceFile) {
 */
 int return_(Token *token, FILE *sourceFile) {
     int error;
+    // aplikace pravidla 35
 
     // return
     if ((error = get_non_white_token(token, sourceFile)))
@@ -909,7 +927,7 @@ int return_(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal return_void.
  *
- * Implementuje pravidlo 35 a 36.
+ * Implementuje pravidlo 36 a 37.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -932,9 +950,9 @@ int return_void(Token *token, FILE *sourceFile) {
     if (token->Value.keyword == KEYWORD_END) {    // end
         // nastavim cteni pred end, aby si ji precetl volajici
         fsetpos(sourceFile, &lastReadPos);
-        return ERROR_PASSED; // aplikace pravidla 36
+        return ERROR_PASSED; // aplikace pravidla 37
     } else if (token->Value.keyword == KEYWORD_RETURN) {
-        // aplikace pravidla 35
+        // aplikace pravidla 36
     } else { // pro prijaty token neexistuje pravidlo
         return ERROR_SYNTAX;
     }
@@ -946,7 +964,7 @@ int return_void(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal fnc_body.
  *
- * Implementuje pravidlo 37, 38, 39 a 40.
+ * Implementuje pravidlo 38, 39 a 40 a 41.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -970,21 +988,21 @@ int fnc_body(Token *token, FILE *sourceFile) {
                 fsetpos(sourceFile, &lastReadPos);
 
                 // rozvinu neterminal statement
-                if ((error = statement(token, sourceFile))) // aplikace pravidla 39
+                if ((error = statement(token, sourceFile))) // aplikace pravidla 40
                     return error;
 
                 break;
 
             case KEYWORD_IF: // if
                 // rozvinu neterminal if
-                if ((error = if_(token, sourceFile))) // aplikace pravidla 37
+                if ((error = if_(token, sourceFile))) // aplikace pravidla 38
                     return error;
                 break;
 
 
             case KEYWORD_WHILE: // while
                 // rozvinu neterminal while
-                if ((error = loop(token, sourceFile))) // aplikace pravidla 38
+                if ((error = loop(token, sourceFile))) // aplikace pravidla 39
                     return error;
                 break;
 
@@ -993,7 +1011,7 @@ int fnc_body(Token *token, FILE *sourceFile) {
                 // vratim cteni pred keyword, aby si ho precetl volajici
                 fsetpos(sourceFile, &lastReadPos);
 
-                return ERROR_PASSED; // aplikace pravidla 40
+                return ERROR_PASSED; // aplikace pravidla 41
                 break;
 
             default: // pro keyword neexistuje pravidlo
@@ -1004,7 +1022,7 @@ int fnc_body(Token *token, FILE *sourceFile) {
         fsetpos(sourceFile, &lastReadPos);
 
         // rozvinu neterminal statement
-        if ((error = statement(token, sourceFile))) // aplikace pravidla 39
+        if ((error = statement(token, sourceFile))) // aplikace pravidla 40
             return error;
     } else { // pro prijaty token neexistuje pravidlo
         return ERROR_SYNTAX;
@@ -1017,7 +1035,7 @@ int fnc_body(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal statement.
  *
- * Implementuje pravidlo 41, 42 a 43.
+ * Implementuje pravidlo 42, 43 a 44.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -1036,7 +1054,7 @@ int statement(Token *token, FILE *sourceFile) {
 
     if (token->ID == TOKEN_ID_KEYWORD) // local
         // rozvinuti neterminalu var_dec
-        return var_dec(token, sourceFile); // aplikace pravidla 41
+        return var_dec(token, sourceFile); // aplikace pravidla 42
     else if (token->ID == TOKEN_ID_ID) { // id_var nebo id_fnc
         // najdu uzel identifikatoru
         bst_node_t *id_node = search_Iden(token->Value.string, symTable);
@@ -1048,14 +1066,14 @@ int statement(Token *token, FILE *sourceFile) {
             // vratim cteni pred identifikator, aby si ho precetl volany
             fsetpos(sourceFile, &lastReadPos);
             // rozsirim neterminal fnc_call
-            return fnc_call(token, sourceFile); // aplikace pravidla 43
+            return fnc_call(token, sourceFile); // aplikace pravidla 44
         } else { // id_var
             // aplikace pravidla 42
         }
     } else // pro prijaty token neexistuje pravidlo
         return ERROR_SYNTAX;
 
-    // z podminek pokracuje dal uz jen pravidlo 42
+    // z podminek pokracuje dal uz jen pravidlo 43
     // '='
     if ((error = get_non_white_token(token, sourceFile)))
         // lexikalni nebo kompilatorova chyba
@@ -1071,14 +1089,14 @@ int statement(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal var_dec.
  *
- * Implementuje pravidlo 44.
+ * Implementuje pravidlo 45.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
 int var_dec(Token *token, FILE *sourceFile) {
-    // aplikace pravidla 44
+    // aplikace pravidla 45
 
     int error;
     // local bylo uz precteno volajicim
@@ -1095,7 +1113,7 @@ int var_dec(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal var_dec_init.
  *
- * Implementuje pravidlo 45 a 46.
+ * Implementuje pravidlo 46 a 47.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -1113,7 +1131,7 @@ int var_dec_init(Token *token, FILE *sourceFile) {
         return error;
 
     if (token->ID == TOKEN_ID_ASSIGN) { // '='
-        // aplikace pravidla 45
+        // aplikace pravidla 46
 
         // rozvinuti neteminalu var_assign
         return var_assign(token, sourceFile);
@@ -1125,14 +1143,14 @@ int var_dec_init(Token *token, FILE *sourceFile) {
             case KEYWORD_WHILE:
             case KEYWORD_RETURN:
             case KEYWORD_END:
-                // aplikace pravidla 46
+                // aplikace pravidla 47
                 break;
 
             default: // prot tento keyword neexisuje pravidlo
                 return ERROR_SYNTAX;
         }
     } else if (token->ID == TOKEN_ID_ID) { // id_var nebo id_fce
-        // aplikace pravidla 46
+        // aplikace pravidla 47
     } else {
         // pro tento token neexistuje pravidlo
         return ERROR_SYNTAX;
@@ -1147,7 +1165,7 @@ int var_dec_init(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal var_assign.
  *
- * Implementuje pravidlo 47 a 48.
+ * Implementuje pravidlo 48 a 49.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -1168,19 +1186,19 @@ int var_assign(Token *token, FILE *sourceFile) {
     bst_node_t *id;
     switch (token->ID) {
         case TOKEN_ID_ID: // id_var nebo var_fce
-            // TODO rozlisit identifikator funkce od promenne pomoci symtable
-            // pro id_fce aplikace pravidla 48 => fnc_call()
-            // pro id_var aplikace pravidla 47 => fsetpos(), expr()
-
+            // vyhledam identifikator v tabulce
             id = search_Iden(token->Value.string, symTable);
             // nastaveni cteni pred identifikator, aby si to precetl volany
             fsetpos(sourceFile, &lastReadPos);
+
             if (id == NULL) // identifikator neexistuje
                 return ERROR_SEM_UNDEFINED;
             else if (isFnc(id)) // id_fnc
-                fnc_call(token, sourceFile);
+                // rozvinuti neterminalu fnc_call
+                error = fnc_call(token, sourceFile); // aplikace pravidla 49
             else // id_var
-                exprSyntaxCheck(token, sourceFile, symTable);
+                // zavolani bottomup SA pro neterminal expr
+                error = exprSyntaxCheck(token, sourceFile, symTable); // aplikace pravidla 48
             break;
 
         case TOKEN_ID_RBR: // ')'
@@ -1197,24 +1215,35 @@ int var_assign(Token *token, FILE *sourceFile) {
             // vratim cteni pred token, aby si ho precetl volany
             fsetpos(sourceFile, &lastReadPos);
 
-            //aplikace pravidla 47
+            //aplikace pravidla 48
             // volani bottom-up SA (rozsireni neterminalu expr)
-            if ((error = exprSyntaxCheck(token, sourceFile, symTable)))
-                return error;
+            error = exprSyntaxCheck(token, sourceFile, symTable);
+            break;
+
+        case TOKEN_ID_KEYWORD:
+            if (token->Value.keyword == KEYWORD_NIL) { // nil
+                // vratim cteni pred nil, aby si ho precetl volany
+                fsetpos(sourceFile, &lastReadPos);
+
+                //aplikace pravidla 48
+                // volani bottom-up SA (rozsireni neterminalu expr)
+                error = exprSyntaxCheck(token, sourceFile, symTable);
+            } else // pro tento keyword neexistuje pravidlo
+                return ERROR_SYNTAX;
             break;
 
         default: // pro tento token neexistuje pravidlo
-            return ERROR_PASSED;
+            return ERROR_SYNTAX;
     }
 
-    return ERROR_PASSED;
+    return error;
 } // var_assign
 
 
 /**
  * @brief Neterminal if
  *
- * Implementuje pravidlo 49.
+ * Implementuje pravidlo 50.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -1223,7 +1252,7 @@ int var_assign(Token *token, FILE *sourceFile) {
 int if_(Token *token, FILE *sourceFile) {
     int error;
     // token if byl precten o uroven vyse => pokracuju dal
-    // aplikace pravidla 49
+    // aplikace pravidla 50
 
     // volani bottom-up SA (rozsireni neterminalu expr)
     if ((error = exprSyntaxCheck(token, sourceFile, symTable)))
@@ -1286,7 +1315,7 @@ int if_(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal loop
  *
- * Implementuje pravidlo 50.
+ * Implementuje pravidlo 51.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -1295,7 +1324,7 @@ int if_(Token *token, FILE *sourceFile) {
 int loop(Token *token, FILE *sourceFile) {
     int error;
     // token while byl precten o uroven vyse => pokracuju dal
-    // aplikace pravidla 50
+    // aplikace pravidla 51
 
     // volani bottom-up SA (rozsireni neterminalu expr)
     if ((error = exprSyntaxCheck(token, sourceFile, symTable)))
@@ -1338,7 +1367,7 @@ int loop(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal statements
  *
- * Implementuje pravidlo 51 a 52.
+ * Implementuje pravidlo 52 a 53.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -1364,7 +1393,7 @@ int statements(Token *token, FILE *sourceFile) {
             case KEYWORD_END:
                 // nastavim cteni pred keyword, aby si to precetl volajici
                 fsetpos(sourceFile, &lastReadPos);
-                return ERROR_PASSED;
+                return ERROR_PASSED; // aplikace pravidla 52
 
             case KEYWORD_LOCAL:
                 // nastavim cteni pred keyword, aby si to precetl volajici
@@ -1378,7 +1407,7 @@ int statements(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX;
 
     // rozvinuti neterminalu statement
-    if ((error = statement(token, sourceFile)))
+    if ((error = statement(token, sourceFile))) // aplikace pravidla 53
         return error;
 
     return statements(token, sourceFile);
