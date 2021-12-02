@@ -725,6 +725,7 @@ int fnc_def2(Token *token, FILE *sourceFile) {
             // korektni zadani
         } else if (token->ID == TOKEN_ID_KEYWORD) { // local, if, while, return nebo end
             switch (token->Value.keyword) {
+                case KEYWORD_LOCAL:
                 case KEYWORD_IF:
                 case KEYWORD_WHILE:
                 case KEYWORD_RETURN:
@@ -741,6 +742,14 @@ int fnc_def2(Token *token, FILE *sourceFile) {
 
         // vraceni cteni pred identifikator/ keyword, aby si to precetl volajici
         fsetpos(sourceFile, &lastReadPos);
+
+        // rozvinuti neterminalu fnc_body
+        if((error = fnc_body(token, sourceFile)))
+            return error;
+
+        // rozvinuti neterminalu return_void
+        if((error = return_void(token, sourceFile)))
+            return error;
     }
 
     return ERROR_PASSED;
