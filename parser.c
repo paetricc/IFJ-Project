@@ -41,7 +41,8 @@ int get_non_white_token(Token *token, FILE *sourceFile) {
             return error;
     } while (token->ID != TOKEN_ID_EOF && (
             token->ID == TOKEN_ID_SPACE || token->ID == TOKEN_ID_EOL ||
-            token->ID == TOKEN_ID_TAB));
+            token->ID == TOKEN_ID_TAB || token->ID == TOKEN_ID_LCMT2 ||
+            token->ID == TOKEN_ID_BCMT4));
     return error;
 }
 
