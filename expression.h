@@ -9,7 +9,9 @@ int exprSyntaxCheck( Token *, FILE *, SLList_Frame * );
 
 int skipNonPrintChar(Token *, FILE * );
 
-int checkRulesAndApply( TermStack * );
+int checkRulesAndApply( TermStack *, TypeStack * );
+
+int checkDataTypes_ADD_SUB_MUL_DIV(TypeStack *);
 
 int SA_isOK( TermStack * );
 

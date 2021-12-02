@@ -13,7 +13,7 @@
 fpos_t last_read_pos;
 
 static TermsAndNonTerms p_table[17][17] =
-{       /* $  +  -  *  /  // (  )  i  #  .. <  >  <= >= == ~= */ 
+{       /* $  +  -  *  /  // (  )  i  #  .. <  >  <= >= == ~= */
 /*  $ */ {-1, R, R, R, R, R, R,-1, R, R, R, I, I, I, I, I, I },
 /*  + */ { I, I, I, R, R, R, R, I, R, R, I, I, I, I, I, I, I },
 /*  - */ { I, I, I, R, R, R, R, I, R, R, I, I, I, I, I, I, I },
@@ -34,6 +34,10 @@ static TermsAndNonTerms p_table[17][17] =
 };
 
 TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token *token, TypeStack *typeStack ) {
+    if(token->Value.keyword == KEYWORD_NIL) {
+        TypeStack_push(typeStack, DATA_TYPE_NIL);
+        return ID;
+    }
     switch (token->ID) {
     case TOKEN_ID_ADD:
         return ADD;
@@ -75,6 +79,7 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token *token, TypeStack *
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
         return ID;
     case TOKEN_ID_FSTR:
+        TypeStack_push(typeStack, DATA_TYPE_STRING);
         return ID;
     case TOKEN_ID_LEN:
         return LEN;
@@ -89,97 +94,33 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token *token, TypeStack *
     }
 }
 
-
-/**
- * @brief Pomocna funkce pro lepsi vizualizaci dat na zasobniku
- * 
- * @param data Ukazatel na prvek v zasobniku
- */
-void termPrint(struct TermStackElement *data) {
-    switch (data->data)
-    {
-    case EXP:
-        printf("E");
-        break;
-    case R:
-        printf("←");
-        break;
-    case I:
-        printf("→");
-        break;
-    case E:
-        printf("=");
-        break;
-    case USD:
-        printf("$");
-        break;
-    case ADD:
-        printf("+");
-        break;
-    case SUB:
-        printf("-");
-        break;
-    case MUL:
-        printf("*");
-        break;
-    case DIV:
-        printf("/");
-        break;
-    case DIV2:
-        printf("//");
-        break;
-    case RBR:
-        printf(")");
-        break;
-    case LBR:
-        printf("(");
-        break;
-    case ID:
-        printf("i");
-        break;
-    case LEN:
-        printf("#");
-        break;
-    case DDOT:
-        printf("..");
-        break;
-    case LT:
-        printf("<");
-        break;
-    case GT:
-        printf(">");
-        break;
-    case LTE:
-        printf("<=");
-        break;
-    case GTE:
-        printf(">=");
-        break;
-    case EQ:
-        printf("==");
-        break;
-    case NEQ:
-        printf("~=");
-        break;
-    default:
-        break;
+int checkDataTypes_ADD_SUB_MUL_DIV(TypeStack *typeStack) {
+    DataTypes firstOP, secondOp;
+    firstOP = TypeStack_pop(typeStack);
+    secondOp = TypeStack_pop(typeStack);
+    if(firstOP == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
+        TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+    } else if (firstOP == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_INTEGER ||
+               firstOP == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOP == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else {
+        return ERROR_SEM_COMPAT;
     }
+    return ERROR_PASSED;
 }
 
-/**
- * @brief Pomocna funkce pro vypis zasobniku
- * 
- * @param stack Ukazatel na strukturu jednosmerne vazaneho seznamu
- */
-void stackPrint( TermStack *stack ) {
-    struct TermStackElement *tmp = stack->topElement;
-    printf("--- TOP ----");
-    while(tmp != NULL) {
-        printf("\n     ");
-        termPrint(tmp);
-        tmp = tmp->previousElement;
+int checkDataTypes_DIV2(TypeStack *typeStack) {
+    DataTypes firstOP, secondOp;
+    firstOP = TypeStack_pop(typeStack);
+    secondOp = TypeStack_pop(typeStack);
+    if(firstOP == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
+        TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+    } else {
+        return ERROR_SEM_COMPAT;
     }
-    printf("\n-- BOTTOM --\n");
+    return  ERROR_PASSED;
 }
 
 /**
@@ -209,20 +150,25 @@ int skipNonPrintChar(Token *token, FILE *file) {
  * @param termStack Ukazatel na strukturu jednosmerne vazaneho seznamu
  * @return int Typ erroru generovany analyzou
  */
-int checkRulesAndApply( TermStack *termStack ) {
+int checkRulesAndApply( TermStack *termStack, TypeStack *typeStack ) {
     TermStackElementPtr ptr = NULL;
     TermStack_top(termStack, &ptr);
     if (ptr->data == ID && ptr->previousElement->data == R) {
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == ADD && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == SUB && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == MUL && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DIV && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DIV2 && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_DIV2(typeStack)) return ERROR_SEM_COMPAT;
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DDOT && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
         TermStack_applyReduce(termStack);
@@ -241,6 +187,12 @@ int checkRulesAndApply( TermStack *termStack ) {
     } else if (ptr->data == EXP && ptr->previousElement->data == NEQ && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == LEN && ptr->previousElement->previousElement->data == R) {
+        DataTypes firstOp = TypeStack_pop(typeStack);
+        if (firstOp == DATA_TYPE_STRING) {
+            TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+        } else {
+            return ERROR_SEM_COMPAT;
+        }
         TermStack_applyReduce(termStack);
     } else {
         return ERROR_SYNTAX;
@@ -343,11 +295,14 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
             break;
         // zredukuju po nejblizsi znak redukce
         case I:
-            error = checkRulesAndApply(termStack);
+            error = checkRulesAndApply(termStack, typeStack);
             // neexistije pro redukci pravidlo
             if(error == ERROR_SYNTAX) {
                 freeStacks(termStack, typeStack);
                 return ERROR_SYNTAX;
+            } else if(error == ERROR_SEM_COMPAT) {
+                freeStacks(termStack, typeStack);
+                return ERROR_SEM_ASSIGN;
             }
             break;
         // vyhodnotim co se jde a predam rizeni zpet top-down analyze
