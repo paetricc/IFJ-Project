@@ -186,6 +186,7 @@ void stackPrint( TermStack *stack ) {
 int skipNonPrintChar(Token *token, FILE *file) {
     int error = ERROR_PASSED;
     do {
+        fgetpos(file, &last_read_pos);
         // nacteni noveho tokenu a kontrola vysupu scanneru
         if ((error = get_token(token, file)) != ERROR_PASSED)
             // lexikalni nebo kompilatorova chyba
