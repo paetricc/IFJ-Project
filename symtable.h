@@ -161,7 +161,7 @@ bool isUsedVar(bst_node_t *tree);
 
 Data_type typeVar(bst_node_t *tree);
 
-int setBuildInFun(SLList_Frame *listFrame, Dynamic_string *string);
+int setBuildInFun(SLList_Frame *listFrame, Dynamic_string *string, Data_type param1, Data_type param2, Data_type param3, Data_type return1);
 
 //nejake funkce na vraceni hodnoty parametru a returnu
 

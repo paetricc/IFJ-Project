@@ -510,10 +510,25 @@ Data_type typeVar(bst_node_t *tree) {
  * @param listFrame Ukazatel na Tabulku symbolu.
  * @return Vraci ERROR_PASSED, jestlize se pridani povedlo, jinak ERROR_COMPILER.
  */
-int setBuildInFun(SLList_Frame *listFrame, Dynamic_string *string){
+int setBuildInFun(SLList_Frame *listFrame, Dynamic_string *string, Data_type param1, Data_type param2, Data_type param3, Data_type return1){
+    int error = 0;
     bst_node_t *tree;
-    bst_insert(&(listFrame->globalElement->node), string, true);        //prida uzel s vestavenou funkci
+    if ((bst_insert(&(listFrame->globalElement->node), string, true)) == ERROR_COMPILER){       //prida uzel s vestavenou funkci
+        return ERROR_COMPILER;
+    }
     tree = search_Iden(string, listFrame);
     setDataF(tree, true);                       //nastavi ji na definovanou
-    return ERROR_PASSED;
+    if (param1 != TYPE_UNDEFINED){
+        error = SLL_Param_Insert(param1, string, tree);
+    }
+    if (!error && (param2 != TYPE_UNDEFINED)){
+        error = SLL_Param_Insert(param2, string, tree);
+    }
+    if (!error && (param3 != TYPE_UNDEFINED)){
+        error = SLL_Param_Insert(param3, string, tree);
+    }
+    if (!error && (return1 != TYPE_UNDEFINED)){
+        error = SLL_Return_Insert(return1, tree);
+    }
+    return error;
 }
