@@ -1,7 +1,7 @@
 /**
  * Projekt: IFJ2021
  *
- * @brief Zasobnik pro terminaly a neterminaly
+ * @brief Zasobnik pro datove typy
  *
  * @details Zasobnik je implementovany jednosmerne vazanym seznamem
  *
@@ -39,10 +39,9 @@ void TypeStack_error( int error ) {
 /**
  * @brief Inicializace zasobniku pro analyzu zdola nahoru
  *
- * @details Jedna se o zasobnik implementovany jednosmerne vazanym seznamem,
- *  protoze bude potreba se divat nejen na prvni polozku zasobniku ale in na
- *  polozky pod ni. Budeme totiz potrebovat najit prvni neterminal a ten
- *  nemusi byt vzdy na vrcholu zasobniku
+ * @details Jedna se o zasobnik implementovany jednosmerne vazanym seznamem.
+ *  Nemusel by se takto implementovat. Kdybychom ho ale implementovali polem,
+ *  tak bychom museli mit pevne danou velikost ale to nechceme
  *
  * @param stack Ukazatel na strukturu jednosmerne vazaneho seznamu
  */
@@ -57,11 +56,10 @@ void TypeStack_init( TypeStack *stack ) {
 /**
  * @brief Vkladani prvku na vrchol zasobniku
  *
- * @details Je treba si naallocovat pamet abychom mohli ulozit terminal ci
- *  neterminal na vrchol zasobniku.
+ * @details Je treba si naallocovat pamet abychom mohli ulozit datovy typ na vrchol zasobniku.
  *
- * @param stack Ukazatel na strukturo jednosmerne vazaneho seznamu
- * @param element Terminal nebo neterminal ktery vlozime na vrchol zasobniku
+ * @param stack Ukazatel na strukturu jednosmerne vazaneho seznamu
+ * @param element Datovy typ ktery vlozime na vrchol zasobniku
  */
 void TypeStack_push( TypeStack *stack, DataTypes element) {
     struct TypeStackElement *tmp = (struct TypeStackElement *) malloc(sizeof(struct TypeStackElement));
@@ -113,7 +111,7 @@ int TypeStack_isEmpty( const TypeStack *stack ) {
  * @brief Prvni prvek na vrcholu zasobniku;
  *
  * @param stack Ukazatel na strukturu jednosmerne vazaneho seznamu
- * @param element Ukazatel do nehoz se vlozi najit hodnota
+ * @param element Ukazatel do nehoz se vlozi najita hodnota
  */
 void TypeStack_top( const TypeStack *stack, TypeStackElementPtr *element ) {
     if (TypeStack_isEmpty(stack)) {
