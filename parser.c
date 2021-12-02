@@ -1121,6 +1121,7 @@ int var_dec_init(Token *token, FILE *sourceFile) {
         switch (token->Value.keyword) {
             case KEYWORD_LOCAL:
             case KEYWORD_IF:
+            case KEYWORD_ELSE:
             case KEYWORD_WHILE:
             case KEYWORD_RETURN:
             case KEYWORD_END:
