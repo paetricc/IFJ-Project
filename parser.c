@@ -856,7 +856,7 @@ int var_def(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX;
 
     // overeni, ze identifikator zatim neexistuje
-    if (search_Iden(token->Value.string, symTable) != NULL)
+    if (bst_search(symTable->TopLocalElement->node, token->Value.string) != NULL)
         return ERROR_SEM_UNDEFINED;
     // vlozeni identifikatoru do symtable
     bst_insert(&(symTable->TopLocalElement->node), token->Value.string, false);

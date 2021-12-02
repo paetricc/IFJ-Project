@@ -415,13 +415,15 @@ bst_node_t *search_Iden(Dynamic_string *string, SLList_Frame *listFrame){
     //pomocne ukazatele
     SLList_Frame *elemPtr;
     elemPtr = listFrame;
-    SLList_Frame *pElemPtr;
+    SLList_Frame *pElemPtr = (SLList_Frame *) malloc(sizeof(SLList_Frame));
     bst_node_t *treePtr;
 
     if (listFrame->TopLocalElement != NULL){
+        pElemPtr->globalElement = listFrame->globalElement;
         while (elemPtr->TopLocalElement->previousElement != elemPtr->globalElement){ //hleda v lokalnich framech
             pElemPtr->TopLocalElement = elemPtr->TopLocalElement->previousElement;
             if((treePtr = bst_search(elemPtr->TopLocalElement->node, string))){      //prohleda jejich BVS
+                free(pElemPtr);
                 return treePtr;
             } else{
                 elemPtr = pElemPtr;
@@ -429,15 +431,18 @@ bst_node_t *search_Iden(Dynamic_string *string, SLList_Frame *listFrame){
         }
         if (elemPtr->TopLocalElement->previousElement == elemPtr->globalElement){ //hleda v prvnim lokalnim framu
             if ((treePtr = bst_search(elemPtr->TopLocalElement->node, string))){  //prohleda jeho BVS
+                free(pElemPtr);
                 return treePtr;
             }
         }
     }
     if(listFrame->globalElement != NULL){                                           //prohleda globalni frame
         if ((treePtr = bst_search(elemPtr->globalElement->node, string))){          //prohleda jeho BVS
+            free(pElemPtr);
             return treePtr;
         }
     }
+    free(pElemPtr);
     return NULL;            //pokud nenasel ani jeden uzel
 }
 
