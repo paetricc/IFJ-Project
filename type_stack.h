@@ -1,0 +1,46 @@
+#ifndef _TYPE_STACK_H_
+#define _TYPE_STACK_H_
+
+
+#include "scanner.h"
+#include <stdlib.h>
+
+#define SERR 4
+
+#define INIT_ERR 4
+
+#define TOP_ERR 3
+
+#define POP_ERR 2
+
+#define PUSH_ERR 1
+
+typedef enum{ TYPE_INTEGER, TYPE_STRING, TYPE_NUMBER, TYPE_NIL
+} DataTypes;
+
+typedef struct TypeStackElement{
+    DataTypes data;
+    struct TypeStackElement *previousElement;
+} *TypeStackElementPtr;
+
+
+typedef struct {
+    TypeStackElementPtr topElement;
+} TypeStack;
+
+
+void TypeStack_init( TypeStack *);
+
+int TypeStack_isEmpty( const TypeStack * );
+
+void TypeStack_top( const TypeStack *, TypeStackElementPtr *);
+
+DataTypes TypeStack_pop( TypeStack * );
+
+void TypeStack_push( TypeStack *, DataTypes );
+
+void TypeStack_error( int );
+
+void TypeStack_dispose( TypeStack * );
+
+#endif
