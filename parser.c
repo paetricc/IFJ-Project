@@ -86,6 +86,59 @@ int start(Token *token, FILE *sourceFile) {
         return ERROR_COMPILER;
     // vytvoreni globalniho ramce
     SLL_Frame_Insert(symTable);
+    /* nacteni vestavenych funkci */
+    // dynamic string pro jmena vestavenych funkci
+    Dynamic_string *str = (Dynamic_string *) malloc(sizeof(Dynamic_string));
+
+    // write()
+    str->str = "write";
+    error = bst_insert(&(symTable->globalElement->node), str, true);
+
+    // reads()
+    if(!error) {
+        str->str = "reads";
+        error = setBuildInFun(symTable, str, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_STRING);
+    }
+
+    // readi()
+    if(!error) {
+        str->str = "readi";
+        error = setBuildInFun(symTable, str, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_INTEGER);
+    }
+
+    // readn()
+    if(!error) {
+        str->str = "readn";
+        error = setBuildInFun(symTable, str, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_NUMBER);
+    }
+
+    // tointeger()
+    if(!error) {
+        str->str = "tointeger";
+        error = setBuildInFun(symTable, str, TYPE_NUMBER, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_INTEGER);
+    }
+
+    // substr()
+    if(!error) {
+        str->str = "substr";
+        error = setBuildInFun(symTable, str, TYPE_STRING, TYPE_NUMBER, TYPE_NUMBER, TYPE_STRING);
+    }
+
+    // ord()
+    if(!error) {
+        str->str = "ord";
+        error = setBuildInFun(symTable, str, TYPE_STRING, TYPE_INTEGER, TYPE_UNDEFINED, TYPE_INTEGER);
+    }
+
+    // chr()
+    if(!error) {
+        str->str = "chr";
+        error = setBuildInFun(symTable, str, TYPE_INTEGER, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_STRING);
+    }
+
+    free(str);
+    if(error) // doslo k chybe prirazeni pameti
+        return error;
 
     // vse korektni - uplatnuju pravidlo a rozsiruju dalsi neterminal
     error = program(token, sourceFile); // aplikace pravidla 1
