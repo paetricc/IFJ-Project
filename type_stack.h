@@ -15,7 +15,7 @@
 
 #define PUSH_ERR 1
 
-typedef enum{ TYPE_INTEGER, TYPE_STRING, TYPE_NUMBER, TYPE_NIL
+typedef enum{ DATA_TYPE_INTEGER, DATA_TYPE_STRING, DATA_TYPE_NUMBER, DATA_TYPE_NIL
 } DataTypes;
 
 typedef struct TypeStackElement{

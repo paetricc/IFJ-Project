@@ -6,16 +6,16 @@ TypeStack *stack;
 void typePrint(struct TypeStackElement *data) {
     switch (data->data)
     {
-        case TYPE_STRING:
+        case DATA_TYPE_STRING:
             printf("STRING");
             break;
-        case TYPE_INTEGER:
+        case DATA_TYPE_INTEGER:
             printf("INTEGER");
             break;
-        case TYPE_NIL:
+        case DATA_TYPE_NIL:
             printf("NIL");
             break;
-        case TYPE_NUMBER:
+        case DATA_TYPE_NUMBER:
             printf("NUMBER");
             break;
         default:
@@ -65,7 +65,7 @@ int main() {
 
     printf("[TEST%02d] Vlozeni prvniho prvku\n", i++);
     printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    TypeStack_push(stack, TYPE_NIL);
+    TypeStack_push(stack, DATA_TYPE_NIL);
     stackPrint(stack);
 
     printf("[TEST%02d] Zjisteni prvku na vrcholu zasobniku\n", i++);
@@ -84,12 +84,12 @@ int main() {
 
     printf("[TEST%02d] Vlozeni nekolika hodnot\n", i++);
     printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    TypeStack_push(stack, TYPE_INTEGER);
-    TypeStack_push(stack, TYPE_NIL);
-    TypeStack_push(stack, TYPE_STRING);
-    TypeStack_push(stack, TYPE_STRING);
-    TypeStack_push(stack, TYPE_INTEGER);
-    TypeStack_push(stack, TYPE_NUMBER);
+    TypeStack_push(stack, DATA_TYPE_INTEGER);
+    TypeStack_push(stack, DATA_TYPE_NIL);
+    TypeStack_push(stack, DATA_TYPE_STRING);
+    TypeStack_push(stack, DATA_TYPE_STRING);
+    TypeStack_push(stack, DATA_TYPE_INTEGER);
+    TypeStack_push(stack, DATA_TYPE_NUMBER);
     stackPrint(stack);
 
     printf("[TEST%02d] Uvolneni pameti zasobniku\n", i++);
