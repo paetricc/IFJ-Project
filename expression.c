@@ -254,8 +254,9 @@ int SA_isOK(TermStack *stack) {
  * @param file Ukazatel na zdrojovy soubor
  * @return int Typ erroru generovany analyzou
  */
-int exprSyntaxCheck(Token *token, FILE *file) {
+int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
     int error;
+    bst_node_t *ptr_node = NULL;
     // pridelim pamet zasobniku
     TermStack *stack = (TermStack *) malloc(sizeof(TermStack));
     if(!stack) return ERROR_COMPILER;
@@ -264,9 +265,24 @@ int exprSyntaxCheck(Token *token, FILE *file) {
     TermStack_push(stack, USD);
 
     struct TermStackElement *top = NULL;
-
+    // zjistim si dalsi token
     skipNonPrintChar(token, file);
-    // prevedu si token->ID na terminal ci neterminal
+    // jedna se o identifikator?
+    if(token->ID == TOKEN_ID_ID) {
+        ptr_node = search_Iden(token->Value.string, listFrame);
+        // nasel jsem ho?
+        if(ptr_node != NULL) {
+            // pokud to neni to promenna a je inicializovane?
+            // muze to ale byt buldin funkce (write, readi, ...)
+            if(!(isFnc(ptr_node) && isInitVar(ptr_node))) {
+                return ERROR_SEM_UNDEFINED;
+            }
+        } else {
+            // nenasel, takze klasika. Yeetni error
+            return ERROR_SEM_UNDEFINED;
+        }
+    }
+    // proslo to, tak prelozime token na terminal
     TermsAndNonTerms vstup = convertTokenType_To_TermsAndNonTerms(token->ID);
 
     do {
@@ -276,14 +292,33 @@ int exprSyntaxCheck(Token *token, FILE *file) {
         // terminaly jsou si rovny
         case E:
             TermStack_push(stack, vstup);
+            // zjistim si dalsi token
             skipNonPrintChar(token, file);
+            // jedna se o identifikator?
+            if(token->ID == TOKEN_ID_ID) {
+                // zname ho?
+                if(search_Iden(token->Value.string, listFrame)) {
+                    // nee? tak hod error
+                    return ERROR_SEM_UNDEFINED;
+                }
+            }
+            // proslo to, tak prelozime token na terminal
             vstup = convertTokenType_To_TermsAndNonTerms(token->ID);
             break;
         // vlozim znak redukce
         case R:
             TermStack_insertReduce(stack, top);
             TermStack_push(stack, vstup);
+            // zjisitm si dalsi token
             skipNonPrintChar(token, file);
+            // jedna se o identifikator?
+            if(token->ID == TOKEN_ID_ID) {
+                // a zname ho?
+                if(!search_Iden(token->Value.string, listFrame)) {
+                    // nee? tak hod error
+                    return ERROR_SEM_UNDEFINED;
+                }
+            }
             vstup = convertTokenType_To_TermsAndNonTerms(token->ID);
             break;
         // zredukuju po nejblizsi znak redukce
