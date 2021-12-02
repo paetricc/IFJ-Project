@@ -33,8 +33,8 @@ static TermsAndNonTerms p_table[17][17] =
 /* ~= */ { I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
 };
 
-TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token_ID token_ID ) {
-    switch (token_ID) {
+TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token *token, TypeStack *typeStack ) {
+    switch (token->ID) {
     case TOKEN_ID_ADD:
         return ADD;
     case TOKEN_ID_SUB:
@@ -62,13 +62,18 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token_ID token_ID ) {
     case TOKEN_ID_RBR:
         return RBR;
     case TOKEN_ID_ID:
+        return ID;
     case TOKEN_ID_INT0:
     case TOKEN_ID_INT:
     case TOKEN_ID_ZERO:
+        TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+        return ID;
     case TOKEN_ID_DBL2:
     case TOKEN_ID_EXP3:
     case TOKEN_ID_DHEX2:
     case TOKEN_ID_HEXP3:
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+        return ID;
     case TOKEN_ID_FSTR:
         return ID;
     case TOKEN_ID_LEN:
@@ -201,42 +206,42 @@ int skipNonPrintChar(Token *token, FILE *file) {
 /**
  * @brief Gramaticka pravidla
  * 
- * @param stack Ukazatel na strukturu jednosmerne vazaneho seznamu
+ * @param termStack Ukazatel na strukturu jednosmerne vazaneho seznamu
  * @return int Typ erroru generovany analyzou
  */
-int checkRulesAndApply( TermStack *stack ) {
+int checkRulesAndApply( TermStack *termStack ) {
     TermStackElementPtr ptr = NULL;
-    TermStack_top(stack, &ptr);
+    TermStack_top(termStack, &ptr);
     if (ptr->data == ID && ptr->previousElement->data == R) {
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == ADD && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == SUB && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == MUL && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DIV && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DIV2 && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DDOT && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
     } else if (ptr->data == RBR && ptr->previousElement->data == EXP && ptr->previousElement->previousElement->data == LBR && ptr->previousElement->previousElement->previousElement->data == R) {
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == LT && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == GT && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == LTE && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == GTE && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == EQ && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == NEQ && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == LEN && ptr->previousElement->previousElement->data == R) {
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
     } else {
         return ERROR_SYNTAX;
     }
@@ -265,12 +270,16 @@ int SA_isOK(TermStack *stack) {
 int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
     int error;
     bst_node_t *ptr_node = NULL;
-    // pridelim pamet zasobniku
-    TermStack *stack = (TermStack *) malloc(sizeof(TermStack));
-    if(!stack) return ERROR_COMPILER;
-    TermStack_init(stack);
+    // pridelim pamet zasobniku datovych typu
+    TypeStack *typeStack = (TypeStack *) malloc(sizeof (TypeStack));
+    if(!typeStack) return ERROR_COMPILER;
+    TypeStack_init(typeStack);
+    // pridelim pamet zasobniku terminalu a neterminalu
+    TermStack *termStack = (TermStack *) malloc(sizeof(TermStack));
+    if(!termStack) return ERROR_COMPILER;
+    TermStack_init(termStack);
     // vlozim $
-    TermStack_push(stack, USD);
+    TermStack_push(termStack, USD);
 
     struct TermStackElement *top = NULL;
     // zjistim si dalsi token
@@ -287,19 +296,20 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
             }
         } else {
             // nenasel, takze klasika. Yeetni error
+            freeStacks(termStack, typeStack);
             return ERROR_SEM_UNDEFINED;
         }
     }
     // proslo to, tak prelozime token na terminal
-    TermsAndNonTerms vstup = convertTokenType_To_TermsAndNonTerms(token->ID);
+    TermsAndNonTerms vstup = convertTokenType_To_TermsAndNonTerms(token, typeStack);
 
     do {
-        TermStack_firstTermPtr(stack, &top);
+        TermStack_firstTermPtr(termStack, &top);
         // podle pravidla v tabulce rozhodnu co budu delat
         switch (p_table[(top->data-4)][vstup-4]) {
         // terminaly jsou si rovny
         case E:
-            TermStack_push(stack, vstup);
+            TermStack_push(termStack, vstup);
             // zjistim si dalsi token
             skipNonPrintChar(token, file);
             // jedna se o identifikator?
@@ -307,16 +317,17 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
                 // zname ho?
                 if(search_Iden(token->Value.string, listFrame)) {
                     // nee? tak hod error
+                    freeStacks(termStack, typeStack);
                     return ERROR_SEM_UNDEFINED;
                 }
             }
             // proslo to, tak prelozime token na terminal
-            vstup = convertTokenType_To_TermsAndNonTerms(token->ID);
+            vstup = convertTokenType_To_TermsAndNonTerms(token, typeStack);
             break;
         // vlozim znak redukce
         case R:
-            TermStack_insertReduce(stack, top);
-            TermStack_push(stack, vstup);
+            TermStack_insertReduce(termStack, top);
+            TermStack_push(termStack, vstup);
             // zjisitm si dalsi token
             skipNonPrintChar(token, file);
             // jedna se o identifikator?
@@ -324,17 +335,18 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
                 // a zname ho?
                 if(!search_Iden(token->Value.string, listFrame)) {
                     // nee? tak hod error
+                    freeStacks(termStack, typeStack);
                     return ERROR_SEM_UNDEFINED;
                 }
             }
-            vstup = convertTokenType_To_TermsAndNonTerms(token->ID);
+            vstup = convertTokenType_To_TermsAndNonTerms(token, typeStack);
             break;
         // zredukuju po nejblizsi znak redukce
         case I:
-            error = checkRulesAndApply(stack);
+            error = checkRulesAndApply(termStack);
             // neexistije pro redukci pravidlo
             if(error == ERROR_SYNTAX) {
-                TermStack_dispose(stack);
+                freeStacks(termStack, typeStack);
                 return ERROR_SYNTAX;
             }
             break;
@@ -344,12 +356,19 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
             break;
         // chybovy stav
         default:
-            TermStack_dispose(stack);
+            freeStacks(termStack, typeStack);
             return ERROR_SYNTAX;
         }
-    } while( vstup != USD  || !SA_isOK(stack)); // opakuji dokud vstup neni $ a dokud muzu redukovat
+    } while( vstup != USD  || !SA_isOK(termStack)); // opakuji dokud vstup neni $ a dokud muzu redukovat
     //uvolnim pamet zasobniku
-    TermStack_dispose(stack);
+    freeStacks(termStack, typeStack);
     fsetpos(file, &last_read_pos);
     return ERROR_PASSED;
+}
+
+void freeStacks(TermStack *termStack, TypeStack *typeStack) {
+    TypeStack_dispose(typeStack);
+    free(typeStack);
+    TermStack_dispose(termStack);
+    free(termStack);
 }
