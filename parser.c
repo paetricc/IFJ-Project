@@ -898,7 +898,7 @@ int return_(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX;
 
     // volani bottom-up SA (rozsireni neterminalu expr)
-    if ((error = exprSyntaxCheck(token, sourceFile)))
+    if ((error = exprSyntaxCheck(token, sourceFile, symTable)))
         return error;
 
     return ERROR_PASSED;
@@ -1178,7 +1178,7 @@ int var_assign(Token *token, FILE *sourceFile) {
             else if (isFnc(id)) // id_fnc
                 fnc_call(token, sourceFile);
             else // id_var
-                exprSyntaxCheck(token, sourceFile);
+                exprSyntaxCheck(token, sourceFile, symTable);
             break;
 
         case TOKEN_ID_RBR: // ')'
@@ -1197,7 +1197,7 @@ int var_assign(Token *token, FILE *sourceFile) {
 
             //aplikace pravidla 47
             // volani bottom-up SA (rozsireni neterminalu expr)
-            if ((error = exprSyntaxCheck(token, sourceFile)))
+            if ((error = exprSyntaxCheck(token, sourceFile, symTable)))
                 return error;
             break;
 
@@ -1224,7 +1224,7 @@ int if_(Token *token, FILE *sourceFile) {
     // aplikace pravidla 49
 
     // volani bottom-up SA (rozsireni neterminalu expr)
-    if ((error = exprSyntaxCheck(token, sourceFile)))
+    if ((error = exprSyntaxCheck(token, sourceFile, symTable)))
         return error;
 
     // then
@@ -1296,7 +1296,7 @@ int loop(Token *token, FILE *sourceFile) {
     // aplikace pravidla 50
 
     // volani bottom-up SA (rozsireni neterminalu expr)
-    if ((error = exprSyntaxCheck(token, sourceFile)))
+    if ((error = exprSyntaxCheck(token, sourceFile, symTable)))
         return error;
 
     // do
