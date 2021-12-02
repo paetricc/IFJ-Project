@@ -183,11 +183,18 @@ void stackPrint( TermStack *stack ) {
  * @param token Struktura tokenu
  * @param file Ukazatel na zdrojovy soubor
  */
-void skipNonPrintChar(Token *token, FILE *file) {
+int skipNonPrintChar(Token *token, FILE *file) {
+    int error = ERROR_PASSED;
     do {
-        fgetpos(file, &last_read_pos);
-        get_token(token, file);
-    } while (token->ID == TOKEN_ID_SPACE || token->ID == TOKEN_ID_TAB);
+        // nacteni noveho tokenu a kontrola vysupu scanneru
+        if ((error = get_token(token, file)) != ERROR_PASSED)
+            // lexikalni nebo kompilatorova chyba
+            return error;
+    } while (token->ID != TOKEN_ID_EOF && (
+            token->ID == TOKEN_ID_SPACE || token->ID == TOKEN_ID_EOL ||
+            token->ID == TOKEN_ID_TAB || token->ID == TOKEN_ID_LCMT2 ||
+            token->ID == TOKEN_ID_BCMT4));
+    return error;
 }
 
 /**

@@ -6,7 +6,7 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token_ID );
 
 int exprSyntaxCheck( Token *, FILE *, SLList_Frame * );
 
-void skipNonPrintChar(Token *, FILE * );
+int skipNonPrintChar(Token *, FILE * );
 
 int checkRulesAndApply( TermStack * );
 
