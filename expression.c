@@ -95,15 +95,15 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token *token, TypeStack *
 }
 
 int checkDataTypes_ADD_SUB_MUL_DIV(TypeStack *typeStack) {
-    DataTypes firstOP, secondOp;
-    firstOP = TypeStack_pop(typeStack);
+    DataTypes firstOp, secondOp;
+    firstOp = TypeStack_pop(typeStack);
     secondOp = TypeStack_pop(typeStack);
-    if(firstOP == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
+    if(firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
-    } else if (firstOP == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_INTEGER ||
-               firstOP == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_INTEGER ||
+               firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
-    } else if (firstOP == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_NUMBER) {
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_NUMBER) {
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else {
         return ERROR_SEM_COMPAT;
@@ -111,6 +111,11 @@ int checkDataTypes_ADD_SUB_MUL_DIV(TypeStack *typeStack) {
     return ERROR_PASSED;
 }
 
+/**
+ *
+ * @param typeStack
+ * @return
+ */
 int checkDataTypes_DIV2(TypeStack *typeStack) {
     DataTypes firstOP, secondOp;
     firstOP = TypeStack_pop(typeStack);
@@ -121,6 +126,71 @@ int checkDataTypes_DIV2(TypeStack *typeStack) {
         return ERROR_SEM_COMPAT;
     }
     return  ERROR_PASSED;
+}
+
+/**
+ *
+ * @param typeStack
+ * @return
+ */
+int checkDataTypes_LT_GT(TypeStack *typeStack) {
+    DataTypes firstOp, secondOp;
+    firstOp = TypeStack_pop(typeStack);
+    secondOp = TypeStack_pop(typeStack);
+    if(firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
+        TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_INTEGER ||
+               firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else {
+        return ERROR_SEM_COMPAT;
+    }
+    return ERROR_PASSED;
+}
+
+/**
+ *
+ * @param typeStack
+ * @return
+ */
+int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
+    DataTypes firstOp, secondOp;
+    firstOp = TypeStack_pop(typeStack);
+    secondOp = TypeStack_pop(typeStack);
+    if(firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
+        TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_INTEGER ||
+               firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_NIL     && secondOp == DATA_TYPE_NIL   ) {
+        TypeStack_push(typeStack, DATA_TYPE_NIL);
+    } else {
+        return ERROR_SEM_COMPAT;
+    }
+    return ERROR_PASSED;
+}
+
+int checkDataTypes_LTE_GTE(TypeStack *typeStack) {
+    DataTypes firstOp, secondOp;
+    firstOp = TypeStack_pop(typeStack);
+    secondOp = TypeStack_pop(typeStack);
+    if(firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
+        TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_INTEGER ||
+               firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_NIL     && secondOp == DATA_TYPE_NIL   ) {
+        TypeStack_push(typeStack, DATA_TYPE_NIL);
+    } else {
+        return ERROR_SEM_COMPAT;
+    }
+    return ERROR_PASSED;
 }
 
 /**
@@ -142,6 +212,18 @@ int skipNonPrintChar(Token *token, FILE *file) {
             token->ID == TOKEN_ID_TAB || token->ID == TOKEN_ID_LCMT2 ||
             token->ID == TOKEN_ID_BCMT4));
     return error;
+}
+
+int checkDataTypes_DDOT(TypeStack *typeStack) {
+    DataTypes firstOp, secondOp;
+    firstOp = TypeStack_pop(typeStack);
+    secondOp = TypeStack_pop(typeStack);
+    if (firstOp == DATA_TYPE_STRING && secondOp == DATA_TYPE_STRING) {
+        TypeStack_push(typeStack, DATA_TYPE_STRING);
+    } else {
+        return  ERROR_SEM_COMPAT;
+    }
+    return ERROR_PASSED;
 }
 
 /**
@@ -171,20 +253,27 @@ int checkRulesAndApply( TermStack *termStack, TypeStack *typeStack ) {
         if(checkDataTypes_DIV2(typeStack)) return ERROR_SEM_COMPAT;
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DDOT && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_DDOT(typeStack)) return ERROR_SEM_COMPAT;
         TermStack_applyReduce(termStack);
     } else if (ptr->data == RBR && ptr->previousElement->data == EXP && ptr->previousElement->previousElement->data == LBR && ptr->previousElement->previousElement->previousElement->data == R) {
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == LT && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_LT_GT(typeStack)) return ERROR_SEM_COMPAT;
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == GT && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_LT_GT(typeStack)) return ERROR_SEM_COMPAT;
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == LTE && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_LTE_GTE(typeStack)) return ERROR_SEM_COMPAT;
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == GTE && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_LTE_GTE(typeStack)) return ERROR_SEM_COMPAT;
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == EQ && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_EQ_NEQ(typeStack)) return ERROR_SEM_COMPAT;
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == NEQ && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_EQ_NEQ(typeStack)) return ERROR_SEM_COMPAT;
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == LEN && ptr->previousElement->previousElement->data == R) {
         DataTypes firstOp = TypeStack_pop(typeStack);
@@ -243,7 +332,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
         if(ptr_node != NULL) {
             // pokud to neni to promenna a je inicializovane?
             // muze to ale byt buldin funkce (write, readi, ...)
-            if(!(isFnc(ptr_node) && isInitVar(ptr_node))) {
+            if(isFnc(ptr_node) || !isInitVar(ptr_node)) {
                 return ERROR_SEM_UNDEFINED;
             }
         } else {
@@ -297,12 +386,9 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
         case I:
             error = checkRulesAndApply(termStack, typeStack);
             // neexistije pro redukci pravidlo
-            if(error == ERROR_SYNTAX) {
+            if(error) {
                 freeStacks(termStack, typeStack);
-                return ERROR_SYNTAX;
-            } else if(error == ERROR_SEM_COMPAT) {
-                freeStacks(termStack, typeStack);
-                return ERROR_SEM_ASSIGN;
+                return error;
             }
             break;
         // vyhodnotim co se jde a predam rizeni zpet top-down analyze
@@ -311,6 +397,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
             break;
         // chybovy stav
         default:
+
             freeStacks(termStack, typeStack);
             return ERROR_SYNTAX;
         }
