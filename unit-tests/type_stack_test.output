@@ -1,0 +1,38 @@
+Zasobnik implementovany jednosmerne vazanym seznamem
+----------------------------------------------------
+[TEST01] Inicializace zasobniku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+-- BOTTOM --
+[TEST02] Kontrola stavu zasobniku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Zasobnik je prazdny
+[TEST03] Vlozeni prvniho prvku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+     NIL
+-- BOTTOM --
+[TEST04] Zjisteni prvku na vrcholu zasobniku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Data v elementu jsou: NIL
+[TEST05] Kontrola stavu zasobniku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Zasobnik neni prazdny
+[TEST06] Odstraneni prvku zasobniku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+-- BOTTOM --
+[TEST07] Vlozeni nekolika hodnot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+     NUMBER
+     INTEGER
+     STRING
+     STRING
+     NIL
+     INTEGER
+-- BOTTOM --
+[TEST08] Uvolneni pameti zasobniku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+-- BOTTOM --
