@@ -5,15 +5,15 @@
 #include "scanner.h"
 #include <stdlib.h>
 
-#define SERR 4
+#define TYPE_SERR 4
 
-#define INIT_ERR 4
+#define TYPE_INIT_ERR 4
 
-#define TOP_ERR 3
+#define TYPE_TOP_ERR 3
 
-#define POP_ERR 2
+#define TYPE_POP_ERR 2
 
-#define PUSH_ERR 1
+#define TYPE_PUSH_ERR 1
 
 typedef enum{ DATA_TYPE_INTEGER, DATA_TYPE_STRING, DATA_TYPE_NUMBER, DATA_TYPE_NIL
 } DataTypes;

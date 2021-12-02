@@ -22,14 +22,14 @@
  * @param error Definovana hodnota erroru
  */
 void TypeStack_error( int error ) {
-    static const char *ERRORS[SERR+1] = {
+    static const char *ERRORS[TYPE_SERR+1] = {
             "Stack error: unknown",
             "Stack error: PUSH",
             "Stack error: POP",
             "Stack error: TOP",
             "Stack error: INIT"
     };
-    if (error <= 0 || error > SERR) {
+    if (error <= 0 || error > TYPE_SERR) {
         error = 0;
     }
     fprintf(stderr ,"%s\n", ERRORS[error]);
@@ -47,7 +47,7 @@ void TypeStack_error( int error ) {
  */
 void TypeStack_init( TypeStack *stack ) {
     if (stack == NULL) {
-        TypeStack_error(INIT_ERR);
+        TypeStack_error(TYPE_INIT_ERR);
     } else {
         stack->topElement = NULL;
     }
@@ -64,7 +64,7 @@ void TypeStack_init( TypeStack *stack ) {
 void TypeStack_push( TypeStack *stack, DataTypes element) {
     struct TypeStackElement *tmp = (struct TypeStackElement *) malloc(sizeof(struct TypeStackElement));
     if(!tmp) {
-        TypeStack_error(INIT_ERR);
+        TypeStack_error(TYPE_INIT_ERR);
         return;
     }
     tmp->previousElement = stack->topElement;
@@ -84,7 +84,7 @@ void TypeStack_push( TypeStack *stack, DataTypes element) {
  */
 DataTypes TypeStack_pop( TypeStack *stack ) {
     if(TypeStack_isEmpty(stack)) {
-        TypeStack_error(POP_ERR);
+        TypeStack_error(TYPE_POP_ERR);
         return -1;
     }
     TypeStackElementPtr ptr = NULL;
@@ -115,7 +115,7 @@ int TypeStack_isEmpty( const TypeStack *stack ) {
  */
 void TypeStack_top( const TypeStack *stack, TypeStackElementPtr *element ) {
     if (TypeStack_isEmpty(stack)) {
-        TypeStack_error(TOP_ERR);
+        TypeStack_error(TYPE_TOP_ERR);
         return;
     }
     *element = stack->topElement;
