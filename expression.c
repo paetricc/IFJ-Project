@@ -14,7 +14,7 @@ fpos_t last_read_pos;
 
 static TermsAndNonTerms p_table[17][17] =
 {       /* $  +  -  *  /  // (  )  i  #  .. <  >  <= >= == ~= */
-/*  $ */ {-1, R, R, R, R, R, R,-1, R, R, R, I, I, I, I, I, I },
+/*  $ */ {-1, R, R, R, R, R, R,-1, R, R, R, R, R, R, R, R, R },
 /*  + */ { I, I, I, R, R, R, R, I, R, R, I, I, I, I, I, I, I },
 /*  - */ { I, I, I, R, R, R, R, I, R, R, I, I, I, I, I, I, I },
 /*  * */ { I, I, I, I, I, I, R, I, R, R, I, I, I, I, I, I, I },
@@ -168,6 +168,8 @@ int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NIL     && secondOp == DATA_TYPE_NIL   ) {
         TypeStack_push(typeStack, DATA_TYPE_NIL);
+    } else if (firstOp == DATA_TYPE_STRING  && secondOp == DATA_TYPE_STRING) {
+        TypeStack_push(typeStack, DATA_TYPE_STRING);
     } else {
         return ERROR_SEM_COMPAT;
     }
@@ -402,6 +404,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
             return ERROR_SYNTAX;
         }
     } while( vstup != USD  || !SA_isOK(termStack)); // opakuji dokud vstup neni $ a dokud muzu redukovat
+    //if(listFrame->globalElement->node->funcData->returnList->firstElement->type != typeStack->topElement->data) return ERROR_SEM_TYPE_COUNT;
     //uvolnim pamet zasobniku
     freeStacks(termStack, typeStack);
     fsetpos(file, &last_read_pos);
