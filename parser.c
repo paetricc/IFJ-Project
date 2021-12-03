@@ -633,6 +633,10 @@ int value2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr
  * @return Typ erroru generovany analyzou
 */
 int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param param) {
+    // overeni, zda funkce jeste hleda parametry
+    if(param == NULL)
+        return ERROR_SEM_TYPE_COUNT;
+
     int error;
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
@@ -642,19 +646,33 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
         // lexikalni nebo kompilatorova chyba
         return error;
 
+    bst_node_t *node_id;
     switch (token->ID) {
         case TOKEN_ID_ID: // id_var
-            // TODO aplikace pravidla 21
-            // overim, ze jde o id_fnc a ne id_var
-            if (isFnc(search_Iden(token->Value.string, symTable)))
+            // aplikace pravidla 21
+            node_id = search_Iden(token->Value.string, symTable);
+            if(isFnc(node_id)) // id_fnc
                 return ERROR_SYNTAX;
+            setVarUsed(node_id, true);
+            // overeni datovych typu
+            if(getVarType(node_id) != param->type) {
+                if(param->type == TYPE_NUMBER && getVarType(node_id) == TYPE_INTEGER)
+                    // pretypovani integer na number
+                    node_id->varData->type = TYPE_NUMBER;
+                else // promenne nemaji kompatibilni typy
+                    return ERROR_SEM_COMPAT;
+            }
             break;
 
         case TOKEN_ID_INT0:
         case TOKEN_ID_HEX2:
         case TOKEN_ID_INT:
         case TOKEN_ID_ZERO: // int_value
-            // TODO aplikace pravidla 22
+            // aplikace pravidla 22
+            if(getVarType(node_idFnc) != TYPE_INTEGER)
+                if(getVarType(node_idFnc) == TYPE_NUMBER)
+                    // TODO generovani kodu - int2float
+                    // TODO tady jsem skoncil Barte
             break;
 
         case TOKEN_ID_DHEX2:
@@ -679,6 +697,7 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
             return ERROR_SYNTAX;
     }
 
+    param = param->nextElement;
     return ERROR_PASSED;
 } // value_last
 
