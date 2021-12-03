@@ -133,12 +133,29 @@ void SLL_Return_Dispose(SLList_Return *listReturn){
  * @param init Hodnota, zdali byla promenna inicializovana.
  * @param used Hodnota, zdali byla promenna pouzita.
  */
-void setDataV(bst_node_t *tree, Data_type type, bool init, bool used){
+void setVarType(bst_node_t *tree, Data_type type){
     tree->varData->type = type;
+}
+
+void setVarInit(bst_node_t *tree, bool init){
     tree->varData->init = init;
+}
+
+void setVarUsed(bst_node_t *tree, bool used){
     tree->varData->used = used;
 }
 
+Data_type getVarType(bst_node_t *tree){
+    return tree->varData->type;
+}
+
+bool getVarInit(bst_node_t *tree){
+    return tree->varData->init;
+}
+
+bool getVarUsed(bst_node_t *tree){
+    return tree->varData->used;
+}
 /**
  * Funkce pro nahrani dat do struktury pro data funkce.
  *
