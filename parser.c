@@ -136,8 +136,11 @@ int start(Token *token, FILE *sourceFile) {
     }
 
     free(str);
-    if(error) // doslo k chybe prirazeni pameti
+    if(error) { // doslo k chybe prirazeni pameti
+        SLL_Frame_Dispose(symTable);
+        free(symTable);
         return error;
+    }
 
     // vse korektni - uplatnuju pravidlo a rozsiruju dalsi neterminal
     error = program(token, sourceFile); // aplikace pravidla 1
