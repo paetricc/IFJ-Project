@@ -19,7 +19,7 @@ int value2(Token *, FILE *, bst_node_t *, SLLElementPtr_Param);
 int value_last(Token *, FILE *, bst_node_t *, SLLElementPtr_Param);
 int fnc_def(Token *, FILE *);
 int fnc_head(Token *, FILE *, bst_node_t *);
-int fnc_def2(Token *, FILE *, bst_node_t *);
+int fnc_def2(Token *, FILE *, bst_node_t *, SLLElementPtr_Return);
 int params_def(Token *, FILE *, bst_node_t *, SLLElementPtr_Param);
 int params_def2(Token *, FILE *, bst_node_t *, SLLElementPtr_Param);
 int var_def(Token *, FILE *, bst_node_t *, SLLElementPtr_Param);

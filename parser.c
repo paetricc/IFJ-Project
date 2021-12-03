@@ -509,6 +509,7 @@ int fnc_call(Token *token, FILE *sourceFile) {
 
 
     // rozvinuti neterminalu value
+    // TODO seznam parametru jako ukazatel na parametr, nebo ukazatel na ukazatel na parametr
     if ((error = value(token, sourceFile, node_idFnc, node_idFnc->funcData->paramList->firstElement)))
         return error;
 
@@ -727,12 +728,15 @@ int fnc_def(Token *token, FILE *sourceFile) {
     // aplikuju pravidlo 26
     int error;
 
+    // ukazatel na uzel s funkci
+    bst_node_t *node_idFnc = NULL;
+
     // rozvinuti neterminalu fnc_head
-    if ((error = fnc_head(token, sourceFile)))
+    if ((error = fnc_head(token, sourceFile, node_idFnc)))
         return error;
 
     // rozvinuti neterminalu fnc_def2
-    if ((error = fnc_def2(token, sourceFile)))
+    if ((error = fnc_def2(token, sourceFile, node_idFnc, node_idFnc->funcData->returnList->firstElement)))
         return error;
 
     // end
@@ -778,9 +782,9 @@ int fnc_head(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
 
     if (idFnc == NULL)
         bst_insert(&(symTable->globalElement->node), token->Value.string, true);
-    else if (!isDefFnc(idFnc)) {
+    else if (!isDefFnc(idFnc)) { // funkce byla uz deklarovana
         setDataF(idFnc, true);
-    } else {
+    } else { // funkce byla uz i definovanna - pokus o redefinici
         return ERROR_SEM_UNDEFINED;
     }
 
@@ -795,7 +799,8 @@ int fnc_head(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
     SLL_Frame_Insert(symTable);
 
     // rozvinu neterminal params_def
-    if ((error = params_def(token, sourceFile)))
+    // TODO seznam parametru jako ukazatel na parametr, nebo ukazatel na ukazatel na parametr
+    if ((error = params_def(token, sourceFile, node_idFnc, node_idFnc->funcData->paramList->firstElement)))
         return error;
 
 
@@ -819,7 +824,7 @@ int fnc_head(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
-int fnc_def2(Token *token, FILE *sourceFile) {
+int fnc_def2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Return returnlist) {
     int error;
 
     // promenne pro pripadne vraceni cteni
@@ -833,7 +838,7 @@ int fnc_def2(Token *token, FILE *sourceFile) {
     // ':'
     if (token->ID == TOKEN_ID_CLN) { // aplikace pravidla 29
         // rozvinuti neterminalu data_type
-        if ((error = data_type(token, sourceFile)))
+        if ((error = data_type(token, sourceFile, node_idFnc, false)))
             return error;
 
         // rozvinuti neterminalu fnc_body
@@ -841,7 +846,7 @@ int fnc_def2(Token *token, FILE *sourceFile) {
             return error;
 
         // rozvinuti neterminalu return
-        if ((error = return_(token, sourceFile)))
+        if ((error = return_(token, sourceFile, node_idFnc, node_idFnc->funcData->returnList->firstElement)))
             return error;
     } else { // id_fce nebo id_var
         // aplikace pravidla 28
@@ -890,7 +895,7 @@ int fnc_def2(Token *token, FILE *sourceFile) {
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
-int params_def(Token *token, FILE *sourceFile) {
+int params_def(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param) {
     int error;
 
     // promenne pro pripadne vraceni cteni
@@ -912,7 +917,7 @@ int params_def(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX; // pro tento token neexistuje pravidlo
 
     // rozsireni neterminalu var_def
-    if ((error = var_def(token, sourceFile))) // aplikace pravidla 31
+    if ((error = var_def(token, sourceFile, node_idFnc))) // aplikace pravidla 31
         return error;
 
     // rozsireni neterminalu params_def2
