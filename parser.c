@@ -1081,7 +1081,7 @@ int return_void(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal fnc_body.
  *
- * Implementuje pravidlo 38, 39 a 40 a 41.
+ * Implementuje pravidlo 38 a 39.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -1101,26 +1101,15 @@ int fnc_body(Token *token, FILE *sourceFile) {
     if (token->ID == TOKEN_ID_KEYWORD) { // local, if, while, return, nebo end
         switch (token->Value.keyword) {
             case KEYWORD_LOCAL: // local
-                // vratim cteni pred local, aby si ho precetl volany
+            case KEYWORD_IF: // if
+            case KEYWORD_WHILE: // while
+                // vratim cteni pred keyword, aby si ho precetl volany
                 fsetpos(sourceFile, &lastReadPos);
 
                 // rozvinu neterminal statement
-                if ((error = statement(token, sourceFile))) // aplikace pravidla 40
+                if ((error = statement(token, sourceFile))) // aplikace pravidla 38
                     return error;
 
-                break;
-
-            case KEYWORD_IF: // if
-                // rozvinu neterminal if
-                if ((error = if_(token, sourceFile))) // aplikace pravidla 38
-                    return error;
-                break;
-
-
-            case KEYWORD_WHILE: // while
-                // rozvinu neterminal while
-                if ((error = loop(token, sourceFile))) // aplikace pravidla 39
-                    return error;
                 break;
 
             case KEYWORD_END: // end
@@ -1128,7 +1117,7 @@ int fnc_body(Token *token, FILE *sourceFile) {
                 // vratim cteni pred keyword, aby si ho precetl volajici
                 fsetpos(sourceFile, &lastReadPos);
 
-                return ERROR_PASSED; // aplikace pravidla 41
+                return ERROR_PASSED; // aplikace pravidla 39
                 break;
 
             default: // pro keyword neexistuje pravidlo
@@ -1139,7 +1128,7 @@ int fnc_body(Token *token, FILE *sourceFile) {
         fsetpos(sourceFile, &lastReadPos);
 
         // rozvinu neterminal statement
-        if ((error = statement(token, sourceFile))) // aplikace pravidla 40
+        if ((error = statement(token, sourceFile))) // aplikace pravidla 38
             return error;
     } else { // pro prijaty token neexistuje pravidlo
         return ERROR_SYNTAX;
@@ -1152,7 +1141,7 @@ int fnc_body(Token *token, FILE *sourceFile) {
 /**
  * @brief Neterminal statement.
  *
- * Implementuje pravidlo 42, 43 a 44.
+ * Implementuje pravidlo 40, 41, 42, 43 a 44.
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
@@ -1169,28 +1158,48 @@ int statement(Token *token, FILE *sourceFile) {
         // lexikalni nebo kompilatorova chyba
         return error;
 
-    if (token->ID == TOKEN_ID_KEYWORD) // local
-        // rozvinuti neterminalu var_dec
-        return var_dec(token, sourceFile); // aplikace pravidla 42
+    if (token->ID == TOKEN_ID_KEYWORD) { // local, if nebo while
+        switch (token->Value.keyword) {
+            case KEYWORD_LOCAL: // local
+                // rozvinuti neterminalu var_dec
+                error = var_dec(token, sourceFile); // aplikace pravidla 40
+                break;
+
+            case KEYWORD_IF: // if
+                // rozvinuti neterminalu if
+                error = if_(token, sourceFile); // aplikace pravidla 43
+                break;
+
+            case KEYWORD_WHILE: // while
+                // rozvinuti neterminalu loop
+                error = loop(token, sourceFile); // aplikace pravidla 44
+                break;
+
+            default: // pro keyword neexistuje pravidlo
+                error = ERROR_SYNTAX;
+                break;
+        }
+        return error;
+    }
     else if (token->ID == TOKEN_ID_ID) { // id_var nebo id_fnc
         // najdu uzel identifikatoru
         bst_node_t *id_node = search_Iden(token->Value.string, symTable);
 
-        // zjistim, jestli existuje
+        // zjistim, jestli identifikator existuje
         if (id_node == NULL)
             return ERROR_SEM_UNDEFINED;
         if (isFnc(id_node)) { // id_fnc
             // vratim cteni pred identifikator, aby si ho precetl volany
             fsetpos(sourceFile, &lastReadPos);
             // rozsirim neterminal fnc_call
-            return fnc_call(token, sourceFile); // aplikace pravidla 44
+            return fnc_call(token, sourceFile); // aplikace pravidla 42
         } else { // id_var
-            // aplikace pravidla 42
+            // aplikace pravidla 41
         }
     } else // pro prijaty token neexistuje pravidlo
         return ERROR_SYNTAX;
 
-    // z podminek pokracuje dal uz jen pravidlo 43
+    // z podminek pokracuje dal uz jen pravidlo 41
     // '='
     if ((error = get_non_white_token(token, sourceFile)))
         // lexikalni nebo kompilatorova chyba
