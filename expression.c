@@ -243,21 +243,27 @@ int checkRulesAndApply( TermStack *termStack, TypeStack *typeStack ) {
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == ADD && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
         if(checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
+        // TODO instrukce ADDS
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == SUB && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
         if(checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
+        // TODO instrukce SUBS
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == MUL && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
         if(checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
+        // TODO istrukce MULS
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DIV && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
         if(checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
+        // TODO istrukce DIVS
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DIV2 && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
         if(checkDataTypes_DIV2(typeStack)) return ERROR_SEM_COMPAT;
+        // TODO instrukce IDIVS
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DDOT && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
         if(checkDataTypes_DDOT(typeStack)) return ERROR_SEM_COMPAT;
+        // TODO instrukce CONCAT (POPS <str1>(firstOp), POPS <str2>(secondOp), CONCAT <var> <str2> <str1> PUSHS <var>(str2..str1))
         TermStack_applyReduce(termStack);
     } else if (ptr->data == RBR && ptr->previousElement->data == EXP && ptr->previousElement->previousElement->data == LBR && ptr->previousElement->previousElement->previousElement->data == R) {
         TermStack_applyReduce(termStack);
@@ -286,6 +292,7 @@ int checkRulesAndApply( TermStack *termStack, TypeStack *typeStack ) {
         } else {
             return ERROR_SEM_COMPAT;
         }
+        // TODO intrukce STRLEN (POPS <str>(firstOp), STRLEN <var> <str>, PUSHS <var>)
         TermStack_applyReduce(termStack);
     } else {
         return ERROR_SYNTAX;
@@ -377,6 +384,8 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
             break;
         // vlozim znak redukce
         case R:
+            // TODO instrukce pushnuti na zasobnik kdyz operand
+            //      PUSHS <symb>
             TermStack_insertReduce(termStack, top);
             TermStack_push(termStack, vstup);
             // zjisitm si dalsi token
@@ -413,7 +422,6 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
             break;
         // chybovy stav
         default:
-
             freeStacks(termStack, typeStack);
             return ERROR_SYNTAX;
         }
