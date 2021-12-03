@@ -895,7 +895,7 @@ int fnc_def2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementP
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
-int params_def(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param) {
+int params_def(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param param) {
     int error;
 
     // promenne pro pripadne vraceni cteni
@@ -917,11 +917,12 @@ int params_def(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
         return ERROR_SYNTAX; // pro tento token neexistuje pravidlo
 
     // rozsireni neterminalu var_def
+    // TODO jak rozlisit var_def pro definici parametru funkce a pro deklaraci promenne
     if ((error = var_def(token, sourceFile, node_idFnc))) // aplikace pravidla 31
         return error;
 
     // rozsireni neterminalu params_def2
-    return params_def2(token, sourceFile);
+    return params_def2(token, sourceFile, node_idFnc, param);
 }
 
 
@@ -934,7 +935,7 @@ int params_def(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
-int params_def2(Token *token, FILE *sourceFile) {
+int params_def2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param param) {
     int error;
 
     // promenne pro pripadne vraceni cteni
@@ -957,11 +958,12 @@ int params_def2(Token *token, FILE *sourceFile) {
     }
 
     // rozvinuti neterminalu var_def
+    // TODO jak rozlisit var_def pro definici parametru funkce a pro deklaraci promenne
     if ((error = var_def(token, sourceFile)))
         return error;
 
     // znovu rozvinuti neterminalu params_def2
-    return params_def2(token, sourceFile);
+    return params_def2(token, sourceFile, node_idFnc, param);
 }
 
 
@@ -975,6 +977,8 @@ int params_def2(Token *token, FILE *sourceFile) {
  * @return Typ erroru generovany analyzou
 */
 int var_def(Token *token, FILE *sourceFile) {
+    // TODO jak rozlisit var_def pro definici parametru funkce a pro deklaraci promenne
+
     int error;
     // aplikace pravidla 34
 
@@ -1015,7 +1019,7 @@ int var_def(Token *token, FILE *sourceFile) {
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
-int return_(Token *token, FILE *sourceFile) {
+int return_(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Return ret) {
     int error;
     // aplikace pravidla 35
 
@@ -1030,7 +1034,7 @@ int return_(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX;
 
     // volani bottom-up SA (rozsireni neterminalu expr)
-    if ((error = exprSyntaxCheck(token, sourceFile, symTable)))
+    if ((error = exprSyntaxCheck(token, sourceFile, ret)))
         return error;
 
     return ERROR_PASSED;
