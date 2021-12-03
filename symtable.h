@@ -149,7 +149,14 @@ bst_node_t *search_Iden(Dynamic_string *, SLList_Frame *listFrame);
 
 void setDataF(bst_node_t *tree, bool def);
 
-void setDataV(bst_node_t *tree, Data_type type, bool init, bool used);
+
+void setVarType(bst_node_t *tree, Data_type type);
+void setVarInit(bst_node_t *tree, bool init);
+void setVarUsed(bst_node_t *tree, bool used);
+Data_type getVarType(bst_node_t *tree);
+bool getVarInit(bst_node_t *tree);
+bool getVarUsed(bst_node_t *tree);
+
 
 bool isFnc(bst_node_t *tree);
 
