@@ -1028,16 +1028,20 @@ int return_(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPt
         // lexikalni nebo kompilatorova chyba
         return error;
 
-    if (token->ID != TOKEN_ID_KEYWORD)
-        return ERROR_SYNTAX;
-    else if (token->Value.keyword != KEYWORD_RETURN)
+    if (token->ID == TOKEN_ID_KEYWORD)
         return ERROR_SYNTAX;
 
-    // volani bottom-up SA (rozsireni neterminalu expr)
-    if ((error = exprSyntaxCheck(token, sourceFile, ret)))
-        return error;
-
-    return ERROR_PASSED;
+    if(token->Value.keyword == KEYWORD_RETURN) { // return
+        // volani bottom-up SA (rozsireni neterminalu expr)
+        return exprSyntaxCheck(token, sourceFile, ret);
+    }
+    else if (token->Value.keyword != KEYWORD_RETURN && token->Value.keyword != KEYWORD_RETURN == KEYWORD_END) {
+        // funkce ma vratit hodnotu. token return neprisel, ale prisel end => vrati hodnotu nil
+        // TODO generovani kodu - vratit hodnotu nil
+        return ERROR_PASSED;
+    }
+    else
+        return ERROR_SYNTAX;
 }
 
 
