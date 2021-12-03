@@ -13,8 +13,8 @@
 fpos_t last_read_pos;
 
 static TermsAndNonTerms p_table[17][17] =
-{       /* $  +  -  *  /  // (  )  i  #  .. <  >  <= >= == ~= */ 
-/*  $ */ {-1, R, R, R, R, R, R,-1, R, R, R, I, I, I, I, I, I },
+{       /* $  +  -  *  /  // (  )  i  #  .. <  >  <= >= == ~= */
+/*  $ */ {-1, R, R, R, R, R, R,-1, R, R, R, R, R, R, R, R, R },
 /*  + */ { I, I, I, R, R, R, R, I, R, R, I, I, I, I, I, I, I },
 /*  - */ { I, I, I, R, R, R, R, I, R, R, I, I, I, I, I, I, I },
 /*  * */ { I, I, I, I, I, I, R, I, R, R, I, I, I, I, I, I, I },
@@ -23,7 +23,7 @@ static TermsAndNonTerms p_table[17][17] =
 /*  ( */ {-1, R, R, R, R, R, R, E, R, R, R, R, R, R, R, R, R },
 /*  ) */ { I, I, I, I, I, I,-1, I,-1,-1, I, I, I, I, I, I, I },
 /*  i */ { I, I, I, I, I, I,-1, I, H, R, I, I, I, I, I, I, I },
-/*  # */ { I, I, I, I, I, I, R,-1, R,-1, I, I, I, I, I, I, I },
+/*  # */ { I, I, I, I, I, I, R, I, R,-1, I, I, I, I, I, I, I },
 /* .. */ { I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
 /*  < */ { I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
 /*  > */ { I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
@@ -33,8 +33,13 @@ static TermsAndNonTerms p_table[17][17] =
 /* ~= */ { I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
 };
 
-TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token_ID token_ID ) {
-    switch (token_ID) {
+Token_ID prev;
+TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token *token, TypeStack *typeStack ) {
+    if(token->Value.keyword == KEYWORD_NIL) {
+        TypeStack_push(typeStack, DATA_TYPE_NIL);
+        return ID;
+    }
+    switch (token->ID) {
     case TOKEN_ID_ADD:
         return ADD;
     case TOKEN_ID_SUB:
@@ -62,14 +67,20 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token_ID token_ID ) {
     case TOKEN_ID_RBR:
         return RBR;
     case TOKEN_ID_ID:
+        return ID;
     case TOKEN_ID_INT0:
-    case TOKEN_ID_INT:
     case TOKEN_ID_ZERO:
+    case TOKEN_ID_INT:
+        TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+        return ID;
     case TOKEN_ID_DBL2:
     case TOKEN_ID_EXP3:
     case TOKEN_ID_DHEX2:
     case TOKEN_ID_HEXP3:
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+        return ID;
     case TOKEN_ID_FSTR:
+        TypeStack_push(typeStack, DATA_TYPE_STRING);
         return ID;
     case TOKEN_ID_LEN:
         return LEN;
@@ -84,97 +95,105 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token_ID token_ID ) {
     }
 }
 
-
-/**
- * @brief Pomocna funkce pro lepsi vizualizaci dat na zasobniku
- * 
- * @param data Ukazatel na prvek v zasobniku
- */
-void termPrint(struct TermStackElement *data) {
-    switch (data->data)
-    {
-    case EXP:
-        printf("E");
-        break;
-    case R:
-        printf("←");
-        break;
-    case I:
-        printf("→");
-        break;
-    case E:
-        printf("=");
-        break;
-    case USD:
-        printf("$");
-        break;
-    case ADD:
-        printf("+");
-        break;
-    case SUB:
-        printf("-");
-        break;
-    case MUL:
-        printf("*");
-        break;
-    case DIV:
-        printf("/");
-        break;
-    case DIV2:
-        printf("//");
-        break;
-    case RBR:
-        printf(")");
-        break;
-    case LBR:
-        printf("(");
-        break;
-    case ID:
-        printf("i");
-        break;
-    case LEN:
-        printf("#");
-        break;
-    case DDOT:
-        printf("..");
-        break;
-    case LT:
-        printf("<");
-        break;
-    case GT:
-        printf(">");
-        break;
-    case LTE:
-        printf("<=");
-        break;
-    case GTE:
-        printf(">=");
-        break;
-    case EQ:
-        printf("==");
-        break;
-    case NEQ:
-        printf("~=");
-        break;
-    default:
-        break;
+int checkDataTypes_ADD_SUB_MUL_DIV(TypeStack *typeStack) {
+    DataTypes firstOp, secondOp;
+    firstOp = TypeStack_pop(typeStack);
+    secondOp = TypeStack_pop(typeStack);
+    if(firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
+        TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_INTEGER ||
+               firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else {
+        return ERROR_SEM_COMPAT;
     }
+    return ERROR_PASSED;
 }
 
 /**
- * @brief Pomocna funkce pro vypis zasobniku
- * 
- * @param stack Ukazatel na strukturu jednosmerne vazaneho seznamu
+ *
+ * @param typeStack
+ * @return
  */
-void stackPrint( TermStack *stack ) {
-    struct TermStackElement *tmp = stack->topElement;
-    printf("--- TOP ----");
-    while(tmp != NULL) {
-        printf("\n     ");
-        termPrint(tmp);
-        tmp = tmp->previousElement;
+int checkDataTypes_DIV2(TypeStack *typeStack) {
+    DataTypes firstOP, secondOp;
+    firstOP = TypeStack_pop(typeStack);
+    secondOp = TypeStack_pop(typeStack);
+    if(firstOP == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
+        TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+    } else {
+        return ERROR_SEM_COMPAT;
     }
-    printf("\n-- BOTTOM --\n");
+    return  ERROR_PASSED;
+}
+
+/**
+ *
+ * @param typeStack
+ * @return
+ */
+int checkDataTypes_LT_GT(TypeStack *typeStack) {
+    DataTypes firstOp, secondOp;
+    firstOp = TypeStack_pop(typeStack);
+    secondOp = TypeStack_pop(typeStack);
+    if(firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
+        TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_INTEGER ||
+               firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else {
+        return ERROR_SEM_COMPAT;
+    }
+    return ERROR_PASSED;
+}
+
+/**
+ *
+ * @param typeStack
+ * @return
+ */
+int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
+    DataTypes firstOp, secondOp;
+    firstOp = TypeStack_pop(typeStack);
+    secondOp = TypeStack_pop(typeStack);
+    if(firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
+        TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_INTEGER ||
+               firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_NIL     && secondOp == DATA_TYPE_NIL   ) {
+        TypeStack_push(typeStack, DATA_TYPE_NIL);
+    } else if (firstOp == DATA_TYPE_STRING  && secondOp == DATA_TYPE_STRING) {
+        TypeStack_push(typeStack, DATA_TYPE_STRING);
+    } else {
+        return ERROR_SEM_COMPAT;
+    }
+    return ERROR_PASSED;
+}
+
+int checkDataTypes_LTE_GTE(TypeStack *typeStack) {
+    DataTypes firstOp, secondOp;
+    firstOp = TypeStack_pop(typeStack);
+    secondOp = TypeStack_pop(typeStack);
+    if(firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
+        TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_INTEGER ||
+               firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_NUMBER  && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_NIL     && secondOp == DATA_TYPE_NIL   ) {
+        TypeStack_push(typeStack, DATA_TYPE_NIL);
+    } else {
+        return ERROR_SEM_COMPAT;
+    }
+    return ERROR_PASSED;
 }
 
 /**
@@ -183,52 +202,91 @@ void stackPrint( TermStack *stack ) {
  * @param token Struktura tokenu
  * @param file Ukazatel na zdrojovy soubor
  */
-void skipNonPrintChar(Token *token, FILE *file) {
+int skipNonPrintChar(Token *token, FILE *file) {
+    int error = ERROR_PASSED;
     do {
         fgetpos(file, &last_read_pos);
-        get_token(token, file);
-    } while (token->ID == TOKEN_ID_SPACE || token->ID == TOKEN_ID_TAB);
+        // nacteni noveho tokenu a kontrola vysupu scanneru
+        if ((error = get_token(token, file)) != ERROR_PASSED)
+            // lexikalni nebo kompilatorova chyba
+            return error;
+    } while (token->ID != TOKEN_ID_EOF && (
+            token->ID == TOKEN_ID_SPACE || token->ID == TOKEN_ID_EOL ||
+            token->ID == TOKEN_ID_TAB || token->ID == TOKEN_ID_LCMT2 ||
+            token->ID == TOKEN_ID_BCMT4));
+    prev = token->ID;
+    return error;
+}
+
+int checkDataTypes_DDOT(TypeStack *typeStack) {
+    DataTypes firstOp, secondOp;
+    firstOp = TypeStack_pop(typeStack);
+    secondOp = TypeStack_pop(typeStack);
+    if (firstOp == DATA_TYPE_STRING && secondOp == DATA_TYPE_STRING) {
+        TypeStack_push(typeStack, DATA_TYPE_STRING);
+    } else {
+        return  ERROR_SEM_COMPAT;
+    }
+    return ERROR_PASSED;
 }
 
 /**
  * @brief Gramaticka pravidla
  * 
- * @param stack Ukazatel na strukturu jednosmerne vazaneho seznamu
+ * @param termStack Ukazatel na strukturu jednosmerne vazaneho seznamu
  * @return int Typ erroru generovany analyzou
  */
-int checkRulesAndApply( TermStack *stack ) {
+int checkRulesAndApply( TermStack *termStack, TypeStack *typeStack ) {
     TermStackElementPtr ptr = NULL;
-    TermStack_top(stack, &ptr);
+    TermStack_top(termStack, &ptr);
     if (ptr->data == ID && ptr->previousElement->data == R) {
-        TermStack_applyReduce(stack);
-    } else if (ptr->data == EXP && ptr->previousElement->data == ADD && ptr->previousElement->previousElement->data == EXP) {
-        TermStack_applyReduce(stack);
-    } else if (ptr->data == EXP && ptr->previousElement->data == SUB && ptr->previousElement->previousElement->data == EXP) {
-        TermStack_applyReduce(stack);
-    } else if (ptr->data == EXP && ptr->previousElement->data == MUL && ptr->previousElement->previousElement->data == EXP) {  
-        TermStack_applyReduce(stack);
-    } else if (ptr->data == EXP && ptr->previousElement->data == DIV && ptr->previousElement->previousElement->data == EXP) {   
-        TermStack_applyReduce(stack);
-    } else if (ptr->data == EXP && ptr->previousElement->data == DIV2 && ptr->previousElement->previousElement->data == EXP) {    
-        TermStack_applyReduce(stack);
-    } else if (ptr->data == EXP && ptr->previousElement->data == DDOT && ptr->previousElement->previousElement->data == EXP) {   
-        TermStack_applyReduce(stack);
-    } else if (ptr->data == RBR && ptr->previousElement->data == EXP && ptr->previousElement->previousElement->data == LBR) {   
-        TermStack_applyReduce(stack);
-    } else if (ptr->data == EXP && ptr->previousElement->data == LT && ptr->previousElement->previousElement->data == EXP) {   
-        TermStack_applyReduce(stack);
-    } else if (ptr->data == EXP && ptr->previousElement->data == GT && ptr->previousElement->previousElement->data == EXP) {   
-        TermStack_applyReduce(stack);
-    } else if (ptr->data == EXP && ptr->previousElement->data == LTE && ptr->previousElement->previousElement->data == EXP) {   
-        TermStack_applyReduce(stack);
-    } else if (ptr->data == EXP && ptr->previousElement->data == GTE && ptr->previousElement->previousElement->data == EXP) {   
-        TermStack_applyReduce(stack);
-    } else if (ptr->data == EXP && ptr->previousElement->data == EQ && ptr->previousElement->previousElement->data == EXP) {   
-        TermStack_applyReduce(stack);
-    } else if (ptr->data == EXP && ptr->previousElement->data == NEQ && ptr->previousElement->previousElement->data == EXP) {   
-        TermStack_applyReduce(stack);
-    } else if (ptr->data == EXP && ptr->previousElement->data == LEN) {   
-        TermStack_applyReduce(stack);
+        TermStack_applyReduce(termStack);
+    } else if (ptr->data == EXP && ptr->previousElement->data == ADD && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
+        TermStack_applyReduce(termStack);
+    } else if (ptr->data == EXP && ptr->previousElement->data == SUB && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
+        TermStack_applyReduce(termStack);
+    } else if (ptr->data == EXP && ptr->previousElement->data == MUL && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
+        TermStack_applyReduce(termStack);
+    } else if (ptr->data == EXP && ptr->previousElement->data == DIV && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
+        TermStack_applyReduce(termStack);
+    } else if (ptr->data == EXP && ptr->previousElement->data == DIV2 && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_DIV2(typeStack)) return ERROR_SEM_COMPAT;
+        TermStack_applyReduce(termStack);
+    } else if (ptr->data == EXP && ptr->previousElement->data == DDOT && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_DDOT(typeStack)) return ERROR_SEM_COMPAT;
+        TermStack_applyReduce(termStack);
+    } else if (ptr->data == RBR && ptr->previousElement->data == EXP && ptr->previousElement->previousElement->data == LBR && ptr->previousElement->previousElement->previousElement->data == R) {
+        TermStack_applyReduce(termStack);
+    } else if (ptr->data == EXP && ptr->previousElement->data == LT && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_LT_GT(typeStack)) return ERROR_SEM_COMPAT;
+        TermStack_applyReduce(termStack);
+    } else if (ptr->data == EXP && ptr->previousElement->data == GT && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_LT_GT(typeStack)) return ERROR_SEM_COMPAT;
+        TermStack_applyReduce(termStack);
+    } else if (ptr->data == EXP && ptr->previousElement->data == LTE && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_LTE_GTE(typeStack)) return ERROR_SEM_COMPAT;
+        TermStack_applyReduce(termStack);
+    } else if (ptr->data == EXP && ptr->previousElement->data == GTE && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_LTE_GTE(typeStack)) return ERROR_SEM_COMPAT;
+        TermStack_applyReduce(termStack);
+    } else if (ptr->data == EXP && ptr->previousElement->data == EQ && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_EQ_NEQ(typeStack)) return ERROR_SEM_COMPAT;
+        TermStack_applyReduce(termStack);
+    } else if (ptr->data == EXP && ptr->previousElement->data == NEQ && ptr->previousElement->previousElement->data == EXP && ptr->previousElement->previousElement->previousElement->data == R) {
+        if(checkDataTypes_EQ_NEQ(typeStack)) return ERROR_SEM_COMPAT;
+        TermStack_applyReduce(termStack);
+    } else if (ptr->data == EXP && ptr->previousElement->data == LEN && ptr->previousElement->previousElement->data == R) {
+        DataTypes firstOp = TypeStack_pop(typeStack);
+        if (firstOp == DATA_TYPE_STRING) {
+            TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+        } else {
+            return ERROR_SEM_COMPAT;
+        }
+        TermStack_applyReduce(termStack);
     } else {
         return ERROR_SYNTAX;
     }
@@ -257,12 +315,16 @@ int SA_isOK(TermStack *stack) {
 int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
     int error;
     bst_node_t *ptr_node = NULL;
-    // pridelim pamet zasobniku
-    TermStack *stack = (TermStack *) malloc(sizeof(TermStack));
-    if(!stack) return ERROR_COMPILER;
-    TermStack_init(stack);
+    // pridelim pamet zasobniku datovych typu
+    TypeStack *typeStack = (TypeStack *) malloc(sizeof (TypeStack));
+    if(!typeStack) return ERROR_COMPILER;
+    TypeStack_init(typeStack);
+    // pridelim pamet zasobniku terminalu a neterminalu
+    TermStack *termStack = (TermStack *) malloc(sizeof(TermStack));
+    if(!termStack) return ERROR_COMPILER;
+    TermStack_init(termStack);
     // vlozim $
-    TermStack_push(stack, USD);
+    TermStack_push(termStack, USD);
 
     struct TermStackElement *top = NULL;
     // zjistim si dalsi token
@@ -274,60 +336,75 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
         if(ptr_node != NULL) {
             // pokud to neni to promenna a je inicializovane?
             // muze to ale byt buldin funkce (write, readi, ...)
-            if(!(isFnc(ptr_node) && isInitVar(ptr_node))) {
+            if(isFnc(ptr_node) || !isInitVar(ptr_node)) {
                 return ERROR_SEM_UNDEFINED;
             }
         } else {
             // nenasel, takze klasika. Yeetni error
+            freeStacks(termStack, typeStack);
             return ERROR_SEM_UNDEFINED;
         }
     }
+    if(prev == TOKEN_ID_DIV2 || prev == TOKEN_ID_DIV)
+        return ERROR_RUNTIME_DIV_ZERO;
     // proslo to, tak prelozime token na terminal
-    TermsAndNonTerms vstup = convertTokenType_To_TermsAndNonTerms(token->ID);
+    TermsAndNonTerms vstup = convertTokenType_To_TermsAndNonTerms(token, typeStack);
 
     do {
-        TermStack_firstTermPtr(stack, &top);
+        TermStack_firstTermPtr(termStack, &top);
         // podle pravidla v tabulce rozhodnu co budu delat
         switch (p_table[(top->data-4)][vstup-4]) {
         // terminaly jsou si rovny
         case E:
-            TermStack_push(stack, vstup);
+            TermStack_push(termStack, vstup);
             // zjistim si dalsi token
             skipNonPrintChar(token, file);
             // jedna se o identifikator?
             if(token->ID == TOKEN_ID_ID) {
-                // zname ho?
-                if(search_Iden(token->Value.string, listFrame)) {
-                    // nee? tak hod error
-                    return ERROR_SEM_UNDEFINED;
+                if(ptr_node != NULL) {
+                    // pokud to neni to promenna a je inicializovane?
+                    // muze to ale byt buldin funkce (write, readi, ...)
+                    if (isFnc(ptr_node) || !isInitVar(ptr_node)) {
+                        freeStacks(termStack, typeStack);
+                        return ERROR_SEM_UNDEFINED;
+                    }
                 }
             }
+            if(prev == TOKEN_ID_DIV2 || prev == TOKEN_ID_DIV)
+                return ERROR_RUNTIME_DIV_ZERO;
             // proslo to, tak prelozime token na terminal
-            vstup = convertTokenType_To_TermsAndNonTerms(token->ID);
+            vstup = convertTokenType_To_TermsAndNonTerms(token, typeStack);
             break;
         // vlozim znak redukce
         case R:
-            TermStack_insertReduce(stack, top);
-            TermStack_push(stack, vstup);
+            TermStack_insertReduce(termStack, top);
+            TermStack_push(termStack, vstup);
             // zjisitm si dalsi token
             skipNonPrintChar(token, file);
             // jedna se o identifikator?
             if(token->ID == TOKEN_ID_ID) {
-                // a zname ho?
-                if(!search_Iden(token->Value.string, listFrame)) {
-                    // nee? tak hod error
-                    return ERROR_SEM_UNDEFINED;
+                ptr_node = search_Iden(token->Value.string, listFrame);
+                // nasel jsem ho?
+                if(ptr_node != NULL) {
+                    // pokud to neni to promenna a je inicializovane?
+                    // muze to ale byt buldin funkce (write, readi, ...)
+                    if (isFnc(ptr_node) || !isInitVar(ptr_node)) {
+                        freeStacks(termStack, typeStack);
+                        return ERROR_SEM_UNDEFINED;
+                    }
                 }
             }
-            vstup = convertTokenType_To_TermsAndNonTerms(token->ID);
+            if(prev == TOKEN_ID_DIV2 || prev == TOKEN_ID_DIV)
+                return ERROR_RUNTIME_DIV_ZERO;
+            vstup = convertTokenType_To_TermsAndNonTerms(token, typeStack);
             break;
         // zredukuju po nejblizsi znak redukce
         case I:
-            error = checkRulesAndApply(stack);
+            error = checkRulesAndApply(termStack, typeStack);
             // neexistije pro redukci pravidlo
-            if(error == ERROR_SYNTAX) {
-                TermStack_dispose(stack);
-                return ERROR_SYNTAX;
+            if(error) {
+                freeStacks(termStack, typeStack);
+                return error;
             }
             break;
         // vyhodnotim co se jde a predam rizeni zpet top-down analyze
@@ -336,12 +413,21 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
             break;
         // chybovy stav
         default:
-            TermStack_dispose(stack);
+
+            freeStacks(termStack, typeStack);
             return ERROR_SYNTAX;
         }
-    } while( vstup != USD  || !SA_isOK(stack)); // opakuji dokud vstup neni $ a dokud muzu redukovat
+    } while( vstup != USD  || !SA_isOK(termStack)); // opakuji dokud vstup neni $ a dokud muzu redukovat
+    //if(listFrame->globalElement->node->funcData->returnList->firstElement->type != typeStack->topElement->data) return ERROR_SEM_TYPE_COUNT;
     //uvolnim pamet zasobniku
-    TermStack_dispose(stack);
+    freeStacks(termStack, typeStack);
     fsetpos(file, &last_read_pos);
     return ERROR_PASSED;
+}
+
+void freeStacks(TermStack *termStack, TypeStack *typeStack) {
+    TypeStack_dispose(typeStack);
+    free(typeStack);
+    TermStack_dispose(termStack);
+    free(termStack);
 }

@@ -22,7 +22,7 @@
  * @param error Definovana hodnota erroru
  */
 void TermStack_error( int error ) {
-    static const char *ERRORS[SERR+1] = {
+    static const char *ERRORS[TERM_SERR+1] = {
         "Stack error: unknown",
         "Stack error: PUSH",
         "Stack error: POP",
@@ -30,7 +30,7 @@ void TermStack_error( int error ) {
         "Stack error: INIT",
         "Stack error: REDUCE"
     };
-    if (error <= 0 || error > SERR) {
+    if (error <= 0 || error > TERM_SERR) {
         error = 0;
     }
     fprintf(stderr ,"%s\n", ERRORS[error]);
@@ -49,7 +49,7 @@ void TermStack_error( int error ) {
  */
 void TermStack_init( TermStack *stack ) {
     if (stack == NULL) {
-        TermStack_error(INIT_ERR);
+        TermStack_error(TERM_INIT_ERR);
     } else {
         stack->topElement = NULL;
     }
@@ -67,7 +67,7 @@ void TermStack_init( TermStack *stack ) {
 void TermStack_push( TermStack *stack, TermsAndNonTerms element) {
     struct TermStackElement *tmp = (struct TermStackElement *) malloc(sizeof(struct TermStackElement));
     if(!tmp) {
-        TermStack_error(INIT_ERR);
+        TermStack_error(TERM_INIT_ERR);
         return;
     }
     tmp->previousElement = stack->topElement;
@@ -87,7 +87,7 @@ void TermStack_push( TermStack *stack, TermsAndNonTerms element) {
  */
 TermsAndNonTerms TermStack_pop( TermStack *stack ) {
     if(TermStack_isEmpty(stack)) {
-        TermStack_error(POP_ERR);
+        TermStack_error(TERM_POP_ERR);
         return -1;
     }
     TermStackElementPtr ptr = NULL;
@@ -138,7 +138,7 @@ void TermStack_insertReduce( TermStack *stack, struct TermStackElement *ptr) {
 
     struct TermStackElement *new = (struct TermStackElement *) malloc(sizeof(struct TermStackElement));
     if(!new) {
-        TermStack_error(INIT_ERR);
+        TermStack_error(TERM_INIT_ERR);
         return;
     }
 
@@ -157,7 +157,7 @@ void TermStack_insertReduce( TermStack *stack, struct TermStackElement *ptr) {
 void TermStack_applyReduce( TermStack *stack ) {
     struct TermStackElement *tmp = stack->topElement;
     if(tmp == NULL) {
-        TermStack_error(RED_ERR);
+        TermStack_error(TERM_RED_ERR);
         return;
     }
 
@@ -165,7 +165,7 @@ void TermStack_applyReduce( TermStack *stack ) {
         tmp = tmp->previousElement;
         TermStack_pop(stack);
         if(TermStack_isEmpty(stack)) {
-            TermStack_error(RED_ERR);
+            TermStack_error(TERM_RED_ERR);
             return;
         }   
     }
@@ -199,7 +199,7 @@ int TermStack_isUSDLast( const TermStack *stack) {
  */
 void TermStack_top( const TermStack *stack, TermStackElementPtr *element ) {
     if (TermStack_isEmpty(stack)) {
-        TermStack_error(TOP_ERR);
+        TermStack_error(TERM_TOP_ERR);
         return;
     }
     *element = stack->topElement;
