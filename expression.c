@@ -23,7 +23,7 @@ static TermsAndNonTerms p_table[17][17] =
 /*  ( */ {-1, R, R, R, R, R, R, E, R, R, R, R, R, R, R, R, R },
 /*  ) */ { I, I, I, I, I, I,-1, I,-1,-1, I, I, I, I, I, I, I },
 /*  i */ { I, I, I, I, I, I,-1, I, H, R, I, I, I, I, I, I, I },
-/*  # */ { I, I, I, I, I, I, R,-1, R,-1, I, I, I, I, I, I, I },
+/*  # */ { I, I, I, I, I, I, R, I, R,-1, I, I, I, I, I, I, I },
 /* .. */ { I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
 /*  < */ { I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
 /*  > */ { I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
@@ -33,6 +33,7 @@ static TermsAndNonTerms p_table[17][17] =
 /* ~= */ { I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
 };
 
+Token_ID prev;
 TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token *token, TypeStack *typeStack ) {
     if(token->Value.keyword == KEYWORD_NIL) {
         TypeStack_push(typeStack, DATA_TYPE_NIL);
@@ -68,8 +69,8 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token *token, TypeStack *
     case TOKEN_ID_ID:
         return ID;
     case TOKEN_ID_INT0:
-    case TOKEN_ID_INT:
     case TOKEN_ID_ZERO:
+    case TOKEN_ID_INT:
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
         return ID;
     case TOKEN_ID_DBL2:
@@ -213,6 +214,7 @@ int skipNonPrintChar(Token *token, FILE *file) {
             token->ID == TOKEN_ID_SPACE || token->ID == TOKEN_ID_EOL ||
             token->ID == TOKEN_ID_TAB || token->ID == TOKEN_ID_LCMT2 ||
             token->ID == TOKEN_ID_BCMT4));
+    prev = token->ID;
     return error;
 }
 
@@ -343,6 +345,8 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
             return ERROR_SEM_UNDEFINED;
         }
     }
+    if(prev == TOKEN_ID_DIV2 || prev == TOKEN_ID_DIV)
+        return ERROR_RUNTIME_DIV_ZERO;
     // proslo to, tak prelozime token na terminal
     TermsAndNonTerms vstup = convertTokenType_To_TermsAndNonTerms(token, typeStack);
 
@@ -357,13 +361,17 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
             skipNonPrintChar(token, file);
             // jedna se o identifikator?
             if(token->ID == TOKEN_ID_ID) {
-                // zname ho?
-                if(search_Iden(token->Value.string, listFrame)) {
-                    // nee? tak hod error
-                    freeStacks(termStack, typeStack);
-                    return ERROR_SEM_UNDEFINED;
+                if(ptr_node != NULL) {
+                    // pokud to neni to promenna a je inicializovane?
+                    // muze to ale byt buldin funkce (write, readi, ...)
+                    if (isFnc(ptr_node) || !isInitVar(ptr_node)) {
+                        freeStacks(termStack, typeStack);
+                        return ERROR_SEM_UNDEFINED;
+                    }
                 }
             }
+            if(prev == TOKEN_ID_DIV2 || prev == TOKEN_ID_DIV)
+                return ERROR_RUNTIME_DIV_ZERO;
             // proslo to, tak prelozime token na terminal
             vstup = convertTokenType_To_TermsAndNonTerms(token, typeStack);
             break;
@@ -375,13 +383,19 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
             skipNonPrintChar(token, file);
             // jedna se o identifikator?
             if(token->ID == TOKEN_ID_ID) {
-                // a zname ho?
-                if(!search_Iden(token->Value.string, listFrame)) {
-                    // nee? tak hod error
-                    freeStacks(termStack, typeStack);
-                    return ERROR_SEM_UNDEFINED;
+                ptr_node = search_Iden(token->Value.string, listFrame);
+                // nasel jsem ho?
+                if(ptr_node != NULL) {
+                    // pokud to neni to promenna a je inicializovane?
+                    // muze to ale byt buldin funkce (write, readi, ...)
+                    if (isFnc(ptr_node) || !isInitVar(ptr_node)) {
+                        freeStacks(termStack, typeStack);
+                        return ERROR_SEM_UNDEFINED;
+                    }
                 }
             }
+            if(prev == TOKEN_ID_DIV2 || prev == TOKEN_ID_DIV)
+                return ERROR_RUNTIME_DIV_ZERO;
             vstup = convertTokenType_To_TermsAndNonTerms(token, typeStack);
             break;
         // zredukuju po nejblizsi znak redukce
