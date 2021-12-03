@@ -12,6 +12,7 @@
 // jezdec udavajici skutecnou pozici v ctenem souboru
 fpos_t last_read_pos;
 
+// Prediktivni tabulka
 static TermsAndNonTerms p_table[17][17] =
 {       /* $  +  -  *  /  // (  )  i  #  .. <  >  <= >= == ~= */
 /*  $ */ {-1, R, R, R, R, R, R,-1, R, R, R, R, R, R, R, R, R },
@@ -33,7 +34,16 @@ static TermsAndNonTerms p_table[17][17] =
 /* ~= */ { I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
 };
 
+// hodnota predchoziho tokenu
 Token_ID prev;
+
+/**
+ * @brief Prevod tokenu na terminal nebo neterminal
+ *
+ * @param token Ukazatel na aktualni token
+ * @param typeStack Zasobnik datovych typu
+ * @return Terminal ci neterminal daneho tokenu
+ */
 TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token *token, TypeStack *typeStack ) {
     if(token->Value.keyword == KEYWORD_NIL) {
         TypeStack_push(typeStack, DATA_TYPE_NIL);
@@ -95,6 +105,15 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token *token, TypeStack *
     }
 }
 
+/**
+ * @brief Kontrola kompatibility datoych typu
+ *  ADD, SUB, MUL, DIV respektive v tomto poradi +, -, *, /
+ *
+ * @details Po zpracovani vlozi na zasobnik vysledny datovy typ
+ *
+ * @param typeStack Zasobnik datovych typu
+ * @return Typ erroru generovany analyzou
+ */
 int checkDataTypes_ADD_SUB_MUL_DIV(TypeStack *typeStack) {
     DataTypes firstOp, secondOp;
     firstOp = TypeStack_pop(typeStack);
@@ -113,9 +132,13 @@ int checkDataTypes_ADD_SUB_MUL_DIV(TypeStack *typeStack) {
 }
 
 /**
+ * @brief Kontrola kompatibility datoveho typu
+ *  DIV2 respektive //
  *
- * @param typeStack
- * @return
+ * @details Po zpracovani vlozi na zasobnik vysledny datovy typ
+ *
+ * @param typeStack Zasobnik datovych typu
+ * @return Typ erroru generovany analyzou
  */
 int checkDataTypes_DIV2(TypeStack *typeStack) {
     DataTypes firstOP, secondOp;
@@ -130,9 +153,13 @@ int checkDataTypes_DIV2(TypeStack *typeStack) {
 }
 
 /**
+ * @brief Kontrola kompatibility datoych typu
+ *  LT, GT respektive v tomto poradi <, >
  *
- * @param typeStack
- * @return
+ * @details Po zpracovani vlozi na zasobnik vysledny datovy typ
+ *
+ * @param typeStack Zasobnik datovych typu
+ * @return Typ erroru generovany analyzou
  */
 int checkDataTypes_LT_GT(TypeStack *typeStack) {
     DataTypes firstOp, secondOp;
@@ -152,9 +179,13 @@ int checkDataTypes_LT_GT(TypeStack *typeStack) {
 }
 
 /**
+ * @brief Kontrola kompatibility datoych typu
+ *  EQ, NEQ respetive v tomto poradi ==, ~=
  *
- * @param typeStack
- * @return
+ * @details Po zpracovani vlozi na zasobnik vysledny datovy typ
+ *
+ * @param typeStack Zasobnik datovych typu
+ * @return Typ erroru generovany analyzou
  */
 int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
     DataTypes firstOp, secondOp;
@@ -177,6 +208,15 @@ int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
     return ERROR_PASSED;
 }
 
+/**
+ * @brief Kontrola kompatibility datoych typu
+ *  LTE, GTE respektive v tomto poradi <=, >=
+ *
+ * @details Po zpracovani vlozi na zasobnik vysledny datovy typ
+ *
+ * @param typeStack Zasobnik datovych typu
+ * @return Typ erroru generovany analyzou
+ */
 int checkDataTypes_LTE_GTE(TypeStack *typeStack) {
     DataTypes firstOp, secondOp;
     firstOp = TypeStack_pop(typeStack);
@@ -433,6 +473,12 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
     return ERROR_PASSED;
 }
 
+/**
+ * @brief Uvolneni pameti zasobniku
+ *
+ * @param termStack Ukazatel na zasobnik datovych typu
+ * @param typeStack Ukazatel na zasobmil terminalu a neterminalu
+ */
 void freeStacks(TermStack *termStack, TypeStack *typeStack) {
     TypeStack_dispose(typeStack);
     free(typeStack);
