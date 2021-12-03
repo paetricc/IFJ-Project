@@ -238,7 +238,7 @@ int fnc_dec(Token *token, FILE *sourceFile) {
         return error;
 
     // ulozim si uzel id_fnc, abych vedel komu pridavat parametry a navratovou hodnotu
-    node_idFnc = bst_search(symTable->globalElement->node, token->Value.string)
+    node_idFnc = bst_search(symTable->globalElement->node, token->Value.string);
 
     // ':'
     if ((error = get_non_white_token(token, sourceFile)))
@@ -669,26 +669,37 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
         case TOKEN_ID_INT:
         case TOKEN_ID_ZERO: // int_value
             // aplikace pravidla 22
-            if(getVarType(node_idFnc) != TYPE_INTEGER)
-                if(getVarType(node_idFnc) == TYPE_NUMBER)
+            if(getVarType(node_idFnc) != TYPE_INTEGER) {
+                if(getVarType(node_idFnc) == TYPE_NUMBER) { // ocekavam number, davam mu integer
                     // TODO generovani kodu - int2float
-                    // TODO tady jsem skoncil Barte
+                }
+                else // datove typy nejsou kompatibilni
+                    return ERROR_SEM_COMPAT;
+            }
+            // TODO generovani kodu pro integer
             break;
 
         case TOKEN_ID_DHEX2:
         case TOKEN_ID_HEXP3:
         case TOKEN_ID_DBL2:
         case TOKEN_ID_EXP3: // num_value
-            // TODO aplikace pravidla 23
+            // aplikace pravidla 23
+            if(getVarType(node_idFnc) != TYPE_NUMBER) // datove typy nejsou kompatibilni
+                return ERROR_SEM_COMPAT;
+            // TODO generace kodu pro number
             break;
 
         case TOKEN_ID_FSTR: // str_value
-            // TODO aplikace pravidla 24
+            // aplikace pravidla 24
+            if(getVarType(node_idFnc) != TYPE_STRING) // datove typy nejsou kompatibilni
+                return ERROR_SEM_COMPAT;
+            // TODO generace kodu pro string
             break;
 
         case TOKEN_ID_KEYWORD: // nil
             if (token->Value.keyword == KEYWORD_NIL) {
-                // TODO aplikace pravidal 25
+                // aplikace pravidal 25
+                // TODO generovani kodu pro nil
             } else // pro keyword neexistuje pravidlo
                 return ERROR_SYNTAX;
             break;
