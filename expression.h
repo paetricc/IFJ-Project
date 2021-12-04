@@ -6,9 +6,11 @@
 
 TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token *, TypeStack *);
 
-int exprSyntaxCheck( Token *, FILE *, SLList_Frame * );
+int exprSyntaxCheck( Token *, FILE *, SLList_Frame *, Data_type );
 
 int skipNonPrintChar(Token *, FILE * );
+
+int checkRulesAndApply( TermStack *, TypeStack * );
 
 int checkRulesAndApply( TermStack *, TypeStack * );
 

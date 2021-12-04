@@ -663,7 +663,7 @@ int SA_isOK(TermStack *stack) {
  * @param file Ukazatel na zdrojovy soubor
  * @return int Typ erroru generovany analyzou
  */
-int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
+int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type retData) {
     bool isNew = true;
     int error;
     bst_node_t *ptr_node = NULL;
