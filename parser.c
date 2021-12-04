@@ -464,14 +464,14 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
                         error = SLL_Param_Insert(TYPE_INTEGER, node_id->name, node_id);
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
                         // TODO vratit odpovidajici chybu
-                        error = (param->type != TYPE_INTEGER);
+                        error = (param->type == TYPE_INTEGER ? ERROR_PASSED : ERROR_SEM_OTHERS);
                     break;
 
                 case RET_TYPE:
                     if(!isDecFnc(node_id))
                         error = SLL_Return_Insert(TYPE_INTEGER, node_id);
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
-                        error = (node_id->funcData->returnList->firstElement->type != TYPE_INTEGER);
+                        error = (node_id->funcData->returnList->firstElement->type == TYPE_INTEGER ? ERROR_PASSED : ERROR_SEM_OTHERS);
                     break;
             }
             break; // KEYWORD_INTEGER
@@ -486,14 +486,14 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
                     if(!isDecFnc(node_id))
                         error = SLL_Param_Insert(TYPE_NUMBER, node_id->name, node_id);
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
-                        error = (param->type != TYPE_NUMBER);
+                        error = (param->type == TYPE_NUMBER ? ERROR_PASSED : ERROR_SEM_OTHERS);
                     break;
 
                 case RET_TYPE:
                     if(!isDecFnc(node_id))
                         error = SLL_Return_Insert(TYPE_NUMBER, node_id);
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
-                        error = (node_id->funcData->returnList->firstElement->type != TYPE_NUMBER);
+                        error = (node_id->funcData->returnList->firstElement->type == TYPE_NUMBER ? ERROR_PASSED : ERROR_SEM_OTHERS);
                     break;
             } // KEYWORD_NUMBER
             break;
@@ -508,14 +508,14 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
                     if(!isDecFnc(node_id))
                         error = SLL_Param_Insert(TYPE_STRING, node_id->name, node_id);
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
-                        error = (param->type != TYPE_STRING);
+                        error = (param->type == TYPE_STRING ? ERROR_PASSED : ERROR_SEM_OTHERS);
                     break;
 
                 case RET_TYPE:
                     if(!isDecFnc(node_id))
                         error = SLL_Return_Insert(TYPE_STRING, node_id);
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
-                        error = (node_id->funcData->returnList->firstElement->type != TYPE_STRING);
+                        error = (node_id->funcData->returnList->firstElement->type != TYPE_STRING ? ERROR_PASSED : ERROR_SEM_OTHERS);
                     break;
             } // KEYWORD_STRING
             break;
