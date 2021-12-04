@@ -49,6 +49,19 @@ int get_non_white_token(Token *token, FILE *sourceFile) {
     return error;
 }
 
+int checkDeclaredFncs(bst_node_t *func) {
+    if(func == NULL)
+        return ERROR_PASSED;
+    else if(!isDefFnc(func))
+        return ERROR_SEM_UNDEFINED;
+    else {
+        int error;
+        if((error = checkDeclaredFncs(func->left)))
+            return error;
+        else
+            return checkDeclaredFncs(func->right);
+    }
+}
 
 /**
  * @brief Neterminal start.
@@ -150,6 +163,11 @@ int start(Token *token, FILE *sourceFile) {
 
     // vse korektni - uplatnuju pravidlo a rozsiruju dalsi neterminal
     error = program(token, sourceFile); // aplikace pravidla 1
+
+    if(error == ERROR_PASSED)
+        // kontrola, ze vsechny deklarovane funkce byly definovany
+        error = checkDeclaredFncs(symTable->globalElement->node);
+
 
     // uvoleni symTable
     SLL_Frame_Dispose(symTable);
@@ -466,14 +484,14 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
                         error = SLL_Param_Insert(TYPE_INTEGER, node_id->name, node_id);
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
                         // TODO vratit odpovidajici chybu
-                        error = (param->type == TYPE_INTEGER ? ERROR_PASSED : ERROR_SEM_OTHERS);
+                        error = (param->type == TYPE_INTEGER ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
                     break;
 
                 case RET_TYPE:
                     if(!isDecFnc(node_id))
                         error = SLL_Return_Insert(TYPE_INTEGER, node_id);
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
-                        error = (node_id->funcData->returnList->firstElement->type == TYPE_INTEGER ? ERROR_PASSED : ERROR_SEM_OTHERS);
+                        error = (node_id->funcData->returnList->firstElement->type == TYPE_INTEGER ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
                     break;
             }
             break; // KEYWORD_INTEGER
@@ -488,14 +506,14 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
                     if(!isDecFnc(node_id))
                         error = SLL_Param_Insert(TYPE_NUMBER, node_id->name, node_id);
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
-                        error = (param->type == TYPE_NUMBER ? ERROR_PASSED : ERROR_SEM_OTHERS);
+                        error = (param->type == TYPE_NUMBER ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
                     break;
 
                 case RET_TYPE:
                     if(!isDecFnc(node_id))
                         error = SLL_Return_Insert(TYPE_NUMBER, node_id);
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
-                        error = (node_id->funcData->returnList->firstElement->type == TYPE_NUMBER ? ERROR_PASSED : ERROR_SEM_OTHERS);
+                        error = (node_id->funcData->returnList->firstElement->type == TYPE_NUMBER ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
                     break;
             } // KEYWORD_NUMBER
             break;
@@ -510,14 +528,14 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
                     if(!isDecFnc(node_id))
                         error = SLL_Param_Insert(TYPE_STRING, node_id->name, node_id);
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
-                        error = (param->type == TYPE_STRING ? ERROR_PASSED : ERROR_SEM_OTHERS);
+                        error = (param->type == TYPE_STRING ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
                     break;
 
                 case RET_TYPE:
                     if(!isDecFnc(node_id))
                         error = SLL_Return_Insert(TYPE_STRING, node_id);
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
-                        error = (node_id->funcData->returnList->firstElement->type != TYPE_STRING ? ERROR_PASSED : ERROR_SEM_OTHERS);
+                        error = (node_id->funcData->returnList->firstElement->type == TYPE_STRING ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
                     break;
             } // KEYWORD_STRING
             break;
