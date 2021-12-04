@@ -52,6 +52,164 @@ static TermsAndNonTerms p_table[17][17] =
 
 // hodnota predchoziho tokenu
 Token_ID prev;
+int isCorrect = 1;
+TermsAndNonTerms decide;
+
+void termPrint(struct TermStackElement *data) {
+    switch (data->data)
+    {
+        case EXP:
+            printf("E");
+            break;
+        case R:
+            printf("←");
+            break;
+        case I:
+            printf("→");
+            break;
+        case E:
+            printf("=");
+            break;
+        case USD:
+            printf("$");
+            break;
+        case ADD:
+            printf("+");
+            break;
+        case SUB:
+            printf("-");
+            break;
+        case MUL:
+            printf("*");
+            break;
+        case DIV:
+            printf("/");
+            break;
+        case DIV2:
+            printf("//");
+            break;
+        case RBR:
+            printf("(");
+            break;
+        case LBR:
+            printf(")");
+            break;
+        case ID:
+            printf("i");
+            break;
+        case LEN:
+            printf("#");
+            break;
+        case DDOT:
+            printf("..");
+            break;
+        case LT:
+            printf("<");
+            break;
+        case GT:
+            printf(">");
+            break;
+        case LTE:
+            printf("<=");
+            break;
+        case GTE:
+            printf(">=");
+            break;
+        case EQ:
+            printf("==");
+            break;
+        case NEQ:
+            printf("~=");
+            break;
+        default:
+            break;
+    }
+}
+
+void stackPrint( TermStack *stack ) {
+    struct TermStackElement *tmp = stack->topElement;
+    printf("--- TOP ----");
+    while(tmp != NULL) {
+        printf("\n     ");
+        termPrint(tmp);
+        tmp = tmp->previousElement;
+    }
+    printf("\n-- BOTTOM --\n");
+}
+
+/**
+ * @brief Preskoci netisknutelne znaku
+ *
+ * @param token Struktura tokenu
+ * @param file Ukazatel na zdrojovy soubor
+ */
+int skipNonPrintChar(Token *token, FILE *file) {
+    int error = ERROR_PASSED;
+    prev = token->ID;
+    do {
+        fgetpos(file, &last_read_pos);
+        // nacteni noveho tokenu a kontrola vysupu scanneru
+        if ((error = get_token(token, file)) != ERROR_PASSED)
+            // lexikalni nebo kompilatorova chyba
+            return error;
+    } while (token->ID != TOKEN_ID_EOF && (
+            token->ID == TOKEN_ID_SPACE || token->ID == TOKEN_ID_EOL ||
+            token->ID == TOKEN_ID_TAB || token->ID == TOKEN_ID_LCMT2 ||
+            token->ID == TOKEN_ID_BCMT4));
+    return error;
+}
+
+/**
+ * @brief Funkce pro prevod stringu na string podporovany jazykem IFJcode21
+ *
+ * @param input Ukazatel na pole charu
+ * @return Upraveny string
+ */
+char *converString(char *input) {
+    char *output = (char *)malloc(strlen(input)-1);
+    int positon = 0;
+    int i;
+    for(i = 1; input[i] != '\0'; i++) {
+        if (input[i] == '\\') {
+            if(input[i+1] == '\\') {
+                output = (char *) realloc(output, strlen(input) + 4);
+                output[positon++] = '\\';
+                output[positon++] = '0';
+                output[positon++] = '9';
+                output[positon++] = '2';
+            } else if (input[i+1] == '"') {
+                output = (char *) realloc(output, strlen(input) + 4);
+                output[positon++] = '\\';
+                output[positon++] = '0';
+                output[positon++] = '3';
+                output[positon++] = '4';
+            } else if (input[i+1] == 'n') {
+                output = (char *) realloc(output, strlen(input) + 4);
+                output[positon++] = '\\';
+                output[positon++] = '0';
+                output[positon++] = '1';
+                output[positon++] = '0';
+            } else if (input[i+1] == 't') {
+                output = (char *) realloc(output, strlen(input) + 4);
+                output[positon++] = '\\';
+                output[positon++] = '0';
+                output[positon++] = '0';
+                output[positon++] = '9';
+            }
+            i++;
+        } else if(input[i] <= 32 || input[i] == 35 || input[i] == 92) {
+            output = (char *) realloc(output, strlen(input) + 4);
+            output[positon++] = '\\';
+            output[positon++] = (char)((int)input[i]/100+48);
+            output[positon++] = (char)((int)input[i]/10+48);
+            output[positon++] = (char)((int)input[i]%10+48);
+        } else {
+            output[positon++] = input[i];
+        }
+    }
+    output[--positon] = '\0';
+    return output;
+}
 
 /**
  * @brief Prevod tokenu na terminal nebo neterminal
@@ -61,10 +219,6 @@ Token_ID prev;
  * @return Terminal ci neterminal daneho tokenu
  */
 TermsAndNonTerms convertTokenType_To_TermsAndNonTerms(Token *token, TypeStack *typeStack) {
-    if (token->Value.keyword == KEYWORD_NIL) {
-        TypeStack_push(typeStack, DATA_TYPE_NIL);
-        return ID;
-    }
     switch (token->ID) {
         case TOKEN_ID_ADD:
             return ADD;
@@ -77,16 +231,40 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms(Token *token, TypeStack *t
         case TOKEN_ID_DIV2:
             return DIV2;
         case TOKEN_ID_LT:
+            if(!isCorrect)
+                return E;
+            decide = LT;
+            isCorrect = false;
             return LT;
         case TOKEN_ID_LTE:
+            if(!isCorrect)
+                return E;
+            decide = LTE;
+            isCorrect = false;
             return LTE;
         case TOKEN_ID_GT:
+            if(!isCorrect)
+                return E;
+            decide = GT;
+            isCorrect = false;
             return GT;
         case TOKEN_ID_GTE:
+            if(!isCorrect)
+                return E;
+            decide = GTE;
+            isCorrect = false;
             return GTE;
         case TOKEN_ID_NEQ2:
+            if(!isCorrect)
+                return E;
+            decide = NEQ;
+            isCorrect = false;
             return NEQ;
         case TOKEN_ID_EQ:
+            if(!isCorrect)
+                return E;
+            decide = EQ;
+            isCorrect = false;
             return EQ;
         case TOKEN_ID_LBR:
             return LBR;
@@ -112,11 +290,11 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms(Token *token, TypeStack *t
             return LEN;
         case TOKEN_ID_DDOT:
             return DDOT;
-            /*case TOKEN_ID_SPACE:
-            case TOKEN_ID_EOL:
-            case TOKEN_ID_TAB:
-                break;*/
         default:
+            if (token->Value.keyword == KEYWORD_NIL) {
+                TypeStack_push(typeStack, DATA_TYPE_NIL);
+                return ID;
+            }
             return USD;
     }
 }
@@ -126,6 +304,14 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms(Token *token, TypeStack *t
  *  ADD, SUB, MUL, DIV respektive v tomto poradi +, -, *, /
  *
  * @details Po zpracovani vlozi na zasobnik vysledny datovy typ
+ *  | <firstOp>  | <- topElement
+ *  |------------|
+ *  | <secondOp> |
+ *  |------------|
+ *  |   ......   |
+ *  |___BOTTOM___|
+ *  tedy vyraz odpovida:
+ *  <secondOp> {+,-,*,/} <firstOp>
  *
  * @param typeStack Zasobnik datovych typu
  * @return Typ erroru generovany analyzou
@@ -136,9 +322,15 @@ int checkDataTypes_ADD_SUB_MUL_DIV(TypeStack *typeStack) {
     secondOp = TypeStack_pop(typeStack);
     if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
-    } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER ||
-               firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+    } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
+        // druhe operande je INT tak vyndej druhy ho pretypuj
+        printf("POPS <varFloat>\n");
+        printf("INT2FLOATS\n");
+        printf("PUSHS <varFloat>\n");
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+        // prvni operande je INT tak ho pretypuj
+        printf("INT2FLOATS\n");
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_NUMBER) {
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else {
@@ -152,6 +344,14 @@ int checkDataTypes_ADD_SUB_MUL_DIV(TypeStack *typeStack) {
  *  DIV2 respektive //
  *
  * @details Po zpracovani vlozi na zasobnik vysledny datovy typ
+ *  | <firstOp>  | <- topElement
+ *  |------------|
+ *  | <secondOp> |
+ *  |------------|
+ *  |   ......   |
+ *  |___BOTTOM___|
+ *  tedy vyraz odpovida:
+ *  <secondOp> {//} <firstOp>
  *
  * @param typeStack Zasobnik datovych typu
  * @return Typ erroru generovany analyzou
@@ -171,6 +371,14 @@ int checkDataTypes_DIV2(TypeStack *typeStack) {
 /**
  * @brief Kontrola kompatibility datoych typu
  *  LT, GT respektive v tomto poradi <, >
+ *  | <firstOp>  | <- topElement
+ *  |------------|
+ *  | <secondOp> |
+ *  |------------|
+ *  |   ......   |
+ *  |___BOTTOM___|
+ *  tedy vyraz odpovida:
+ *  <secondOp> {<,>} <firstOp>
  *
  * @details Po zpracovani vlozi na zasobnik vysledny datovy typ
  *
@@ -182,11 +390,24 @@ int checkDataTypes_LT_GT(TypeStack *typeStack) {
     firstOp = TypeStack_pop(typeStack);
     secondOp = TypeStack_pop(typeStack);
     if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
+        printf("POPS <tmp>\n");
+        printf("MOVE GF@<tmp1> <tmp>\n");
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
-    } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER ||
-               firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+    } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
+        printf("POPS <var>\n");
+        printf("INT2FLOATS\n");
+        printf("PUSHS <var>\n");
+        printf("POPS <tmp>\n");
+        printf("MOVE GF@<tmp1> <tmp>\n");
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+        printf("INT2FLOATS\n");
+        printf("POPS <tmp>\n");
+        printf("MOVE GF@<tmp1> <tmp>\n");
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_NUMBER) {
+        printf("POPS <tmp>\n");
+        printf("MOVE GF@<tmp1> <tmp>\n");
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else {
         return ERROR_SEM_COMPAT;
@@ -199,6 +420,14 @@ int checkDataTypes_LT_GT(TypeStack *typeStack) {
  *  EQ, NEQ respetive v tomto poradi ==, ~=
  *
  * @details Po zpracovani vlozi na zasobnik vysledny datovy typ
+ *  | <firstOp>  | <- topElement
+ *  |------------|
+ *  | <secondOp> |
+ *  |------------|
+ *  |   ......   |
+ *  |___BOTTOM___|
+ *  tedy vyraz odpovida:
+ *  <secondOp> {==, ~=} <firstOp>
  *
  * @param typeStack Zasobnik datovych typu
  * @return Typ erroru generovany analyzou
@@ -208,15 +437,32 @@ int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
     firstOp = TypeStack_pop(typeStack);
     secondOp = TypeStack_pop(typeStack);
     if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
+        printf("POPS <tmp>\n");
+        printf("MOVE GF@<tmp1> <tmp>\n");
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
-    } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER ||
-               firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+    } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
+        printf("POPS <var>\n");
+        printf("INT2FLOATS\n");
+        printf("PUSHS <var>\n");
+        printf("POPS <tmp>\n");
+        printf("MOVE GF@<tmp1> <tmp>\n");
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+        printf("INT2FLOATS\n");
+        printf("POPS <tmp>\n");
+        printf("MOVE GF@<tmp1> <tmp>\n");
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_NUMBER) {
+        printf("POPS <tmp>\n");
+        printf("MOVE GF@<tmp1> <tmp>\n");
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NIL && secondOp == DATA_TYPE_NIL) {
+        printf("POPS GF@<tmp>\n");
+        printf("MOVE GF@<tmp1> GF@<tmp>\n");
         TypeStack_push(typeStack, DATA_TYPE_NIL);
     } else if (firstOp == DATA_TYPE_STRING && secondOp == DATA_TYPE_STRING) {
+        printf("POPS GF@<tmp>\n");
+        printf("MOVE GF@<tmp1> <tmp>\n");
         TypeStack_push(typeStack, DATA_TYPE_STRING);
     } else {
         return ERROR_SEM_COMPAT;
@@ -229,6 +475,14 @@ int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
  *  LTE, GTE respektive v tomto poradi <=, >=
  *
  * @details Po zpracovani vlozi na zasobnik vysledny datovy typ
+ *  | <firstOp>  | <- topElement
+ *  |------------|
+ *  | <secondOp> |
+ *  |------------|
+ *  |   ......   |
+ *  |___BOTTOM___|
+ *  tedy vyraz odpovida:
+ *  <secondOp> {<=, >=} <firstOp>
  *
  * @param typeStack Zasobnik datovych typu
  * @return Typ erroru generovany analyzou
@@ -238,13 +492,28 @@ int checkDataTypes_LTE_GTE(TypeStack *typeStack) {
     firstOp = TypeStack_pop(typeStack);
     secondOp = TypeStack_pop(typeStack);
     if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
+        printf("POPS GF@<tmp>\n");
+        printf("MOVE GF@<tmp1> GF@<tmp>\n");
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
-    } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER ||
-               firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+    } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
+        printf("POPS GF@<var>\n");
+        printf("INT2FLOATS\n");
+        printf("PUSHS GF@<var>\n");
+        printf("POPS GF@<tmp>\n");
+        printf("MOVE GF@<tmp1> GF@<tmp>\n");
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+        printf("INT2FLOATS\n");
+        printf("POPS GF@<tmp>\n");
+        printf("MOVE GF@<tmp1> GF@<tmp>\n");
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_NUMBER) {
+        printf("POPS GF@<tmp>\n");
+        printf("MOVE GF@<tmp1> GF@<tmp>\n");
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NIL && secondOp == DATA_TYPE_NIL) {
+        printf("POPS GF@<tmp>\n");
+        printf("MOVE GF@<tmp1> GF@<tmp>\n");
         TypeStack_push(typeStack, DATA_TYPE_NIL);
     } else {
         return ERROR_SEM_COMPAT;
@@ -252,33 +521,13 @@ int checkDataTypes_LTE_GTE(TypeStack *typeStack) {
     return ERROR_PASSED;
 }
 
-/**
- * @brief Preskoci netisknutelne znaku
- * 
- * @param token Struktura tokenu
- * @param file Ukazatel na zdrojovy soubor
- */
-int skipNonPrintChar(Token *token, FILE *file) {
-    int error = ERROR_PASSED;
-    do {
-        fgetpos(file, &last_read_pos);
-        // nacteni noveho tokenu a kontrola vysupu scanneru
-        if ((error = get_token(token, file)) != ERROR_PASSED)
-            // lexikalni nebo kompilatorova chyba
-            return error;
-    } while (token->ID != TOKEN_ID_EOF && (
-            token->ID == TOKEN_ID_SPACE || token->ID == TOKEN_ID_EOL ||
-            token->ID == TOKEN_ID_TAB || token->ID == TOKEN_ID_LCMT2 ||
-            token->ID == TOKEN_ID_BCMT4));
-    prev = token->ID;
-    return error;
-}
-
 int checkDataTypes_DDOT(TypeStack *typeStack) {
     DataTypes firstOp, secondOp;
     firstOp = TypeStack_pop(typeStack);
     secondOp = TypeStack_pop(typeStack);
     if (firstOp == DATA_TYPE_STRING && secondOp == DATA_TYPE_STRING) {
+        printf("POPS GF@<tmp>\n");
+        printf("MOVE GF@<tmp1> GF@<tmp>\n");
         TypeStack_push(typeStack, DATA_TYPE_STRING);
     } else {
         return ERROR_SEM_COMPAT;
@@ -302,36 +551,45 @@ int checkRulesAndApply(TermStack *termStack, TypeStack *typeStack) {
                ptr->previousElement->previousElement->previousElement->data == R) {
         if (checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
         // TODO instrukce ADDS
+        printf("ADDS\n");
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == SUB &&
                ptr->previousElement->previousElement->data == EXP &&
                ptr->previousElement->previousElement->previousElement->data == R) {
         if (checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
         // TODO instrukce SUBS
+        printf("SUBS\n");
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == MUL &&
                ptr->previousElement->previousElement->data == EXP &&
                ptr->previousElement->previousElement->previousElement->data == R) {
         if (checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
         // TODO istrukce MULS
+        printf("MULS\n");
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DIV &&
                ptr->previousElement->previousElement->data == EXP &&
                ptr->previousElement->previousElement->previousElement->data == R) {
         if (checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
         // TODO istrukce DIVS
+        printf("DIVS\n");
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DIV2 &&
                ptr->previousElement->previousElement->data == EXP &&
                ptr->previousElement->previousElement->previousElement->data == R) {
         if (checkDataTypes_DIV2(typeStack)) return ERROR_SEM_COMPAT;
         // TODO instrukce IDIVS
+        printf("IDIVS\n");
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DDOT &&
                ptr->previousElement->previousElement->data == EXP &&
                ptr->previousElement->previousElement->previousElement->data == R) {
         if (checkDataTypes_DDOT(typeStack)) return ERROR_SEM_COMPAT;
         // TODO instrukce CONCAT (POPS <str1>(firstOp), POPS <str2>(secondOp), CONCAT <var> <str2> <str1> PUSHS <var>(str2..str1))
+        printf("POPS <str1>\n");
+        printf("POPS <str2>\n");
+        printf("CONCAT <var> <str2> <str1>\n");
+        printf("PUSHS <var>\n");
         TermStack_applyReduce(termStack);
     } else if (ptr->data == RBR && ptr->previousElement->data == EXP &&
                ptr->previousElement->previousElement->data == LBR &&
@@ -376,6 +634,9 @@ int checkRulesAndApply(TermStack *termStack, TypeStack *typeStack) {
             return ERROR_SEM_COMPAT;
         }
         // TODO intrukce STRLEN (POPS <str>(firstOp), STRLEN <var> <str>, PUSHS <var>)
+        printf("POPS <str>\n");
+        printf("STRLEN <var> <str>\n");
+        printf("PUSHS <var>\n");
         TermStack_applyReduce(termStack);
     } else {
         return ERROR_SYNTAX;
@@ -392,8 +653,7 @@ int checkRulesAndApply(TermStack *termStack, TypeStack *typeStack) {
 int SA_isOK(TermStack *stack) {
     struct TermStackElement *tmp = NULL;
     TermStack_top(stack, &tmp);
-    return (tmp->data == EXP && tmp->previousElement->data == USD && tmp->previousElement->previousElement == NULL) ? 1
-                                                                                                                    : 0;
+    return (tmp->data == EXP && tmp->previousElement->data == USD && tmp->previousElement->previousElement == NULL) ? 1 : 0;
 }
 
 /**
@@ -404,6 +664,7 @@ int SA_isOK(TermStack *stack) {
  * @return int Typ erroru generovany analyzou
  */
 int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
+    bool isNew = true;
     int error;
     bst_node_t *ptr_node = NULL;
     // pridelim pamet zasobniku datovych typu
@@ -428,6 +689,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
             // pokud to neni to promenna a je inicializovane?
             // muze to ale byt buldin funkce (write, readi, ...)
             if (isFnc(ptr_node) || !isInitVar(ptr_node)) {
+                freeStacks(termStack, typeStack);
                 return ERROR_SEM_UNDEFINED;
             }
         } else {
@@ -436,13 +698,18 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
             return ERROR_SEM_UNDEFINED;
         }
     }
-    if (prev == TOKEN_ID_DIV2 || prev == TOKEN_ID_DIV)
-        return ERROR_RUNTIME_DIV_ZERO;
     // proslo to, tak prelozime token na terminal
     TermsAndNonTerms vstup = convertTokenType_To_TermsAndNonTerms(token, typeStack);
-
+    if(vstup == E) {
+        freeStacks(termStack, typeStack);
+        return ERROR_SEM_OTHERS;
+    }
     do {
         TermStack_firstTermPtr(termStack, &top);
+        if ((prev == TOKEN_ID_DIV2 || prev == TOKEN_ID_DIV) && (token->ID == TOKEN_ID_ZERO || token->ID == TOKEN_ID_INT0 || token->Value.Double == 0.0)) {
+            freeStacks(termStack, typeStack);
+            return ERROR_RUNTIME_DIV_ZERO;
+        }
         // podle pravidla v tabulce rozhodnu co budu delat
         switch (p_table[(top->data - 4)][vstup - 4]) {
             // terminaly jsou si rovny
@@ -461,15 +728,32 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
                         }
                     }
                 }
-                if (prev == TOKEN_ID_DIV2 || prev == TOKEN_ID_DIV)
+                if ((prev == TOKEN_ID_DIV2 || prev == TOKEN_ID_DIV) && (token->Value.Double == 0.0 || token->Value.Integer == 0))
                     return ERROR_RUNTIME_DIV_ZERO;
                 // proslo to, tak prelozime token na terminal
                 vstup = convertTokenType_To_TermsAndNonTerms(token, typeStack);
+                if(vstup == E) {
+                    freeStacks(termStack, typeStack);
+                    return ERROR_SEM_OTHERS;
+                }
                 break;
                 // vlozim znak redukce
             case R:
                 // TODO instrukce pushnuti na zasobnik kdyz operand
                 //      PUSHS <symb>
+                if(isNew) {
+                    if(token->ID == TOKEN_ID_INT || token->ID == TOKEN_ID_INT0 || token->ID == TOKEN_ID_ZERO )
+                        printf("PUSHS int@%lld\n", token->Value.Integer);
+                    if(token->ID == TOKEN_ID_DBL2 || token->ID == TOKEN_ID_EXP3 || token->ID == TOKEN_ID_DHEX2 || token->ID == TOKEN_ID_HEXP3)
+                        printf("PUSHS float@%a\n", token->Value.Double);
+                    if(token->ID == TOKEN_ID_FSTR) {
+                        char *str = converString(token->Value.string->str);
+                        printf("PUSHS string@%s\n", str);
+                        free(str);
+                    }
+                    if(token->Value.keyword == KEYWORD_NIL)
+                        printf("PUSHS nil@nil\n");
+                }
                 TermStack_insertReduce(termStack, top);
                 TermStack_push(termStack, vstup);
                 // zjisitm si dalsi token
@@ -487,12 +771,16 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
                         }
                     }
                 }
-                if (prev == TOKEN_ID_DIV2 || prev == TOKEN_ID_DIV)
-                    return ERROR_RUNTIME_DIV_ZERO;
+                isNew = true;
                 vstup = convertTokenType_To_TermsAndNonTerms(token, typeStack);
+                if(vstup == E) {
+                    freeStacks(termStack, typeStack);
+                    return ERROR_SEM_OTHERS;
+                }
                 break;
                 // zredukuju po nejblizsi znak redukce
             case I:
+                isNew = false;
                 error = checkRulesAndApply(termStack, typeStack);
                 // neexistije pro redukci pravidlo
                 if (error) {
@@ -511,6 +799,45 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame) {
         }
     } while (vstup != USD || !SA_isOK(termStack)); // opakuji dokud vstup neni $ a dokud muzu redukovat
     //if(listFrame->globalElement->node->funcData->returnList->firstElement->type != typeStack->topElement->data) return ERROR_SEM_TYPE_COUNT;
+    if (!isCorrect) {
+        printf("POPS <tmp>\n");
+        printf("MOVE GF@<tmp2> <tmp>\n");
+    } else {
+        printf("POPS GF@<tmp>\n");
+        printf("MOVE LF@<var> GF@<tmp>\n");
+    }
+    switch (decide) {
+        case EQ:
+            printf("JUMPIFEQS <label>\n");
+            break;
+        case NEQ:
+            printf("JUMPIFNEQS <label>\n");
+            break;
+        case LT:
+            printf("LTS\n");
+            printf("PUSHS bool@true\n");
+            printf("JUMPIFEQS <label>\n");
+            break;
+        case LTE:
+            printf("LT <bool> <tmp2> <tmp1>\n");
+            printf("EQS\n");
+            printf("PUSHS bool@<bool>\n");
+            printf("JUMPIFEQS <label>\n");
+            break;
+        case GT:
+            printf("GTS\n");
+            printf("PUSHS bool@true\n");
+            printf("JUMPIFEQS <label>\n");
+            break;
+        case GTE:
+            printf("GT <bool> <tmp2> <tmp1>\n");
+            printf("EQS\n");
+            printf("PUSHS bool@<bool>\n");
+            printf("JUMPIFEQS <label>\n");
+            break;
+        default:
+            break;
+    }
     //uvolnim pamet zasobniku
     freeStacks(termStack, typeStack);
     fsetpos(file, &last_read_pos);

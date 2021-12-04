@@ -2,8 +2,9 @@
 #include "type_stack.h"
 #include "error.h"
 #include "symtable.h"
+#include <string.h>
 
-TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token *, TypeStack * );
+TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token *, TypeStack *);
 
 int exprSyntaxCheck( Token *, FILE *, SLList_Frame * );
 
@@ -24,5 +25,7 @@ int checkDataTypes_LTE_GTE(TypeStack *);
 int checkDataTypes_DDOT(TypeStack *);
 
 int SA_isOK( TermStack * );
+
+char *converString(char *);
 
 void freeStacks( TermStack *, TypeStack * );
