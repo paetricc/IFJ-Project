@@ -199,6 +199,9 @@ int program(Token *token, FILE *sourceFile) {
         // lexikalni nebo kompilatorova chyba
         return error;
 
+    // uzel s pripadnou volanou funkci
+    bst_node_t *node_idFnc = NULL;
+
     // rozvetveni na ruzna pravidla podle hodnoty tokenu
     switch (token->ID) {
         case TOKEN_ID_KEYWORD: // global nebo function
@@ -216,6 +219,12 @@ int program(Token *token, FILE *sourceFile) {
             break;
 
         case TOKEN_ID_ID: // id_fnc
+            // kontrola, ze funkce nevraci hodnotu
+            node_idFnc = bst_search(symTable->globalElement->node, token->Value.string);
+            if(node_idFnc != NULL && (isDecFnc(node_idFnc) || isDefFnc(node_idFnc))&& node_idFnc->funcData->returnList->firstElement != NULL)
+                return ERROR_SEM_TYPE_COUNT;
+
+
             // nastaveni cteni pred identifikator, aby si to precetl volany
             fsetpos(sourceFile, &lastReadPos);
             if ((error = fnc_call(token, sourceFile))) // aplikace pravidla 3
