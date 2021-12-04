@@ -145,24 +145,23 @@ void setVarUsed(bst_node_t *tree, bool used){
     tree->varData->used = used;
 }
 
-Data_type getVarType(bst_node_t *tree){
-    return tree->varData->type;
+/**
+ * Funkce pro nahrani dat do struktury pro data funkce.
+ *
+ * @param tree Ukazatel na uzel, do ktereho se nahravaji hodnoty.
+ * @param dec Hodnota, zdali byla funkce deklarovana.
+ */
+void setFncDec(bst_node_t *tree, bool dec){
+    tree->funcData->dec = dec;
 }
 
-bool getVarInit(bst_node_t *tree){
-    return tree->varData->init;
-}
-
-bool getVarUsed(bst_node_t *tree){
-    return tree->varData->used;
-}
 /**
  * Funkce pro nahrani dat do struktury pro data funkce.
  *
  * @param tree Ukazatel na uzel, do ktereho se nahravaji hodnoty.
  * @param def Hodnota, zdali byla funkce definovana.
  */
-void setDataF(bst_node_t *tree, bool def){
+void setFncDef(bst_node_t *tree, bool def){
     tree->funcData->def = def;
 }
 
@@ -481,6 +480,17 @@ bool isFnc(bst_node_t *tree){
  * @param tree Ukazatel na uzel, ze ktereho je chteno ziskat hodnoty.
  * @return Vraci hodnotu true, jestlize je funkce definovana, jinak false.
  */
+bool isDecFnc(bst_node_t *tree){
+    bool isDecFnc = tree->funcData->dec;
+    return isDecFnc;
+}
+
+/**
+ * Funkce pro ziskani dat, jestli je funkce definovana.
+ *
+ * @param tree Ukazatel na uzel, ze ktereho je chteno ziskat hodnoty.
+ * @return Vraci hodnotu true, jestlize je funkce definovana, jinak false.
+ */
 bool isDefFnc(bst_node_t *tree){
     bool isDefFnc = tree->funcData->def;
     return isDefFnc;
@@ -534,7 +544,7 @@ int setBuildInFun(SLList_Frame *listFrame, Dynamic_string *string, Data_type par
         return ERROR_COMPILER;
     }
     tree = search_Iden(string, listFrame);
-    setDataF(tree, true);                       //nastavi ji na definovanou
+    setFncDef(tree, true);                       //nastavi ji na definovanou
     if (param1 != TYPE_UNDEFINED){
         error = SLL_Param_Insert(param1, string, tree);
     }

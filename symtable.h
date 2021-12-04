@@ -73,6 +73,8 @@ typedef struct Table_data_func{
     SLList_Return *returnList;
     /** Fce definovana*/
     bool def;
+    /** Fce deklarovana*/
+    bool dec;
 } Table_data_func_t;
 
 /**
@@ -147,18 +149,19 @@ void SLL_Frame_DeleteGlobal(SLList_Frame *listFrame);
 
 bst_node_t *search_Iden(Dynamic_string *, SLList_Frame *listFrame);
 
-void setDataF(bst_node_t *tree, bool def);
+void setFncDec(bst_node_t *tree, bool dec);
 
+void setFncDef(bst_node_t *tree, bool def);
 
 void setVarType(bst_node_t *tree, Data_type type);
-void setVarInit(bst_node_t *tree, bool init);
-void setVarUsed(bst_node_t *tree, bool used);
-Data_type getVarType(bst_node_t *tree);
-bool getVarInit(bst_node_t *tree);
-bool getVarUsed(bst_node_t *tree);
 
+void setVarInit(bst_node_t *tree, bool init);
+
+void setVarUsed(bst_node_t *tree, bool used);
 
 bool isFnc(bst_node_t *tree);
+
+bool isDecFnc(bst_node_t *tree);
 
 bool isDefFnc(bst_node_t *tree);
 
