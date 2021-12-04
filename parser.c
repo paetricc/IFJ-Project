@@ -595,7 +595,6 @@ int fnc_call(Token *token, FILE *sourceFile) {
     *param = node_idFnc->funcData->paramList->firstElement;
 
     // rozvinuti neterminalu value
-    // TODO seznam parametru jako ukazatel na parametr, nebo ukazatel na ukazatel na parametr
     if ((error = value(token, sourceFile, node_idFnc, param))) {
         free(param);
         return error;
@@ -635,20 +634,26 @@ int value(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_
 
     switch (token->ID) {
         case TOKEN_ID_RBR: // ')'
-            if(param != NULL) // funkce ocekava parametr, ktery na vstup neprisel
+            // funkce ocekava parametr, ktery na vstup neprisel
+            if(isDecFnc(node_idFnc) && (*param) != NULL)
                 return ERROR_SEM_TYPE_COUNT;
-
-            // nasteveni cteni pred zavorku, aby si ji precetl volajici
-            fsetpos(sourceFile, &lastReadPos);
-            return ERROR_PASSED; // aplikace pravidla 17
+            else {
+                // nastaveni cteni pred zavorku, aby si ji precetl volajici
+                fsetpos(sourceFile, &lastReadPos);
+                return ERROR_PASSED; // aplikace pravidla 17
+            }
 
         case TOKEN_ID_KEYWORD: // nil
             if (token->Value.keyword == KEYWORD_NIL) {
-                // nasteveni cteni pred nil, aby si ji precetl volany
-                fsetpos(sourceFile, &lastReadPos);
-                if(param == NULL) // funkce neocekava dalsi parametr
+                // deklarovana funkce neocekava dalsi parametr
+                if(isDecFnc(node_idFnc) && (*param) == NULL)
                     return ERROR_SEM_TYPE_COUNT;
-                value_last(token, sourceFile, node_idFnc, param); // aplikace pravidla 18
+                else {
+                    // nasteveni cteni pred nil, aby si ji precetl volany
+                    fsetpos(sourceFile, &lastReadPos);
+                    if((error = value_last(token, sourceFile, node_idFnc, param))) // aplikace pravidla 18
+                        return error;
+                }
             }
             break;
 
@@ -663,10 +668,15 @@ int value(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_
         case TOKEN_ID_DBL2:
         case TOKEN_ID_EXP3: // num_value
         case TOKEN_ID_FSTR: // str_value
-            // nastaveni cteni pred hodnotu, aby si ji precetl volany
-            fsetpos(sourceFile, &lastReadPos);
-            if((error = value_last(token, sourceFile, node_idFnc, param))) // aplikace pravidla 18
-                return error;
+            // deklarovana funkce neocekava dalsi parametr
+            if(isDecFnc(node_idFnc) && (*param) == NULL)
+                return ERROR_SEM_TYPE_COUNT;
+            else {
+                // nastaveni cteni pred hodnotu, aby si ji precetl volany
+                fsetpos(sourceFile, &lastReadPos);
+                if ((error = value_last(token, sourceFile, node_idFnc, param))) // aplikace pravidla 18
+                    return error;
+            }
             break;
 
         default:
@@ -697,14 +707,23 @@ int value2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr
         return error;
 
     if (token->ID == TOKEN_ID_RBR) { // ')'
-        // vratim cteni pred zavorku, aby si ji precetl volajici
-        fsetpos(sourceFile, &lastReadPos);
-        return ERROR_PASSED; // aplikace pravidla 20
+        // funkce ocekava parametr, ktery na vstup neprisel
+        if(isDecFnc(node_idFnc) && (*param) != NULL)
+            return ERROR_SEM_TYPE_COUNT;
+        else {
+            // nastaveni cteni pred zavorku, aby si ji precetl volajici
+            fsetpos(sourceFile, &lastReadPos);
+            return ERROR_PASSED; // aplikace pravidla 20
+        }
     } else if (token->ID == TOKEN_ID_CMA) { // ','
         // aplikace pravidla 19
     } else { // pro token zadne pravidlo neexistuje
         return ERROR_SYNTAX;
     }
+
+    // deklarovana funkce neocekava dalsi parametr
+    if(isDecFnc(node_idFnc) && (*param) == NULL)
+        return ERROR_SEM_TYPE_COUNT;
 
     // rozvinuti neterminalu value_last
     if ((error = value_last(token, sourceFile, node_idFnc, param)))
@@ -1049,14 +1068,25 @@ int params_def(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
         return error;
 
     if (token->ID == TOKEN_ID_RBR) { // ')'
-        // nastavim cteni pred zavorku, aby si ji precetl volajici
-        fsetpos(sourceFile, &lastReadPos);
-        return ERROR_PASSED; // aplikace pravidla 30
-    } else if (token->ID == TOKEN_ID_ID) { // id_var
+        // deklarovana funkce ocekava parametr a zadny nedostala
+        if(isDecFnc(node_idFnc) && (*param) != NULL)
+            return ERROR_SEM_UNDEFINED;
+        else {
+            // nastavim cteni pred zavorku, aby si ji precetl volajici
+            fsetpos(sourceFile, &lastReadPos);
+            return ERROR_PASSED; // aplikace pravidla 30
+        }
+    }
+    else if (token->ID == TOKEN_ID_ID) { // id_var
         // nastavim cteni pred identifikator, aby si ho precetl volany
         fsetpos(sourceFile, &lastReadPos);
-    } else // pro tento token neexistuje pravidlo
+    }
+    else // pro tento token neexistuje pravidlo
         return ERROR_SYNTAX;
+
+    // deklarovana funkce nema parametr, ale dostala ho
+    if(isDecFnc(node_idFnc) && (*param) == NULL)
+        return ERROR_SEM_UNDEFINED;
 
     // rozsireni neterminalu var_def
     if ((error = var_defParam(token, sourceFile, node_idFnc, param))) // aplikace pravidla 31
@@ -1088,14 +1118,23 @@ int params_def2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLEleme
         return error;
 
     if (token->ID == TOKEN_ID_RBR) { // ')'
-        // nastavim cteni pred zavorku, aby si ji precetl volajici
-        fsetpos(sourceFile, &lastReadPos);
-        return ERROR_PASSED; // aplikace pravidla 32
+        // deklarovana funkce ocekava parametr a zadny nedostala
+        if(isDecFnc(node_idFnc) && (*param) != NULL)
+            return ERROR_SEM_UNDEFINED;
+        else {
+            // nastavim cteni pred zavorku, aby si ji precetl volajici
+            fsetpos(sourceFile, &lastReadPos);
+            return ERROR_PASSED; // aplikace pravidla 32
+        }
     } else if (token->ID == TOKEN_ID_CMA) { // ','
         // aplikace pravidla 33 (hned za koncem podminky)
     } else { // pro tento token neexistuje pravidlo
         return ERROR_SYNTAX;
     }
+
+    // deklarovana funkce neocekava parametr, ale nejaky dostala
+    if(isDecFnc(node_idFnc) && (*param) == NULL)
+        return ERROR_SEM_UNDEFINED;
 
     // rozvinuti neterminalu var_def
     // TODO jak rozlisit var_def pro definici parametru funkce a pro deklaraci promenne
