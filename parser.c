@@ -918,8 +918,10 @@ int fnc_head(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
     // overeni, zda nebyla funkce uz deklarovana nebo definovana
     *node_idFnc = search_Iden(token->Value.string, symTable);
 
-    if (*node_idFnc == NULL)
+    if (*node_idFnc == NULL) {
         bst_insert(&(symTable->globalElement->node), token->Value.string, true);
+        *node_idFnc = bst_search(symTable->globalElement->node,token->Value.string);
+    }
     else if (isDecFnc(*node_idFnc) && !isDefFnc(*node_idFnc)) { // funkce byla uz deklarovana
 
     } else { // funkce byla uz i definovanna - pokus o redefinici
@@ -1230,7 +1232,7 @@ int var_defParam(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElem
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
-int var_def(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
+int var_def(Token *token, FILE *sourceFile, bst_node_t **node_idVar) {
     // TODO jak rozlisit var_def pro definici parametru funkce a pro deklaraci promenne
 
     int error;
@@ -1250,7 +1252,7 @@ int var_def(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
     // vlozeni identifikatoru do symtable
     bst_insert(&(symTable->TopLocalElement->node), token->Value.string, false);
 
-    node_idFnc = bst_search(symTable->TopLocalElement->node, token->Value.string);
+    *node_idVar = bst_search(symTable->TopLocalElement->node, token->Value.string);
 
     // ':'
     if ((error = get_non_white_token(token, sourceFile)))
@@ -1261,7 +1263,7 @@ int var_def(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
         return ERROR_SYNTAX;
 
     // rozvinuti neterminalu data_type
-    return data_type(token, sourceFile, node_idFnc, NULL, VAR_TYPE);
+    return data_type(token, sourceFile, *node_idVar, NULL, VAR_TYPE);
 } // var_def
 
 
@@ -1494,14 +1496,20 @@ int var_dec(Token *token, FILE *sourceFile) {
     // local bylo uz precteno volajicim
 
     // ukazatel na uzel s promennou
-    bst_node_t *node_idVar = NULL;
+    bst_node_t **node_idVar = (bst_node_t **) malloc(sizeof(bst_node_t *));
+    if(node_idVar == NULL)
+        return ERROR_COMPILER;
 
     // rozvinuti neterminalu var_def
-    if ((error = var_def(token, sourceFile, node_idVar)))
+    if ((error = var_def(token, sourceFile, node_idVar))) {
+        free(node_idVar);
         return error;
+    }
 
     // rozvinuti neterminalu var_dec_init
-    return var_dec_init(token, sourceFile, node_idVar);
+    error = var_dec_init(token, sourceFile, *node_idVar);
+    free(node_idVar);
+    return error;
 }
 
 
@@ -1840,4 +1848,4 @@ int parser(FILE *sourceFile) {
     // TODO free(token->Value.string);
     free(token);
     return error;
-} 
+}

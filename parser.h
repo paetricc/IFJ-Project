@@ -22,7 +22,7 @@ int fnc_head(Token *, FILE *, bst_node_t **);
 int fnc_def2(Token *, FILE *, bst_node_t **);
 int params_def(Token *, FILE *, bst_node_t *, SLLElementPtr_Param *);
 int params_def2(Token *, FILE *, bst_node_t *, SLLElementPtr_Param *);
-int var_def(Token *, FILE *, bst_node_t *);
+int var_def(Token *, FILE *, bst_node_t **);
 int var_defParam(Token *, FILE *, bst_node_t *, SLLElementPtr_Param *);
 int return_(Token *, FILE *, Data_type);
 int return_void(Token *, FILE *);
