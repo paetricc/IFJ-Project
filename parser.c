@@ -95,20 +95,20 @@ int start(Token *token, FILE *sourceFile) {
     if(str == NULL)
         return ERROR_COMPILER;
 
-    // write()
-    str->str = "write";
-    error = bst_insert(&(symTable->globalElement->node), str, true);
+    // ord()
+    str->str = "ord";
+    error = setBuildInFun(symTable, str, TYPE_STRING, TYPE_INTEGER, TYPE_UNDEFINED, TYPE_INTEGER);
+
+    // chr()
+    if(!error) {
+        str->str = "chr";
+        error = setBuildInFun(symTable, str, TYPE_INTEGER, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_STRING);
+    }
 
     // reads()
     if(!error) {
         str->str = "reads";
         error = setBuildInFun(symTable, str, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_STRING);
-    }
-
-    // readi()
-    if(!error) {
-        str->str = "readi";
-        error = setBuildInFun(symTable, str, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_INTEGER);
     }
 
     // readn()
@@ -123,22 +123,22 @@ int start(Token *token, FILE *sourceFile) {
         error = setBuildInFun(symTable, str, TYPE_NUMBER, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_INTEGER);
     }
 
+    // readi()
+    if(!error) {
+        str->str = "readi";
+        error = setBuildInFun(symTable, str, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_INTEGER);
+    }
+
     // substr()
     if(!error) {
         str->str = "substr";
         error = setBuildInFun(symTable, str, TYPE_STRING, TYPE_NUMBER, TYPE_NUMBER, TYPE_STRING);
     }
 
-    // ord()
+    // write()
     if(!error) {
-        str->str = "ord";
-        error = setBuildInFun(symTable, str, TYPE_STRING, TYPE_INTEGER, TYPE_UNDEFINED, TYPE_INTEGER);
-    }
-
-    // chr()
-    if(!error) {
-        str->str = "chr";
-        error = setBuildInFun(symTable, str, TYPE_INTEGER, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_STRING);
+        str->str = "write";
+        error = bst_insert(&(symTable->globalElement->node), str, true);
     }
 
     free(str);
