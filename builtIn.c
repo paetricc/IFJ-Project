@@ -146,6 +146,19 @@ void make_substr(){
     printf("DEFVAR LF@_var3\n");
     printf("MOVE LF@_var3 LF@_cvar3\n");
     printf("DEFVAR LF@$_tmp\n");
+    printf("LT LF@$_tmp LF@_var3 LF@_var2\n");
+    printf("JUMPIFEQ $end_while_substr LF@$_tmp bool@true\n");
+    printf("GT LF@$_tmp LF@_var2 int@0\n");
+    printf("JUMPIFNEQ $end_while_substr LF@$_tmp bool@true\n");
+    printf("GT LF@$_tmp LF@_var3 int@0\n");
+    printf("JUMPIFNEQ $end_while_substr LF@$_tmp bool@true\n");
+    printf("DEFVAR LF@_strlen\n");
+    printf("STRLEN LF@_strlen LF@_var1\n");
+    printf("ADD LF@_strlen LF@_strlen int@1\n");
+    printf("LT LF@$_tmp LF@_var2 LF@_strlen\n");
+    printf("JUMPIFNEQ $end_while_substr LF@$_tmp bool@true\n");
+    printf("LT LF@$_tmp LF@_var3 LF@_strlen\n");
+    printf("JUMPIFNEQ $end_while_substr LF@$_tmp bool@true\n");
     printf("SUB LF@_var2 LF@_var2 int@1\n");
     printf("LABEL $while_substr\n");
     printf("LT LF@$_tmp LF@_var2 LF@_var3\n");
@@ -158,55 +171,6 @@ void make_substr(){
     printf("POPFRAME\n");
     printf("RETURN\n");
     printf("LABEL $end_fnc_substr\n");
-    
-    /**
-    printf("#builtIn substr()\n");
-    printf("JUMP $end_fnc_substr\n");
-    printf("LABEL $fnc_substr\n");
-    printf("PUSHFRAME\n");
-    printf("DEFVAR LF@*return\n");
-    printf("MOVE LF@*return string@\n");
-    printf("DEFVAR LF@_var1\n");
-    printf("MOVE LF@_var1 LF@_cvar1\n");
-    printf("DEFVAR LF@_var2\n");
-    printf("MOVE LF@_var2 LF@_cvar2\n");
-    printf("DEFVAR LF@_var3\n");
-    printf("MOVE LF@_var3 LF@_cvar3\n");
-    printf("DEFVAR LF@tmp\n");
-    //test jestli var3 < var2, vrací funkce prázdný řetězec
-    printf("LT LF@$tmp LF@_var3 LF@_var2\n");
-    printf("JUMPIFEQ $end_while_substr LF@tmp bool@true\n");
-
-    //jestli jsou v intervalu od 0 dál
-    printf("GT LF@$tmp LF@_var3 int@0\n");
-    printf("JUMPIFEQ $end_while_substr LF@tmp bool@true\n");
-
-    printf("GT LF@$tmp LF@_var2 int@0\n");
-    printf("JUMPIFEQ $end_while_substr LF@tmp bool@true\n");
-
-    //jestli jsou od intervalu od delky stringu míň TODO počítá se do délky i odřádkování? otestovat
-    printf("DEFVAR LF@_strLen\n");
-    printf("STRLEN LF@_strLen LF@_strLen\n");
-
-    printf("LT LF@$tmp LF@_var3 LF@_strLen\n");
-    printf("JUMPIFEQ $end_while_substr LF@tmp bool@true\n");
-
-    printf("LT LF@$tmp LF@_var2 LF@_strLen");
-    printf("JUMPIFEQ $end_while_substr LF@tmp bool@true\n");
-
-    //TODO zkontrolovat tuto část
-    printf("LABEL $while_substr\n");
-    printf("EQ LF@$tmp LF@_var2 LF@_var3\n");
-    printf("JUMPIFEQ $end_while_substr LF@tmp bool@true\n");
-    printf("GETCHAR LF@$tmp LF@_var1 LF@_var2\n");
-    printf("CONCAT LF@*return LF@*return LF@$tmp\n");
-    printf("ADD LF@_var2 LF@_var2 int@1\n");
-    printf("JUMP $while_substr\n");
-    printf("LABEL $end_while_substr\n");
-
-    printf("POPFRAME\n");
-    printf("RETURN\n");
-    printf("LABEL $end_fnc_substr\n");**/
 }
 
 /**
@@ -255,6 +219,7 @@ void make_ord(){
     printf("JUMPIFEQ $outOfRange LF@_vartmp bool@true");
     printf("DEFVAR LF@_var3");
     printf("STRLEN LF@_var3 LF@_var1");
+    printf("SUB LF@_var3 LF@_var3 int@1");
     printf("GT LF@_vartmp LF@_var2 LF@_var3");
     printf("JUMPIFEQ $outOfRange LF@_vartmp bool@true");
     printf("STRI2INT LF@*return LF@_var1 LF@_var2");
@@ -291,7 +256,16 @@ void call_readn(){
     printf("CALL $fnc_readn\n");
 }
 
-//void make_write
+/**
+ * Funkce vytvori kod pro volani kodu pro vestavenou funkci write.
+ *
+ */
+void call_write(Dynamic_string *str){
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@_cvar1\n");
+    printf("MOVE TF@_cvar1 %s\n", str->str);
+    printf("CALL $substr\n");
+}
 
 /**
  * Funkce vytvori kod pro volani kodu pro vestavenou funkci toInteger.
