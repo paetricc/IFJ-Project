@@ -47,6 +47,7 @@ int get_non_white_token(Token *token, FILE *sourceFile) {
     return error;
 } // get_non_white_token
 
+
 /**
  * @brief Kontrolue, zda vsechny deklarovane funkce byly definovany.
  *
@@ -66,6 +67,20 @@ int checkDeclaredFncs(bst_node_t *func) {
             return checkDeclaredFncs(func->right);
     }
 } // checkDeclaredFncs
+
+
+/**
+ *  @brief Zpracovava parametry volane vestavene funkce write()
+ *
+ * @return Typ chyby, ktera nastane
+ */
+int writeFncCall(Token *token, FILE *sourceFile) {
+    // TODO
+    do {
+        get_non_white_token(token, sourceFile);
+    } while (token->ID != TOKEN_ID_RBR);
+    return ERROR_PASSED;
+} // writeFncCall
 
 /**
  * @brief Neterminal start.
@@ -160,6 +175,7 @@ int start(Token *token, FILE *sourceFile) {
         error = bst_insert(&(symTable->globalElement->node), str, true);
         if(!error) {
             bst_node_t *wr = bst_search(symTable->globalElement->node, str);
+            setFncDec(wr, true);
             setFncDef(wr, true);
         }
     }
@@ -603,6 +619,11 @@ int fnc_call(Token *token, FILE *sourceFile) {
     node_idFnc = search_Iden(token->Value.string, symTable);
     if(node_idFnc == NULL) // funkce nebyla deklarovana ani definovana
         return ERROR_SEM_UNDEFINED;
+
+    // volani funkce write se osetri zvlast (promenny pocet parametru
+    if(!strcmp(node_idFnc->name->str, "write")) {
+        return writeFncCall(token, sourceFile);
+    }
 
     // '('
     if ((error = get_non_white_token(token, sourceFile)))
