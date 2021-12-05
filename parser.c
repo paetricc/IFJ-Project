@@ -859,6 +859,12 @@ int fnc_def(Token *token, FILE *sourceFile) {
 
 
     // rozvinuti neterminalu fnc_def2
+    printf("PUSHFRAME\n");
+    printf("#DEFINICE POMOCNYCH PROMENNYCH\n");
+    printf("DEFVAR TF@<tmp>\n");
+    printf("DEFVAR TF@<tmp1>\n");
+    printf("DEFVAR TF@<tmp2>\n");
+    printf("#-----------------------------\n");
     if ((error = fnc_def2(token, sourceFile, node_idFnc))) {
         free(node_idFnc);
         return error;
@@ -1290,7 +1296,7 @@ int return_(Token *token, FILE *sourceFile, Data_type var_dataType) {
 
     if(token->Value.keyword == KEYWORD_RETURN) { // return
         // volani bottom-up SA (rozsireni neterminalu expr)
-        return exprSyntaxCheck(token, sourceFile, symTable, var_dataType);
+        return exprSyntaxCheck(token, sourceFile, symTable, var_dataType, "cus");
     }
     else if (token->Value.keyword == KEYWORD_END) {
         // funkce ma vratit hodnotu. token return neprisel, ale prisel end => vrati hodnotu nil
@@ -1473,7 +1479,7 @@ int statement(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX;
 
     // rozvinu neterminal var_assign
-    error = var_assign(token, sourceFile, typeVar(id_node));
+    error = var_assign(token, sourceFile, typeVar(id_node), token->Value.string->str);
     setVarInit(id_node, true);
 
     return error;
@@ -1500,6 +1506,16 @@ int var_dec(Token *token, FILE *sourceFile) {
     if(node_idVar == NULL)
         return ERROR_COMPILER;
 
+    //zjisti ID tokenu
+    fpos_t last_read_pos;
+    fgetpos(sourceFile, &last_read_pos);
+    if((error = get_non_white_token(token, sourceFile)))
+        return error;
+    if(token->ID != TOKEN_ID_ID)
+        return ERROR_SYNTAX;
+
+    char *var = token->Value.string->str;
+    fsetpos(sourceFile, &last_read_pos);
     // rozvinuti neterminalu var_def
     if ((error = var_def(token, sourceFile, node_idVar))) {
         free(node_idVar);
@@ -1507,7 +1523,7 @@ int var_dec(Token *token, FILE *sourceFile) {
     }
 
     // rozvinuti neterminalu var_dec_init
-    error = var_dec_init(token, sourceFile, *node_idVar);
+    error = var_dec_init(token, sourceFile, *node_idVar, var);
     free(node_idVar);
     return error;
 }
@@ -1522,7 +1538,7 @@ int var_dec(Token *token, FILE *sourceFile) {
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
-int var_dec_init(Token *token, FILE *sourceFile, bst_node_t *node_idVar) {
+int var_dec_init(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var) {
     int error;
 
     // promenne pro pripadne vraceni cteni
@@ -1537,7 +1553,7 @@ int var_dec_init(Token *token, FILE *sourceFile, bst_node_t *node_idVar) {
         // aplikace pravidla 46
 
         // rozvinuti neteminalu var_assign
-        error = var_assign(token, sourceFile, node_idVar->varData->type);
+        error = var_assign(token, sourceFile, node_idVar->varData->type, var);
         // oznacim promennou z vyssi urovne za inicializovanou
         setVarInit(node_idVar, true);
         return error;
@@ -1579,7 +1595,7 @@ int var_dec_init(Token *token, FILE *sourceFile, bst_node_t *node_idVar) {
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
-int var_assign(Token *token, FILE *sourceFile, Data_type varType) {
+int var_assign(Token *token, FILE *sourceFile, Data_type varType, char *var) {
     int error;
 
     // promenne pro pripadne vraceni cteni
@@ -1609,7 +1625,7 @@ int var_assign(Token *token, FILE *sourceFile, Data_type varType) {
             }
             else { // id_var
                 // zavolani bottomup SA pro neterminal expr
-                if((error = exprSyntaxCheck(token, sourceFile, symTable, varType))) // aplikace pravidla 48
+                if((error = exprSyntaxCheck(token, sourceFile, symTable, varType, var))) // aplikace pravidla 48
                     return error;
                 // TODO generovani kodu - prirazeni promenne vysledek vyrazu
             }
@@ -1631,7 +1647,7 @@ int var_assign(Token *token, FILE *sourceFile, Data_type varType) {
 
             //aplikace pravidla 48
             // volani bottom-up SA (rozsireni neterminalu expr)
-            if((error = exprSyntaxCheck(token, sourceFile, symTable, varType))) // aplikace pravidla 48
+            if((error = exprSyntaxCheck(token, sourceFile, symTable, varType, var))) // aplikace pravidla 48
                 return error;
             break;
 
@@ -1642,7 +1658,7 @@ int var_assign(Token *token, FILE *sourceFile, Data_type varType) {
 
                 //aplikace pravidla 48
                 // volani bottom-up SA (rozsireni neterminalu expr)
-                if((error = exprSyntaxCheck(token, sourceFile, symTable, varType))) // aplikace pravidla 48
+                if((error = exprSyntaxCheck(token, sourceFile, symTable, varType, var))) // aplikace pravidla 48
                     return error;
             } else // pro tento keyword neexistuje pravidlo
                 return ERROR_SYNTAX;
@@ -1671,7 +1687,7 @@ int if_(Token *token, FILE *sourceFile) {
     // aplikace pravidla 50
 
     // volani bottom-up SA (rozsireni neterminalu expr)
-    if ((error = exprSyntaxCheck(token, sourceFile, symTable, TYPE_UNDEFINED)))
+    if ((error = exprSyntaxCheck(token, sourceFile, symTable, TYPE_UNDEFINED, "cus")))
         return error;
 
     // then
@@ -1743,7 +1759,7 @@ int loop(Token *token, FILE *sourceFile) {
     // aplikace pravidla 51
 
     // volani bottom-up SA (rozsireni neterminalu expr)
-    if ((error = exprSyntaxCheck(token, sourceFile, symTable, TYPE_UNDEFINED)))
+    if ((error = exprSyntaxCheck(token, sourceFile, symTable, TYPE_UNDEFINED, "cus")))
         return error;
 
     // do
