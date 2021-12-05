@@ -67,11 +67,11 @@ void DLL_Instruct_Next( DLList_Instruct * );
 
 void DLL_Instruct_Previous( DLList_Instruct * );
 
-void DLL_Instruct_setSource(DLList_Instruct *, const unsigned position);
+void DLL_Instruct_setSource(DLList_Instruct *, int position);
 
-void DLL_Instruct_setDestination(DLList_Instruct *, const unsigned position);
+void DLL_Instruct_setDestination(DLList_Instruct *, int position);
 
-int DLL_Instruct_Move(DLList_Instruct *, unsigned countOfElem, const unsigned positionOFDestination,const unsigned positionOFSource);
+int DLL_Instruct_Move(DLList_Instruct *, int countOfElem, int positionOFDestination, int positionOFSource);
 
 #define _INSTRUCT_DLLIST_H
 

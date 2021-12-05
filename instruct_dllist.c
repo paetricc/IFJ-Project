@@ -188,8 +188,8 @@ int DLL_Instruct_InsertAfter( DLList_Instruct *listInstruct, Dynamic_string *str
             nElemPtr->nextElement->previousElement = nElemPtr;          //jinak nastavi ukazatel na prdechozi prvku za nevym prvkem na novy prvek
         }
         (listInstruct->count)++;
-        return ERROR_PASSED;
     }
+    return ERROR_PASSED;
 }
 
 int DLL_Instruct_InsertBefore( DLList_Instruct *listInstruct, Dynamic_string *string){
@@ -210,8 +210,8 @@ int DLL_Instruct_InsertBefore( DLList_Instruct *listInstruct, Dynamic_string *st
             nElemPtr->previousElement->nextElement = nElemPtr;          //jinak nastavi ukazatel na nasledujici prvku pred nevym prvkem na novy prvek
         }
         (listInstruct->count)++;
-        return ERROR_PASSED;
     }
+    return ERROR_PASSED;
 }
 
 void DLL_Instruct_GetValue( DLList_Instruct *listInstruct, Dynamic_string *string){
@@ -246,7 +246,7 @@ void DLL_Instruct_Previous( DLList_Instruct *listInstruct){
     }
 }
 
-void DLL_Instruct_setSource(DLList_Instruct *listInstruct, const unsigned position){
+void DLL_Instruct_setSource(DLList_Instruct *listInstruct, int position){
     if (position <= listInstruct->count){
         listInstruct->sourceElement = listInstruct->firstElement;
         if (position == 1){
@@ -258,7 +258,7 @@ void DLL_Instruct_setSource(DLList_Instruct *listInstruct, const unsigned positi
     }
 }
 
-void DLL_Instruct_setDestination(DLList_Instruct *listInstruct, const unsigned position){
+void DLL_Instruct_setDestination(DLList_Instruct *listInstruct, int position){
     if (position <= listInstruct->count){
         listInstruct->destinationElement = listInstruct->firstElement;
         if (position == 1){
@@ -270,9 +270,9 @@ void DLL_Instruct_setDestination(DLList_Instruct *listInstruct, const unsigned p
     }
 }
 
-int DLL_Instruct_Move(DLList_Instruct *listInstruct, unsigned countOfElem, const unsigned positionOfDestination, const unsigned positionOfSource){
-    unsigned isRdyToCpy = positionOfSource + countOfElem;
-    unsigned countOfElemForDes = countOfElem;
+int DLL_Instruct_Move(DLList_Instruct *listInstruct, int countOfElem, int positionOfDestination, int positionOfSource){
+    int isRdyToCpy = positionOfSource + countOfElem;
+    int countOfElemForDes = countOfElem;
     if ((listInstruct->count+1) >= isRdyToCpy){
         DLLElementPtr_Instruct elemPtr = listInstruct->sourceElement;
         if (positionOfDestination == 1){
@@ -302,4 +302,5 @@ int DLL_Instruct_Move(DLList_Instruct *listInstruct, unsigned countOfElem, const
     } else{
         return ERROR_COMPILER;
     }
+    return ERROR_PASSED;
 }
