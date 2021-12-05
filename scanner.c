@@ -135,6 +135,7 @@ int get_token(Token *token, FILE *source_file ) {
                             DS_Free(ptr_Str);
                             return ERROR_PASSED;
                         case '\n':
+                        case '\r':
                             token->ID = TOKEN_ID_EOL;
                             DS_Free(ptr_Str);
                             return ERROR_PASSED;
