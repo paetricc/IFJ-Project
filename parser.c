@@ -1305,6 +1305,11 @@ int var_def(Token *token, FILE *sourceFile, bst_node_t **node_idVar) {
 */
 int return_(Token *token, FILE *sourceFile, Data_type fnc_ret_dataType) {
     int error;
+
+    // promenne pro pripadne vraceni cteni
+    fpos_t lastReadPos;
+    fgetpos(sourceFile, &lastReadPos);
+
     // aplikace pravidla 35
 
     // return
@@ -1322,6 +1327,7 @@ int return_(Token *token, FILE *sourceFile, Data_type fnc_ret_dataType) {
     else if (token->Value.keyword == KEYWORD_END) {
         // funkce ma vratit hodnotu. token return neprisel, ale prisel end => vrati hodnotu nil
         // TODO generovani kodu - vratit hodnotu nil
+        fsetpos(sourceFile, &lastReadPos);
         return ERROR_PASSED;
     }
     else // pro keyword neexistuje pravidlo
