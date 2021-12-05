@@ -13,132 +13,35 @@
 fpos_t last_read_pos;
 
 // Prediktivni tabulka
-static TermsAndNonTerms p_table[17][17] =
-        {       /* $  +  -  *  /  // (  )  i  #  .. <  >  <= >= == ~= */
-/*  $ */ {-1, R, R, R, R, R, R,  -1, R,  R,  R, R, R, R, R, R, R},
-/*  + */
-         {I,  I, I, R, R, R, R,  I,  R,  R,  I, I, I, I, I, I, I},
-/*  - */
-         {I,  I, I, R, R, R, R,  I,  R,  R,  I, I, I, I, I, I, I},
-/*  * */
-         {I,  I, I, I, I, I, R,  I,  R,  R,  I, I, I, I, I, I, I},
-/*  / */
-         {I,  I, I, I, I, I, R,  I,  R,  R,  I, I, I, I, I, I, I},
-/* // */
-         {I,  I, I, I, I, I, R,  I,  R,  R,  I, I, I, I, I, I, I},
-/*  ( */
-         {-1, R, R, R, R, R, R,  E,  R,  R,  R, R, R, R, R, R, R},
-/*  ) */
-         {I,  I, I, I, I, I, -1, I,  -1, -1, I, I, I, I, I, I, I},
-/*  i */
-         {I,  I, I, I, I, I, -1, I,  H,  R,  I, I, I, I, I, I, I},
-/*  # */
-         {I,  I, I, I, I, I, R,  I,  R,  -1, I, I, I, I, I, I, I},
-/* .. */
-         {I,  R, R, R, R, R, R,  I,  R,  R,  R, I, I, I, I, I, I},
-/*  < */
-         {I,  R, R, R, R, R, R,  I,  R,  R,  R, I, I, I, I, I, I},
-/*  > */
-         {I,  R, R, R, R, R, R,  I,  R,  R,  R, I, I, I, I, I, I},
-/* <= */
-         {I,  R, R, R, R, R, R,  I,  R,  R,  R, I, I, I, I, I, I},
-/* >= */
-         {I,  R, R, R, R, R, R,  I,  R,  R,  R, I, I, I, I, I, I},
-/* == */
-         {I,  R, R, R, R, R, R,  I,  R,  R,  R, I, I, I, I, I, I},
-/* ~= */
-         {I,  R, R, R, R, R, R,  I,  R,  R,  R, I, I, I, I, I, I},
-        };
+static TermsAndNonTerms p_table[17][17] =  {
+        /*  $  +  -  *  / //  (  )  i  # ..  <  > <= >= == ~= */
+/*  $ */ { -1, R, R, R, R, R, R,-1, R, R, R, R, R, R, R, R, R },
+/*  + */ {  I, I, I, R, R, R, R, I, R, R, I, I, I, I, I, I, I },
+/*  - */ {  I, I, I, R, R, R, R, I, R, R, I, I, I, I, I, I, I },
+/*  * */ {  I, I, I, I, I, I, R, I, R, R, I, I, I, I, I, I, I },
+/*  / */ {  I, I, I, I, I, I, R, I, R, R, I, I, I, I, I, I, I },
+/* // */ {  I, I, I, I, I, I, R, I, R, R, I, I, I, I, I, I, I },
+/*  ( */ { -1, R, R, R, R, R, R, E, R, R, R, R, R, R, R, R, R },
+/*  ) */ {  I, I, I, I, I, I,-1, I,-1,-1, I, I, I, I, I, I, I },
+/*  i */ {  I, I, I, I, I, I,-1, I, H, R, I, I, I, I, I, I, I },
+/*  # */ {  I, I, I, I, I, I, R, I, R,-1, I, I, I, I, I, I, I },
+/* .. */ {  I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
+/*  < */ {  I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
+/*  > */ {  I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
+/* <= */ {  I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
+/* >= */ {  I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
+/* == */ {  I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
+/* ~= */ {  I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I } };
 
 // hodnota predchoziho tokenu
 Token_ID prev;
+// pomocna promenna kontrolujici zda bylo jiz pouzti {==, ~=, <, >, <=, >=}
 int isCorrect = 1;
+// pomocna promenna udavajici jaky kod vytiskneme
 TermsAndNonTerms decide;
 
-void termPrint(struct TermStackElement *data) {
-    switch (data->data)
-    {
-        case EXP:
-            printf("E");
-            break;
-        case R:
-            printf("←");
-            break;
-        case I:
-            printf("→");
-            break;
-        case E:
-            printf("=");
-            break;
-        case USD:
-            printf("$");
-            break;
-        case ADD:
-            printf("+");
-            break;
-        case SUB:
-            printf("-");
-            break;
-        case MUL:
-            printf("*");
-            break;
-        case DIV:
-            printf("/");
-            break;
-        case DIV2:
-            printf("//");
-            break;
-        case RBR:
-            printf("(");
-            break;
-        case LBR:
-            printf(")");
-            break;
-        case ID:
-            printf("i");
-            break;
-        case LEN:
-            printf("#");
-            break;
-        case DDOT:
-            printf("..");
-            break;
-        case LT:
-            printf("<");
-            break;
-        case GT:
-            printf(">");
-            break;
-        case LTE:
-            printf("<=");
-            break;
-        case GTE:
-            printf(">=");
-            break;
-        case EQ:
-            printf("==");
-            break;
-        case NEQ:
-            printf("~=");
-            break;
-        default:
-            break;
-    }
-}
-
-void stackPrint( TermStack *stack ) {
-    struct TermStackElement *tmp = stack->topElement;
-    printf("--- TOP ----");
-    while(tmp != NULL) {
-        printf("\n     ");
-        termPrint(tmp);
-        tmp = tmp->previousElement;
-    }
-    printf("\n-- BOTTOM --\n");
-}
-
 /**
- * @brief Preskoci netisknutelne znaku
+ * @brief Preskoci netisknutelne znaky
  *
  * @param token Struktura tokenu
  * @param file Ukazatel na zdrojovy soubor
@@ -331,6 +234,7 @@ int checkDataTypes_ADD_SUB_MUL_DIV(TypeStack *typeStack) {
     } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
         // prvni operande je INT tak ho pretypuj
         printf("INT2FLOATS\n");
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_NUMBER) {
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else {
@@ -441,11 +345,11 @@ int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
         printf("MOVE GF@<tmp1> <tmp>\n");
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
-        printf("POPS <var>\n");
+        printf("POPS GF@<varFloat>\n");
         printf("INT2FLOATS\n");
-        printf("PUSHS <var>\n");
-        printf("POPS <tmp>\n");
-        printf("MOVE GF@<tmp1> <tmp>\n");
+        printf("PUSHS GF@<varFloat>\n");
+        printf("POPS TF@<tmp>\n");
+        printf("MOVE TF@<tmp1> TF@<tmp>\n");
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
         printf("INT2FLOATS\n");
@@ -521,6 +425,21 @@ int checkDataTypes_LTE_GTE(TypeStack *typeStack) {
     return ERROR_PASSED;
 }
 
+/**
+ * @brief Kontrola kompatibility datoveho typu DDOT
+ *
+ * @details Po zpracovani vlozi na zasobnik vysledny datovy typ
+ *  | <firstOp>  | <- topElement
+ *  |------------|
+ *  | <secondOp> |
+ *  |------------|
+ *  |   ......   |
+ *  |___BOTTOM___|
+ *  tedy vyraz odpovida: <secondOp> .. <firstOp>
+ *
+ * @param typeStack Zasobnik datovych typu
+ * @return Typ erroru generovany analyzou
+ */
 int checkDataTypes_DDOT(TypeStack *typeStack) {
     DataTypes firstOp, secondOp;
     firstOp = TypeStack_pop(typeStack);
@@ -663,7 +582,7 @@ int SA_isOK(TermStack *stack) {
  * @param file Ukazatel na zdrojovy soubor
  * @return int Typ erroru generovany analyzou
  */
-int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type retData) {
+int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type retData, char *var) {
     bool isNew = true;
     int error;
     bst_node_t *ptr_node = NULL;
@@ -681,23 +600,6 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
     struct TermStackElement *top = NULL;
     // zjistim si dalsi token
     skipNonPrintChar(token, file);
-    // jedna se o identifikator?
-    if (token->ID == TOKEN_ID_ID) {
-        ptr_node = search_Iden(token->Value.string, listFrame);
-        // nasel jsem ho?
-        if (ptr_node != NULL) {
-            // pokud to neni to promenna a je inicializovane?
-            // muze to ale byt buldin funkce (write, readi, ...)
-            if (isFnc(ptr_node) || !isInitVar(ptr_node)) {
-                freeStacks(termStack, typeStack);
-                return ERROR_SEM_UNDEFINED;
-            }
-        } else {
-            // nenasel, takze klasika. Yeetni error
-            freeStacks(termStack, typeStack);
-            return ERROR_SEM_UNDEFINED;
-        }
-    }
     // proslo to, tak prelozime token na terminal
     TermsAndNonTerms vstup = convertTokenType_To_TermsAndNonTerms(token, typeStack);
     if(vstup == E) {
@@ -709,6 +611,34 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
         if ((prev == TOKEN_ID_DIV2 || prev == TOKEN_ID_DIV) && (token->ID == TOKEN_ID_ZERO || token->ID == TOKEN_ID_INT0 || token->Value.Double == 0.0)) {
             freeStacks(termStack, typeStack);
             return ERROR_RUNTIME_DIV_ZERO;
+        }
+        // jedna se o identifikator?
+        if (token->ID == TOKEN_ID_ID && p_table[(top->data - 4)][vstup - 4] != H && vstup != USD) {
+            ptr_node = search_Iden(token->Value.string, listFrame);
+            // nasel jsem ho?
+            if (ptr_node != NULL) {
+                // pokud to neni to promenna a je inicializovane?
+                // muze to ale byt buldin funkce (write, readi, ...)
+                if (isFnc(ptr_node) || !isInitVar(ptr_node)) {
+                    freeStacks(termStack, typeStack);
+                    return ERROR_SEM_UNDEFINED;
+                }
+                printf("PUSHS LF@%s\n", token->Value.string->str);
+                if (ptr_node->varData->type == TYPE_STRING) {
+                    TypeStack_push(typeStack, DATA_TYPE_STRING);
+                } else if (ptr_node->varData->type == TYPE_NUMBER) {
+                    TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+                } else if (ptr_node->varData->type == TYPE_INTEGER) {
+                    TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+                } else {
+                    freeStacks(termStack, typeStack);
+                    return ERROR_SEM_UNDEFINED;
+                }
+            } else {
+                // nenasel, takze klasika. Yeetni error
+                freeStacks(termStack, typeStack);
+                return ERROR_SEM_UNDEFINED;
+            }
         }
         // podle pravidla v tabulce rozhodnu co budu delat
         switch (p_table[(top->data - 4)][vstup - 4]) {
@@ -758,19 +688,6 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
                 TermStack_push(termStack, vstup);
                 // zjisitm si dalsi token
                 skipNonPrintChar(token, file);
-                // jedna se o identifikator?
-                if (token->ID == TOKEN_ID_ID) {
-                    ptr_node = search_Iden(token->Value.string, listFrame);
-                    // nasel jsem ho?
-                    if (ptr_node != NULL) {
-                        // pokud to neni to promenna a je inicializovane?
-                        // muze to ale byt buldin funkce (write, readi, ...)
-                        if (isFnc(ptr_node) || !isInitVar(ptr_node)) {
-                            freeStacks(termStack, typeStack);
-                            return ERROR_SEM_UNDEFINED;
-                        }
-                    }
-                }
                 isNew = true;
                 vstup = convertTokenType_To_TermsAndNonTerms(token, typeStack);
                 if(vstup == E) {
@@ -799,16 +716,46 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
         }
     } while (vstup != USD || !SA_isOK(termStack)); // opakuji dokud vstup neni $ a dokud muzu redukovat
     //if(listFrame->globalElement->node->funcData->returnList->firstElement->type != typeStack->topElement->data) return ERROR_SEM_TYPE_COUNT;
+
+    //kontrola vyslednych datovych typu
+    if(retData == TYPE_INTEGER) {
+        if (typeStack->topElement->data == DATA_TYPE_STRING) {
+            freeStacks(termStack, typeStack);
+            return ERROR_SEM_ASSIGN;
+        }
+        if (typeStack->topElement->data == DATA_TYPE_NUMBER)
+            printf("FLOAT2INTS\n");
+    } else if (retData == TYPE_NUMBER) {
+        if (typeStack->topElement->data == DATA_TYPE_STRING) {
+            freeStacks(termStack, typeStack);
+            return ERROR_SEM_ASSIGN;
+        }
+        if (typeStack->topElement->data == DATA_TYPE_INTEGER)
+            printf("INT2FLOATS\n");
+    } else if (retData == TYPE_STRING) {
+        if (typeStack->topElement->data == DATA_TYPE_INTEGER) {
+            freeStacks(termStack, typeStack);
+            return ERROR_SEM_ASSIGN;
+        }
+        if (typeStack->topElement->data == DATA_TYPE_NUMBER) {
+            freeStacks(termStack, typeStack);
+            return ERROR_SEM_ASSIGN;
+        }
+    }
+
+    // neni tam rovnost nebo nerovnost
     if (!isCorrect) {
         printf("POPS <tmp>\n");
         printf("MOVE GF@<tmp2> <tmp>\n");
     } else {
-        printf("POPS GF@<tmp>\n");
-        printf("MOVE LF@<var> GF@<tmp>\n");
+        printf("POPS TF@%s\n", var);
+        //printf("POPS GF@<tmp>\n");
+        //printf("MOVE LF@<var> GF@<tmp>\n");
     }
+    // je tam rovnost nebo nerovnost
     switch (decide) {
         case EQ:
-            printf("JUMPIFEQS <label>\n");
+            printf("JUMPIFEQS <label> GF@<tmp2> GF@<tmp1>\n");
             break;
         case NEQ:
             printf("JUMPIFNEQS <label>\n");
