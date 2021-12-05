@@ -1626,7 +1626,7 @@ int var_assign(Token *token, FILE *sourceFile, Data_type varType) {
         return error;
 
     // uzel s pripadnym identifikatorem (za rovnitkem)
-    bst_node_t *id;
+    bst_node_t *id = NULL;
     switch (token->ID) {
         case TOKEN_ID_ID: // id_var nebo var_fce
             // vyhledam identifikator v tabulce
@@ -1637,10 +1637,24 @@ int var_assign(Token *token, FILE *sourceFile, Data_type varType) {
             if (id == NULL) // identifikator neexistuje
                 return ERROR_SEM_UNDEFINED;
             else if (isFnc(id)) { // id_fnc
+                // test, zda vraci funkce spravny datovy typ
+                if(id->funcData->returnList->firstElement == NULL) { // funkce nevraci hodnotu
+                    // TODO generovani kodu rovnou priradit promenne hodnotu nil
+                }
+                else if(id->funcData->returnList->firstElement->type != varType) {
+                    if(varType == TYPE_NUMBER && id->funcData->returnList->firstElement->type == TYPE_INTEGER) {
+                        // TODO  pretypovat pozdejsi volani funkce z integer na number
+                    }
+                    else // navratova hodnota fce neni kompatibilni s typem promenne
+                        return ERROR_SEM_ASSIGN;
+                }
+                else { // navratova hodnota fce je kompatibilni s typem promenne
+
+                }
+
                 // rozvinuti neterminalu fnc_call
                 if((error = fnc_call(token, sourceFile))) // aplikace pravidla 49
                     return error;
-                // TODO generovani kodu - prirazeni promenne navratovou hodnotu funkce
             }
             else { // id_var
                 // zavolani bottomup SA pro neterminal expr
