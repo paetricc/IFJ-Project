@@ -1,7 +1,7 @@
 /**
  * Projekt: IFJ2021
  * 
- * @brief Implementace top-down syntakticke anylzy.
+ * @brief Implementace top-down syntakticke anylzy shora dolu.
  *
  * @author Šimon Vacek xvacek10@stud.fit.vutbr.cz
 */
@@ -42,13 +42,18 @@ int get_non_white_token(Token *token, FILE *sourceFile) {
         if ((error = get_token(token, sourceFile)) != ERROR_PASSED)
             // lexikalni nebo kompilatorova chyba
             return error;
-    } while (token->ID != TOKEN_ID_EOF && (
-            token->ID == TOKEN_ID_SPACE || token->ID == TOKEN_ID_EOL ||
-            token->ID == TOKEN_ID_TAB || token->ID == TOKEN_ID_LCMT2 ||
-            token->ID == TOKEN_ID_BCMT4));
+    } while (token->ID != TOKEN_ID_EOF && (token->ID == TOKEN_ID_SPACE || token->ID == TOKEN_ID_EOL ||
+                token->ID == TOKEN_ID_TAB || token->ID == TOKEN_ID_LCMT2 || token->ID == TOKEN_ID_BCMT4));
     return error;
-}
+} // get_non_white_token
 
+
+/**
+ * @brief Kontrolue, zda vsechny deklarovane funkce byly definovany.
+ *
+ * @param func Koren stromu globalniho ramce
+ * @return Error, ktery funkce vygeneruje
+ */
 int checkDeclaredFncs(bst_node_t *func) {
     if(func == NULL)
         return ERROR_PASSED;
@@ -61,7 +66,21 @@ int checkDeclaredFncs(bst_node_t *func) {
         else
             return checkDeclaredFncs(func->right);
     }
-}
+} // checkDeclaredFncs
+
+
+/**
+ *  @brief Zpracovava parametry volane vestavene funkce write()
+ *
+ * @return Typ chyby, ktera nastane
+ */
+int writeFncCall(Token *token, FILE *sourceFile) {
+    // TODO
+    do {
+        get_non_white_token(token, sourceFile);
+    } while (token->ID != TOKEN_ID_RBR);
+    return ERROR_PASSED;
+} // writeFncCall
 
 /**
  * @brief Neterminal start.
@@ -107,6 +126,8 @@ int start(Token *token, FILE *sourceFile) {
     Dynamic_string *str = (Dynamic_string *) malloc(sizeof(Dynamic_string));
     if(str == NULL)
         return ERROR_COMPILER;
+
+    /* Naplneni stromu vestavenymi funkcemi */
 
     // ord()
     str->str = "ord";
@@ -154,6 +175,7 @@ int start(Token *token, FILE *sourceFile) {
         error = bst_insert(&(symTable->globalElement->node), str, true);
         if(!error) {
             bst_node_t *wr = bst_search(symTable->globalElement->node, str);
+            setFncDec(wr, true);
             setFncDef(wr, true);
         }
     }
@@ -169,7 +191,7 @@ int start(Token *token, FILE *sourceFile) {
     error = program(token, sourceFile); // aplikace pravidla 1
 
     if(error == ERROR_PASSED)
-        // kontrola, ze vsechny deklarovane funkce byly definovany
+        // kontrola, zda vsechny deklarovane funkce byly definovany
         error = checkDeclaredFncs(symTable->globalElement->node);
 
 
@@ -177,7 +199,7 @@ int start(Token *token, FILE *sourceFile) {
     SLL_Frame_Dispose(symTable);
     free(symTable);
     return error;
-}
+} // start
 
 /**
  * @brief Neterminal program.
@@ -265,6 +287,7 @@ int fnc_dec(Token *token, FILE *sourceFile) {
     if (token->ID != TOKEN_ID_ID)
         return ERROR_SYNTAX;
 
+    // uzel nove deklarovane funkce
     bst_node_t *node_idFnc = NULL;
 
     // overeni, zda nebyla funkce uz deklarovana nebo definovana
@@ -338,6 +361,7 @@ int fnc_dec(Token *token, FILE *sourceFile) {
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param node_idFnc Uzel funkce, ke ktere budu pridavat datove typy parametru
  * @return Typ erroru generovany analyzou
 */
 int params_dec(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
@@ -365,8 +389,8 @@ int params_dec(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
                 fsetpos(sourceFile, &lastReadPos);
 
                 // rozvinuti neterminalu data_type
-                // TODO pridat jeden parametr
-                if ((error = data_type(token, sourceFile, node_idFnc, NULL, PARAM_TYPE))) // aplikace pravidla 8
+                // aplikace pravidla 8
+                if ((error = data_type(token, sourceFile, node_idFnc, NULL, PARAM_TYPE)))
                     return error;
             } else // prijate keyword nelze pouzit - pravidlo neexistuje
                 return ERROR_SYNTAX;
@@ -374,7 +398,7 @@ int params_dec(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
 
         default: // pro token zadne pravidlo neexistuje
             return ERROR_SYNTAX;
-    }
+    } // switch
 
     return params_dec2(token, sourceFile, node_idFnc);
 } // params_dec
@@ -387,6 +411,7 @@ int params_dec(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param node_idFnc Uzel funkce, ke ktere budu pridavat datove typy parametru
  * @return Typ erroru generovany analyzou
 */
 int params_dec2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
@@ -404,15 +429,16 @@ int params_dec2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
         fsetpos(sourceFile, &lastReadPos);
         return ERROR_PASSED; // aplikace pravidla 9
     } else if (token->ID == TOKEN_ID_CMA) { // ','
-        // TODO pridat jeden parametr
-        if ((error = data_type(token, sourceFile, node_idFnc, NULL, PARAM_TYPE))) // aplikace pravidla 10
+        // aplikace pravidla 10
+        if ((error = data_type(token, sourceFile, node_idFnc, NULL, PARAM_TYPE)))
             return error;
     } else {
         return ERROR_SYNTAX;
     }
 
+    // rozvinuti neterminalu params_dec2
     return params_dec2(token, sourceFile, node_idFnc);
-}
+} // params_dec2
 
 /**
  * @brief Neterminal return_type.
@@ -421,6 +447,7 @@ int params_dec2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param node_idFnc Uzel funkce, ke ktere budu pridavat datovy typ navratove hodnoty
  * @return Typ erroru generovany analyzou
 */
 int return_type(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
@@ -460,8 +487,9 @@ int return_type(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
 
         default: // pro token zadne pravidlo neexistuje
             return ERROR_SYNTAX;
-    }
+    } // switch
 
+    // rozvinuti netreminalu data_type
     return data_type(token, sourceFile, node_idFnc, NULL, RET_TYPE); // aplikace pravidla 11
 } // return_type
 
@@ -473,6 +501,9 @@ int return_type(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param node_id Uzel funkce, ke ktere budu pridavat datove typy
+ * @param param Ukazatel na jeden parametr ze seznamu parametru funkce (NULL pokud nekontroluju datovy typ parametru)
+ * @param dataSwitch Urcuje, zda se datovy typ priradi promenne, parametru, nebo navratove hodnote
  * @return Typ erroru generovany analyzou
 */
 int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr_Param param, int dataSwitch) {
@@ -496,7 +527,6 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
                     if(!isDecFnc(node_id))
                         error = SLL_Param_Insert(TYPE_INTEGER, node_id->name, node_id);
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
-                        // TODO vratit odpovidajici chybu
                         error = (param->type == TYPE_INTEGER ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
                     break;
 
@@ -506,7 +536,7 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
                         error = (node_id->funcData->returnList->firstElement->type == TYPE_INTEGER ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
                     break;
-            }
+            } // switch
             break; // KEYWORD_INTEGER
 
         case KEYWORD_NUMBER: // aplikace pravidla 14
@@ -528,8 +558,8 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
                         error = (node_id->funcData->returnList->firstElement->type == TYPE_NUMBER ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
                     break;
-            } // KEYWORD_NUMBER
-            break;
+            } // switch
+            break; // KEYWORD_NUMBER
 
         case KEYWORD_STRING: // aplikace pravidla 15
             switch (dataSwitch) {
@@ -550,8 +580,8 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
                         error = (node_id->funcData->returnList->firstElement->type == TYPE_STRING ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
                     break;
-            } // KEYWORD_STRING
-            break;
+            } // switch
+            break; // KEYWORD_STRING
 
         default:
             return ERROR_SYNTAX; // nevalidni klicove slovo
@@ -582,12 +612,18 @@ int fnc_call(Token *token, FILE *sourceFile) {
     if (token->ID != TOKEN_ID_ID)
         return ERROR_SYNTAX;
 
+    // uzel s volanou funkci
     bst_node_t *node_idFnc = NULL;
 
     // vyhledani id_fnc v symtable
     node_idFnc = search_Iden(token->Value.string, symTable);
     if(node_idFnc == NULL) // funkce nebyla deklarovana ani definovana
         return ERROR_SEM_UNDEFINED;
+
+    // volani funkce write se osetri zvlast (promenny pocet parametru
+    if(!strcmp(node_idFnc->name->str, "write")) {
+        return writeFncCall(token, sourceFile);
+    }
 
     // '('
     if ((error = get_non_white_token(token, sourceFile)))
@@ -619,7 +655,7 @@ int fnc_call(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX;
 
     return ERROR_PASSED;
-}
+} // fnc_call
 
 
 /**
@@ -629,6 +665,8 @@ int fnc_call(Token *token, FILE *sourceFile) {
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param node_idFnc Uzel funkce, pro jejiz parametry budu kontrolovat datove typy
+ * @param param Ukazatel na jeden parametr ze seznamu parametru funkce
  * @return Typ erroru generovany analyzou
 */
 int value(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param *param) {
@@ -644,7 +682,7 @@ int value(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_
     switch (token->ID) {
         case TOKEN_ID_RBR: // ')'
             // funkce ocekava parametr, ktery na vstup neprisel
-            if(isDecFnc(node_idFnc) && (*param) != NULL)
+            if((isDecFnc(node_idFnc) || isDefFnc(node_idFnc)) && (*param) != NULL)
                 return ERROR_SEM_TYPE_COUNT;
             else {
                 // nastaveni cteni pred zavorku, aby si ji precetl volajici
@@ -654,8 +692,8 @@ int value(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_
 
         case TOKEN_ID_KEYWORD: // nil
             if (token->Value.keyword == KEYWORD_NIL) {
-                // deklarovana funkce neocekava dalsi parametr
-                if(isDecFnc(node_idFnc) && (*param) == NULL)
+                // funkce neocekava dalsi parametr
+                if((isDecFnc(node_idFnc) || isDefFnc(node_idFnc)) && (*param) == NULL)
                     return ERROR_SEM_TYPE_COUNT;
                 else {
                     // nasteveni cteni pred nil, aby si ji precetl volany
@@ -677,8 +715,8 @@ int value(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_
         case TOKEN_ID_DBL2:
         case TOKEN_ID_EXP3: // num_value
         case TOKEN_ID_FSTR: // str_value
-            // deklarovana funkce neocekava dalsi parametr
-            if(isDecFnc(node_idFnc) && (*param) == NULL)
+            // funkce neocekava dalsi parametr
+            if((isDecFnc(node_idFnc) || isDefFnc(node_idFnc)) && (*param) == NULL)
                 return ERROR_SEM_TYPE_COUNT;
             else {
                 // nastaveni cteni pred hodnotu, aby si ji precetl volany
@@ -690,7 +728,7 @@ int value(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_
 
         default:
             return ERROR_SYNTAX;
-    }
+    } // switch
 
     return value2(token, sourceFile, node_idFnc, param);
 } // value
@@ -703,6 +741,8 @@ int value(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param node_idFnc Uzel funkce, pro jejiz parametry budu kontrolovat datove typy
+ * @param param Ukazatel na jeden parametr ze seznamu parametru funkce
  * @return Typ erroru generovany analyzou
 */
 int value2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param *param) {
@@ -717,7 +757,7 @@ int value2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr
 
     if (token->ID == TOKEN_ID_RBR) { // ')'
         // funkce ocekava parametr, ktery na vstup neprisel
-        if(isDecFnc(node_idFnc) && (*param) != NULL)
+        if((isDecFnc(node_idFnc) || isDefFnc(node_idFnc)) && (*param) != NULL)
             return ERROR_SEM_TYPE_COUNT;
         else {
             // nastaveni cteni pred zavorku, aby si ji precetl volajici
@@ -730,8 +770,8 @@ int value2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr
         return ERROR_SYNTAX;
     }
 
-    // deklarovana funkce neocekava dalsi parametr
-    if(isDecFnc(node_idFnc) && (*param) == NULL)
+    // funkce neocekava dalsi parametr
+    if((isDecFnc(node_idFnc) || isDefFnc(node_idFnc)) && (*param) == NULL)
         return ERROR_SEM_TYPE_COUNT;
 
     // rozvinuti neterminalu value_last
@@ -739,7 +779,7 @@ int value2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr
         return error;
 
     return value2(token, sourceFile, node_idFnc, param);
-}
+} // value2
 
 
 /**
@@ -749,11 +789,13 @@ int value2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param node_idFnc Uzel funkce, pro jejiz parametry budu kontrolovat datove typy
+ * @param param Ukazatel na jeden parametr ze seznamu parametru funkce
  * @return Typ erroru generovany analyzou
 */
 int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param *param) {
     // overeni, zda funkce jeste hleda parametry
-    if(param == NULL)
+    if((*param) == NULL)
         return ERROR_SEM_TYPE_COUNT;
 
     int error;
@@ -765,19 +807,20 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
         // lexikalni nebo kompilatorova chyba
         return error;
 
-    bst_node_t *node_id;
+    // uzel s promennou/funkci
+    bst_node_t *node_idVar = NULL;
     switch (token->ID) {
         case TOKEN_ID_ID: // id_var
             // aplikace pravidla 21
-            node_id = search_Iden(token->Value.string, symTable);
-            if(isFnc(node_id)) // id_fnc
+            node_idVar = search_Iden(token->Value.string, symTable);
+            if(isFnc(node_idVar)) // id_fnc
                 return ERROR_SYNTAX;
-            setVarUsed(node_id, true);
+            setVarUsed(node_idVar, true);
             // overeni datovych typu
-            if(typeVar(node_id) != (*param)->type) {
-                if((*param)->type == TYPE_NUMBER && typeVar(node_id) == TYPE_INTEGER)
+            if(typeVar(node_idVar) != (*param)->type) {
+                if((*param)->type == TYPE_NUMBER && typeVar(node_idVar) == TYPE_INTEGER)
                     // pretypovani integer na number
-                    node_id->varData->type = TYPE_NUMBER;
+                    node_idVar->varData->type = TYPE_NUMBER;
                 else // promenne nemaji kompatibilni typy
                     return ERROR_SEM_TYPE_COUNT;
             }
@@ -825,8 +868,9 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
 
         default: // pro token zadne pravidlo neexistuje
             return ERROR_SYNTAX;
-    }
+    } // switch
 
+    // prejdu na dalsi parametr funkce v seznamu
     (*param) = (*param)->nextElement;
     return ERROR_PASSED;
 } // value_last
@@ -889,12 +933,6 @@ int fnc_def(Token *token, FILE *sourceFile) {
     // odeberu ramec funkce
     SLL_Frame_Delete(symTable);
 
-    // oznacim funkci jako definovanou
-    // TODO kdy tohle provest?
-    // TODO potrebuju promennou isDec? nebo poznam jestli byla fnc deklarovana z isDef?
-    // TODO     <- kvuli volani data_type
-    setFncDef(*node_idFnc, true);
-
     free(node_idFnc);
     return ERROR_PASSED;
 } // fnc_def
@@ -907,6 +945,7 @@ int fnc_def(Token *token, FILE *sourceFile) {
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param node_idFnc Ukazatel na uzel funkce, ktere budu pridavat parametry
  * @return Typ erroru generovany analyzou
 */
 int fnc_head(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
@@ -951,7 +990,6 @@ int fnc_head(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
     *param = (*node_idFnc)->funcData->paramList->firstElement;
 
     // rozvinu neterminal params_def
-    // TODO seznam parametru jako ukazatel na parametr, nebo ukazatel na ukazatel na parametr
     if(isDecFnc(*node_idFnc)) {
         // u deklarovane funkce musim kontrolovat pocet a typ paremtru jeji definice
         if ((error = params_def(token, sourceFile, *node_idFnc, param))) {
@@ -987,6 +1025,7 @@ int fnc_head(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param node_idFnc Ukazatel na uzel funkce, ktere budu pridavat navratovou hodnotu
  * @return Typ erroru generovany analyzou
 */
 int fnc_def2(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
@@ -1051,6 +1090,9 @@ int fnc_def2(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
         // vraceni cteni pred identifikator/ keyword, aby si to precetl volajici
         fsetpos(sourceFile, &lastReadPos);
 
+        // oznacim funkci jako definovanou
+        setFncDef(*node_idFnc, true);
+
         // rozvinuti neterminalu fnc_body
         if ((error = fnc_body(token, sourceFile)))
             return error;
@@ -1071,6 +1113,8 @@ int fnc_def2(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param node_idFnc Uzel funkce, ktere budu pridavat parametry
+ * @param param Ukazatel na jeden parametr ze seznamu parametru funkce
  * @return Typ erroru generovany analyzou
 */
 int params_def(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param *param) {
@@ -1111,7 +1155,7 @@ int params_def(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
 
     // rozsireni neterminalu params_def2
     return params_def2(token, sourceFile, node_idFnc, param);
-}
+} // params_def
 
 
 /**
@@ -1121,6 +1165,8 @@ int params_def(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param node_idFnc Uzel funkce, ktere budu pridavat parametry
+ * @param param Ukazatel na jeden parametr ze seznamu parametru funkce
  * @return Typ erroru generovany analyzou
 */
 int params_def2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param *param) {
@@ -1154,13 +1200,12 @@ int params_def2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLEleme
         return ERROR_SEM_UNDEFINED;
 
     // rozvinuti neterminalu var_def
-    // TODO jak rozlisit var_def pro definici parametru funkce a pro deklaraci promenne
     if ((error = var_defParam(token, sourceFile, node_idFnc, param)))
         return error;
 
     // znovu rozvinuti neterminalu params_def2
     return params_def2(token, sourceFile, node_idFnc, param);
-}
+} // params_def2
 
 /**
  * @brief Neterminal var_def.
@@ -1171,6 +1216,8 @@ int params_def2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLEleme
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param node_idFnc Uzel funkce, ktere budu pridavat parametr
+ * @param param Ukazatel na jeden parametr ze seznamu parametru funkce
  * @return Typ erroru generovany analyzou
 */
 int var_defParam(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param *param) {
@@ -1236,10 +1283,10 @@ int var_defParam(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElem
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param node_idFnc Ukazatel na uzel promenne, ktere budu pridavat datovy typ
  * @return Typ erroru generovany analyzou
 */
 int var_def(Token *token, FILE *sourceFile, bst_node_t **node_idVar) {
-    // TODO jak rozlisit var_def pro definici parametru funkce a pro deklaraci promenne
 
     int error;
     // aplikace pravidla 34
@@ -1280,10 +1327,16 @@ int var_def(Token *token, FILE *sourceFile, bst_node_t **node_idVar) {
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param fnc_ret_dataType Datovy typ, ktera ma funkce vracet
  * @return Typ erroru generovany analyzou
 */
-int return_(Token *token, FILE *sourceFile, Data_type var_dataType) {
+int return_(Token *token, FILE *sourceFile, Data_type fnc_ret_dataType) {
     int error;
+
+    // promenne pro pripadne vraceni cteni
+    fpos_t lastReadPos;
+    fgetpos(sourceFile, &lastReadPos);
+
     // aplikace pravidla 35
 
     // return
@@ -1296,16 +1349,17 @@ int return_(Token *token, FILE *sourceFile, Data_type var_dataType) {
 
     if(token->Value.keyword == KEYWORD_RETURN) { // return
         // volani bottom-up SA (rozsireni neterminalu expr)
-        return exprSyntaxCheck(token, sourceFile, symTable, var_dataType, "cus");
+        return exprSyntaxCheck(token, sourceFile, symTable, fnc_ret_dataType, NULL);
     }
     else if (token->Value.keyword == KEYWORD_END) {
         // funkce ma vratit hodnotu. token return neprisel, ale prisel end => vrati hodnotu nil
         // TODO generovani kodu - vratit hodnotu nil
+        fsetpos(sourceFile, &lastReadPos);
         return ERROR_PASSED;
     }
     else // pro keyword neexistuje pravidlo
         return ERROR_SYNTAX;
-}
+} // return_
 
 
 /**
@@ -1342,7 +1396,7 @@ int return_void(Token *token, FILE *sourceFile) {
     }
 
     return ERROR_PASSED;
-}
+} // return_void
 
 
 /**
@@ -1464,7 +1518,7 @@ int statement(Token *token, FILE *sourceFile) {
             // rozsirim neterminal fnc_call
             return fnc_call(token, sourceFile); // aplikace pravidla 42
         } else { // id_var
-            // aplikace pravidla 41 //TODO tady jsem skoncil
+            // aplikace pravidla 41
 
         }
     } else // pro prijaty token neexistuje pravidlo
@@ -1526,7 +1580,7 @@ int var_dec(Token *token, FILE *sourceFile) {
     error = var_dec_init(token, sourceFile, *node_idVar, var);
     free(node_idVar);
     return error;
-}
+} // var_dec
 
 
 /**
@@ -1536,6 +1590,7 @@ int var_dec(Token *token, FILE *sourceFile) {
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param node_idVar Uzel promenne
  * @return Typ erroru generovany analyzou
 */
 int var_dec_init(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var) {
@@ -1593,6 +1648,7 @@ int var_dec_init(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *v
  *
  * @param token Token, ktery bude naplnen scannerem
  * @param sourceFile Zdrojovy soubor cteny scannerem
+ * @param varType Datovy typ promenne
  * @return Typ erroru generovany analyzou
 */
 int var_assign(Token *token, FILE *sourceFile, Data_type varType, char *var) {
@@ -1607,7 +1663,7 @@ int var_assign(Token *token, FILE *sourceFile, Data_type varType, char *var) {
         return error;
 
     // uzel s pripadnym identifikatorem (za rovnitkem)
-    bst_node_t *id;
+    bst_node_t *id = NULL;
     switch (token->ID) {
         case TOKEN_ID_ID: // id_var nebo var_fce
             // vyhledam identifikator v tabulce
@@ -1618,10 +1674,24 @@ int var_assign(Token *token, FILE *sourceFile, Data_type varType, char *var) {
             if (id == NULL) // identifikator neexistuje
                 return ERROR_SEM_UNDEFINED;
             else if (isFnc(id)) { // id_fnc
+                // test, zda vraci funkce spravny datovy typ
+                if(id->funcData->returnList->firstElement == NULL) { // funkce nevraci hodnotu
+                    // TODO generovani kodu rovnou priradit promenne hodnotu nil
+                }
+                else if(id->funcData->returnList->firstElement->type != varType) {
+                    if(varType == TYPE_NUMBER && id->funcData->returnList->firstElement->type == TYPE_INTEGER) {
+                        // TODO  pretypovat pozdejsi volani funkce z integer na number
+                    }
+                    else // navratova hodnota fce neni kompatibilni s typem promenne
+                        return ERROR_SEM_ASSIGN;
+                }
+                else { // navratova hodnota fce je kompatibilni s typem promenne
+
+                }
+
                 // rozvinuti neterminalu fnc_call
                 if((error = fnc_call(token, sourceFile))) // aplikace pravidla 49
                     return error;
-                // TODO generovani kodu - prirazeni promenne navratovou hodnotu funkce
             }
             else { // id_var
                 // zavolani bottomup SA pro neterminal expr
@@ -1666,7 +1736,7 @@ int var_assign(Token *token, FILE *sourceFile, Data_type varType, char *var) {
 
         default: // pro tento token neexistuje pravidlo
             return ERROR_SYNTAX;
-    }
+    } // switch
 
     return error;
 } // var_assign
@@ -1843,7 +1913,7 @@ int statements(Token *token, FILE *sourceFile) {
         return error;
 
     return statements(token, sourceFile);
-}
+} // statements
 
 
 /**
@@ -1861,7 +1931,8 @@ int parser(FILE *sourceFile) {
     // volani prvniho pravidla a nahrazovani prvniho neterminalu
     int error = start(token, sourceFile);
 
-    // TODO free(token->Value.string);
+    // TODO hazi segfault
+    //free(token->Value.string);
     free(token);
     return error;
 }

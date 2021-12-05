@@ -38,5 +38,6 @@ int statements(Token *, FILE *);
 /*  pomocne funkce  */
 int get_non_white_token(Token *, FILE *);
 int checkDeclaredFncs(bst_node_t *);
+int writeFncCall(Token *, FILE *);
 
 #endif
