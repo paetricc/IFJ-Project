@@ -1,7 +1,7 @@
 /**
  * Projekt: IFJ2021
  * 
- * @brief Implementace top-down syntakticke anylzy.
+ * @brief Implementace top-down syntakticke anylzy shora dolu.
  *
  * @author Šimon Vacek xvacek10@stud.fit.vutbr.cz
 */
@@ -42,10 +42,8 @@ int get_non_white_token(Token *token, FILE *sourceFile) {
         if ((error = get_token(token, sourceFile)) != ERROR_PASSED)
             // lexikalni nebo kompilatorova chyba
             return error;
-    } while (token->ID != TOKEN_ID_EOF && (
-            token->ID == TOKEN_ID_SPACE || token->ID == TOKEN_ID_EOL ||
-            token->ID == TOKEN_ID_TAB || token->ID == TOKEN_ID_LCMT2 ||
-            token->ID == TOKEN_ID_BCMT4));
+    } while (token->ID != TOKEN_ID_EOF && (token->ID == TOKEN_ID_SPACE || token->ID == TOKEN_ID_EOL ||
+                token->ID == TOKEN_ID_TAB || token->ID == TOKEN_ID_LCMT2 || token->ID == TOKEN_ID_BCMT4));
     return error;
 } // get_non_white_token
 
@@ -776,7 +774,7 @@ int value2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr
 */
 int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param *param) {
     // overeni, zda funkce jeste hleda parametry
-    if(param == NULL)
+    if((*param) == NULL)
         return ERROR_SEM_TYPE_COUNT;
 
     int error;
@@ -1487,7 +1485,7 @@ int statement(Token *token, FILE *sourceFile) {
             // rozsirim neterminal fnc_call
             return fnc_call(token, sourceFile); // aplikace pravidla 42
         } else { // id_var
-            // aplikace pravidla 41 //TODO tady jsem skoncil
+            // aplikace pravidla 41
 
         }
     } else // pro prijaty token neexistuje pravidlo
@@ -1876,7 +1874,8 @@ int parser(FILE *sourceFile) {
     // volani prvniho pravidla a nahrazovani prvniho neterminalu
     int error = start(token, sourceFile);
 
-    // TODO free(token->Value.string);
+    // TODO hazi segfault
+    //free(token->Value.string);
     free(token);
     return error;
 }
