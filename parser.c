@@ -661,7 +661,7 @@ int value(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_
     switch (token->ID) {
         case TOKEN_ID_RBR: // ')'
             // funkce ocekava parametr, ktery na vstup neprisel
-            if(isDecFnc(node_idFnc) && (*param) != NULL)
+            if((isDecFnc(node_idFnc) || isDefFnc(node_idFnc)) && (*param) != NULL)
                 return ERROR_SEM_TYPE_COUNT;
             else {
                 // nastaveni cteni pred zavorku, aby si ji precetl volajici
@@ -671,8 +671,8 @@ int value(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_
 
         case TOKEN_ID_KEYWORD: // nil
             if (token->Value.keyword == KEYWORD_NIL) {
-                // deklarovana funkce neocekava dalsi parametr
-                if(isDecFnc(node_idFnc) && (*param) == NULL)
+                // funkce neocekava dalsi parametr
+                if((isDecFnc(node_idFnc) || isDefFnc(node_idFnc)) && (*param) == NULL)
                     return ERROR_SEM_TYPE_COUNT;
                 else {
                     // nasteveni cteni pred nil, aby si ji precetl volany
@@ -694,8 +694,8 @@ int value(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_
         case TOKEN_ID_DBL2:
         case TOKEN_ID_EXP3: // num_value
         case TOKEN_ID_FSTR: // str_value
-            // deklarovana funkce neocekava dalsi parametr
-            if(isDecFnc(node_idFnc) && (*param) == NULL)
+            // funkce neocekava dalsi parametr
+            if((isDecFnc(node_idFnc) || isDefFnc(node_idFnc)) && (*param) == NULL)
                 return ERROR_SEM_TYPE_COUNT;
             else {
                 // nastaveni cteni pred hodnotu, aby si ji precetl volany
@@ -736,7 +736,7 @@ int value2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr
 
     if (token->ID == TOKEN_ID_RBR) { // ')'
         // funkce ocekava parametr, ktery na vstup neprisel
-        if(isDecFnc(node_idFnc) && (*param) != NULL)
+        if((isDecFnc(node_idFnc) || isDefFnc(node_idFnc)) && (*param) != NULL)
             return ERROR_SEM_TYPE_COUNT;
         else {
             // nastaveni cteni pred zavorku, aby si ji precetl volajici
@@ -749,8 +749,8 @@ int value2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr
         return ERROR_SYNTAX;
     }
 
-    // deklarovana funkce neocekava dalsi parametr
-    if(isDecFnc(node_idFnc) && (*param) == NULL)
+    // funkce neocekava dalsi parametr
+    if((isDecFnc(node_idFnc) || isDefFnc(node_idFnc)) && (*param) == NULL)
         return ERROR_SEM_TYPE_COUNT;
 
     // rozvinuti neterminalu value_last
@@ -787,19 +787,19 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
         return error;
 
     // uzel s promennou/funkci
-    bst_node_t *node_id;
+    bst_node_t *node_idVar = NULL;
     switch (token->ID) {
         case TOKEN_ID_ID: // id_var
             // aplikace pravidla 21
-            node_id = search_Iden(token->Value.string, symTable);
-            if(isFnc(node_id)) // id_fnc
+            node_idVar = search_Iden(token->Value.string, symTable);
+            if(isFnc(node_idVar)) // id_fnc
                 return ERROR_SYNTAX;
-            setVarUsed(node_id, true);
+            setVarUsed(node_idVar, true);
             // overeni datovych typu
-            if(typeVar(node_id) != (*param)->type) {
-                if((*param)->type == TYPE_NUMBER && typeVar(node_id) == TYPE_INTEGER)
+            if(typeVar(node_idVar) != (*param)->type) {
+                if((*param)->type == TYPE_NUMBER && typeVar(node_idVar) == TYPE_INTEGER)
                     // pretypovani integer na number
-                    node_id->varData->type = TYPE_NUMBER;
+                    node_idVar->varData->type = TYPE_NUMBER;
                 else // promenne nemaji kompatibilni typy
                     return ERROR_SEM_TYPE_COUNT;
             }
@@ -905,9 +905,6 @@ int fnc_def(Token *token, FILE *sourceFile) {
 
     // odeberu ramec funkce
     SLL_Frame_Delete(symTable);
-
-    // oznacim funkci jako definovanou
-    setFncDef(*node_idFnc, true);
 
     free(node_idFnc);
     return ERROR_PASSED;
@@ -1065,6 +1062,9 @@ int fnc_def2(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
 
         // vraceni cteni pred identifikator/ keyword, aby si to precetl volajici
         fsetpos(sourceFile, &lastReadPos);
+
+        // oznacim funkci jako definovanou
+        setFncDef(*node_idFnc, true);
 
         // rozvinuti neterminalu fnc_body
         if ((error = fnc_body(token, sourceFile)))
