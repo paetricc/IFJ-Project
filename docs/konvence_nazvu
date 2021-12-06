@@ -1,0 +1,7 @@
+LABEL funkce 			  -	$fnc_%s
+LABEL end funkce 		-	$$end_fnc_%s
+Promenne 			      -	&%s	
+if				          -	!if%d
+else				        -	!else%d
+endif				        -	!endif%d
+return				      -	*return_%s
