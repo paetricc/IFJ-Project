@@ -272,6 +272,8 @@ int get_token(Token *token, FILE *source_file ) {
                     }
                     break;
                 case STATE_BCMT2:
+                    if (c == EOF)
+                        return ERROR_LEX;
                     if (c == ']') {
                         state = STATE_BCMT3;
                     } else if (c == '[') {
@@ -585,10 +587,6 @@ int get_token(Token *token, FILE *source_file ) {
                     if (c >= '0' && c <= '9') {
                         if (!(DS_Add_Tester(ptr_Str, c))) { return ERROR_COMPILER; }
                         state = STATE_DBL2;
-
-                    } else if (c == 'e' || c == 'E') {
-                        if (!(DS_Add_Tester(ptr_Str, c))) {return ERROR_COMPILER;}
-                        state = STATE_EXP;
                     } else {
                         state = STATE_ERROR;
                     }

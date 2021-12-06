@@ -80,6 +80,11 @@ int writeFncCall(Token *token, FILE *sourceFile) {
     error = get_non_white_token(token, sourceFile);
     while (token->ID != TOKEN_ID_RBR) {
         if (token->ID == TOKEN_ID_ID) {
+            // vyhledam promennou
+            bst_node_t *node_idVar = search_Iden(token->Value.string, symTable);
+            if(node_idVar == NULL || isFnc(node_idVar)) // promenna neexistuje, nebo jde o funkci
+                return ERROR_SEM_UNDEFINED;
+
             printf("WRITE TF@_%s\n", token->Value.string->str);
             //call_write(token->Value.string);
         } else if (token->ID == TOKEN_ID_FSTR) {
@@ -204,6 +209,7 @@ int start(Token *token, FILE *sourceFile) {
     }
 
     printf(".IFJcode21\n");
+    printf("DEFVAR GF@!varFloat\n");
     //printf("JUMP $$main\n");
 
     // brikule
@@ -664,6 +670,8 @@ int fnc_call(Token *token, FILE *sourceFile) {
         return ERROR_COMPILER;
     *param = node_idFnc->funcData->paramList->firstElement;
 
+    printf("CREATEFRAME\n");
+
     // rozvinuti neterminalu value
     if ((error = value(token, sourceFile, node_idFnc, param))) {
         free(param);
@@ -679,7 +687,6 @@ int fnc_call(Token *token, FILE *sourceFile) {
     if (token->ID != TOKEN_ID_RBR)
         return ERROR_SYNTAX;
 
-    printf("CREATEFRAME\n");
     printf("CALL $%s\n", var);
 
     return ERROR_PASSED;
@@ -1351,7 +1358,7 @@ int var_def(Token *token, FILE *sourceFile, bst_node_t **node_idVar) {
         return ERROR_SYNTAX;
 
     // overeni, ze identifikator zatim neexistuje
-    if (bst_search(symTable->TopLocalElement->node, token->Value.string) != NULL)
+    if (bst_search(symTable->TopLocalElement->node, token->Value.string) != NULL || bst_search(symTable->globalElement->node, token->Value.string) != NULL)
         return ERROR_SEM_UNDEFINED;
     // vlozeni identifikatoru do symtable
     bst_insert(&(symTable->TopLocalElement->node), token->Value.string, false);
