@@ -90,7 +90,9 @@ int writeFncCall(Token *token, FILE *sourceFile) {
             //call_write(token->Value.string);
         } else if (token->ID == TOKEN_ID_FSTR) {
             printf("PUSHFRAME\n");
-            call_write(converString(token->Value.string->str));
+            char *output = converString(token->Value.string->str);
+            call_write(output);
+            free(output);
             printf("POPFRAME\n");
         }
         error = get_non_white_token(token, sourceFile);
@@ -211,10 +213,12 @@ int start(Token *token, FILE *sourceFile) {
 
     printf(".IFJcode21\n");
     printf("DEFVAR GF@&varFloat\n");
+    printf("DEFVAR GF@&varBool\n");
     //printf("JUMP $$main\n");
 
     // brikule
     make_write();
+    make_NILcompare();
 
     // vse korektni - uplatnuju pravidlo a rozsiruju dalsi neterminal
     error = program(token, sourceFile); // aplikace pravidla 1
@@ -1877,6 +1881,7 @@ int if_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     DLL_Instruct_Init(dll_instruct);
     getAllVar(dll_instruct, symTable);
     movePrevious(dll_instruct);
+    DLL_Instruct_Dispose(dll_instruct);
     free(dll_instruct);
 
     // rozvinu neterminal statements
@@ -1909,6 +1914,7 @@ int if_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     DLL_Instruct_Init(dll_instruct);
     getAllVar(dll_instruct, symTable);
     movePrevious(dll_instruct);
+    DLL_Instruct_Dispose(dll_instruct);
     free(dll_instruct);
 
     bool returnedInElse = false;
@@ -2066,7 +2072,7 @@ int parser(FILE *sourceFile) {
     int error = start(token, sourceFile);
 
     // TODO hazi segfault
-    //free(token->Value.string);
+    //DS_Free(token->Value.string);
     free(token);
     return error;
 }

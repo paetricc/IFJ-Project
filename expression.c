@@ -22,7 +22,7 @@ static TermsAndNonTerms p_table[17][17] =  {
 /*  / */ {  I, I, I, I, I, I, R, I, R, R, I, I, I, I, I, I, I },
 /* // */ {  I, I, I, I, I, I, R, I, R, R, I, I, I, I, I, I, I },
 /*  ( */ { -1, R, R, R, R, R, R, E, R, R, R, R, R, R, R, R, R },
-/*  ) */ {  I, I, I, I, I, I,-1, I,-1,-1, I, I, I, I, I, I, I },
+/*  ) */ {  I, I, I, I, I, I,-1, I, H,-1, I, I, I, I, I, I, I },
 /*  i */ {  I, I, I, I, I, I,-1, I, H, R, I, I, I, I, I, I, I },
 /*  # */ {  I, I, I, I, I, I, R, I, R,-1, I, I, I, I, I, I, I },
 /* .. */ {  I, R, R, R, R, R, R, I, R, R, R, I, I, I, I, I, I },
@@ -297,24 +297,18 @@ int checkDataTypes_LT_GT(TypeStack *typeStack) {
     firstOp = TypeStack_pop(typeStack);
     secondOp = TypeStack_pop(typeStack);
     if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
-        printf("POPS <tmp>\n");
-        printf("MOVE GF@<tmp1> <tmp>\n");
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
-        printf("POPS <var>\n");
-        printf("INT2FLOATS\n");
-        printf("PUSHS <var>\n");
-        printf("POPS <tmp>\n");
-        printf("MOVE GF@<tmp1> <tmp>\n");
+        make_POPSandPUSH_float();
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
-        printf("INT2FLOATS\n");
-        printf("POPS <tmp>\n");
-        printf("MOVE GF@<tmp1> <tmp>\n");
+        make_INT2FLOATS();
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_NUMBER) {
-        printf("POPS <tmp>\n");
-        printf("MOVE GF@<tmp1> <tmp>\n");
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else {
         return ERROR_SEM_COMPAT;
@@ -391,28 +385,21 @@ int checkDataTypes_LTE_GTE(TypeStack *typeStack) {
     firstOp = TypeStack_pop(typeStack);
     secondOp = TypeStack_pop(typeStack);
     if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
-        printf("POPS GF@<tmp>\n");
-        printf("MOVE GF@<tmp1> GF@<tmp>\n");
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
-        printf("POPS GF@<var>\n");
-        printf("INT2FLOATS\n");
-        printf("PUSHS GF@<var>\n");
-        printf("POPS GF@<tmp>\n");
-        printf("MOVE GF@<tmp1> GF@<tmp>\n");
+        make_POPSandPUSH_float();
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
-        printf("INT2FLOATS\n");
-        printf("POPS GF@<tmp>\n");
-        printf("MOVE GF@<tmp1> GF@<tmp>\n");
+        make_INT2FLOATS();
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_NUMBER) {
-        printf("POPS GF@<tmp>\n");
-        printf("MOVE GF@<tmp1> GF@<tmp>\n");
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NIL && secondOp == DATA_TYPE_NIL) {
-        printf("POPS GF@<tmp>\n");
-        printf("MOVE GF@<tmp1> GF@<tmp>\n");
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_NIL);
     } else {
         return ERROR_SEM_COMPAT;
@@ -440,8 +427,7 @@ int checkDataTypes_DDOT(TypeStack *typeStack) {
     firstOp = TypeStack_pop(typeStack);
     secondOp = TypeStack_pop(typeStack);
     if (firstOp == DATA_TYPE_STRING && secondOp == DATA_TYPE_STRING) {
-        printf("POPS GF@<tmp>\n");
-        printf("MOVE GF@<tmp1> GF@<tmp>\n");
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_STRING);
     } else {
         return ERROR_SEM_COMPAT;
@@ -500,10 +486,9 @@ int checkRulesAndApply(TermStack *termStack, TypeStack *typeStack) {
                ptr->previousElement->previousElement->previousElement->data == R) {
         if (checkDataTypes_DDOT(typeStack)) return ERROR_SEM_COMPAT;
         // TODO instrukce CONCAT (POPS <str1>(firstOp), POPS <str2>(secondOp), CONCAT <var> <str2> <str1> PUSHS <var>(str2..str1))
-        printf("POPS <str1>\n");
-        printf("POPS <str2>\n");
-        printf("CONCAT <var> <str2> <str1>\n");
-        printf("PUSHS <var>\n");
+        printf("POPS TF@&tmp2\n");
+        printf("CONCAT TF@&tmp TF@&tmp2 TF@&tmp1\n");
+        printf("PUSHS TF@&tmp\n");
         TermStack_applyReduce(termStack);
     } else if (ptr->data == RBR && ptr->previousElement->data == EXP &&
                ptr->previousElement->previousElement->data == LBR &&
@@ -548,9 +533,9 @@ int checkRulesAndApply(TermStack *termStack, TypeStack *typeStack) {
             return ERROR_SEM_COMPAT;
         }
         // TODO intrukce STRLEN (POPS <str>(firstOp), STRLEN <var> <str>, PUSHS <var>)
-        printf("POPS <str>\n");
-        printf("STRLEN <var> <str>\n");
-        printf("PUSHS <var>\n");
+        printf("POPS TF@&tmp1 \n");
+        printf("STRLEN TF@&tmp TF@&tmp1\n");
+        printf("PUSHS TF@&tmp\n");
         TermStack_applyReduce(termStack);
     } else {
         return ERROR_SYNTAX;
@@ -616,7 +601,10 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
             (*ptrFrame) = listFrame->TopLocalElement;
             // iterace ramci dokud ptrFrame neni global && dokud !isInitVar(bst_search((*ptrFrame)->node, token->Value.string)))
 
-            while(true) {
+            ptr_node = bst_search(listFrame->globalElement->node, token->Value.string);
+            bool doLoop = ptr_node == NULL;
+
+            while(doLoop) {
                 if ((*ptrFrame) == listFrame->globalElement) {
                     free(ptrFrame);
                     freeStacks(termStack, typeStack);
@@ -632,6 +620,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
                     } else if (ptr_node->varData->type == TYPE_INTEGER) {
                         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
                     } else {
+                        free(ptrFrame);
                         freeStacks(termStack, typeStack);
                         return ERROR_SEM_UNDEFINED;
                     }
@@ -639,7 +628,6 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
                 }
                 (*ptrFrame) = (*ptrFrame)->previousElement;
             }
-
             /* chujoviny konci tady */
         }
         // podle pravidla v tabulce rozhodnu co budu delat
@@ -764,26 +752,36 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
             printf("JUMPIFEQ !else%d TF@&tmp2 TF@&tmp1\n", elseCounter++);
             break;
         case LT:
+            make_insertNILcompare();
+            printf("PUSHS TF@&tmp2\n");
+            printf("PUSHS TF@&tmp1\n");
             printf("LTS\n");
             printf("PUSHS bool@true\n");
-            printf("JUMPIFEQS <label>\n");
+            printf("JUMPIFNEQS !else%d\n", elseCounter++);
             break;
         case LTE:
-            printf("LT <bool> <tmp2> <tmp1>\n");
-            printf("EQS\n");
-            printf("PUSHS bool@<bool>\n");
-            printf("JUMPIFEQS <label>\n");
+            printf("PUSHS TF@&tmp2\n");
+            printf("PUSHS TF@&tmp1\n");
+            printf("GTS\n");
+            printf("NOTS\n");
+            printf("PUSHS bool@true\n");
+            printf("JUMPIFNEQS !else%d\n", elseCounter++);
             break;
         case GT:
+            make_insertNILcompare();
+            printf("PUSHS TF@&tmp2\n");
+            printf("PUSHS TF@&tmp1\n");
             printf("GTS\n");
             printf("PUSHS bool@true\n");
-            printf("JUMPIFEQS <label>\n");
+            printf("JUMPIFNEQS !else%d\n", elseCounter++);
             break;
         case GTE:
-            printf("GT <bool> <tmp2> <tmp1>\n");
-            printf("EQS\n");
-            printf("PUSHS bool@<bool>\n");
-            printf("JUMPIFEQS <label>\n");
+            printf("PUSHS TF@&tmp2\n");
+            printf("PUSHS TF@&tmp1\n");
+            printf("LTS\n");
+            printf("NOTS\n");
+            printf("PUSHS bool@true\n");
+            printf("JUMPIFNEQS !else%d\n", elseCounter++);
             break;
         default:
             break;

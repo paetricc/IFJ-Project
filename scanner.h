@@ -128,7 +128,7 @@ typedef enum {
  */
 typedef union {
     Dynamic_string *string;
-    int Integer;
+    long long int Integer;
     Keyword keyword;
     double Double;
 }Token_Value;

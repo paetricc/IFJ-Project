@@ -3,6 +3,7 @@
 #include "error.h"
 #include "symtable.h"
 #include <string.h>
+#include "generate_code.h"
 
 TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token *, TypeStack *);
 

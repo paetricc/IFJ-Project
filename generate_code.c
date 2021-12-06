@@ -223,3 +223,36 @@ void make_POPSandPUSH_float(){
     printf("INT2FLOATS\n");
     printf("PUSHS GF@&varFloat\n");
 }
+
+void call_NILcompare() {
+    printf("PUSHFRAME\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@&var\n");
+    printf("MOVE TF@&var LF@&tmp\n");
+    printf("CALL $fnc_NILcompare\n");
+}
+
+void make_NILcompare() {
+    printf("JUMP $$endNILcompare\n");
+    printf("LABEL $fnc_NILcompare\n");
+    printf("PUSHFRAME\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@&varType\n");
+    printf("TYPE TF@&varType LF@&var\n");
+    printf("JUMPIFEQ $errorNil TF@&varType string@nil\n");
+    printf("POPFRAME\n");
+    printf("POPFRAME\n");
+    printf("RETURN\n");
+    printf("LABEL $errorNil\n");
+    printf("EXIT int@8\n");
+    printf("LABEL $$endNILcompare\n");
+}
+
+void make_insertNILcompare() {
+    printf("MOVE TF@&tmp TF@&tmp2\n");
+    call_NILcompare();
+    printf("MOVE TF@&tmp2 TF@&tmp\n");
+    printf("MOVE TF@&tmp TF@&tmp1\n");
+    call_NILcompare();
+    printf("MOVE TF@&tmp1 TF@&tmp\n");
+}

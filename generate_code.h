@@ -60,4 +60,10 @@ void make_FLOAT2INTS();
 
 void make_POPSandPUSH_float();
 
+void call_NILcompare();
+
+void make_NILcompare();
+
+void make_insertNILcompare();
+
 #endif //_GENERATE_CODE_H
