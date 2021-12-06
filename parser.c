@@ -204,6 +204,7 @@ int start(Token *token, FILE *sourceFile) {
     }
 
     printf(".IFJcode21\n");
+    printf("DEFVAR GF@!varFloat\n");
     //printf("JUMP $$main\n");
 
     // brikule
@@ -664,6 +665,8 @@ int fnc_call(Token *token, FILE *sourceFile) {
         return ERROR_COMPILER;
     *param = node_idFnc->funcData->paramList->firstElement;
 
+    printf("CREATEFRAME\n");
+
     // rozvinuti neterminalu value
     if ((error = value(token, sourceFile, node_idFnc, param))) {
         free(param);
@@ -679,7 +682,6 @@ int fnc_call(Token *token, FILE *sourceFile) {
     if (token->ID != TOKEN_ID_RBR)
         return ERROR_SYNTAX;
 
-    printf("CREATEFRAME\n");
     printf("CALL $%s\n", var);
 
     return ERROR_PASSED;

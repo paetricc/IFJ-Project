@@ -232,9 +232,9 @@ int checkDataTypes_ADD_SUB_MUL_DIV(TypeStack *typeStack) {
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
         // druhe operande je INT tak vyndej druhy ho pretypuj
-        printf("POPS <varFloat>\n");
+        printf("POPS GF@!varFloat\n");
         printf("INT2FLOATS\n");
-        printf("PUSHS <varFloat>\n");
+        printf("PUSHS GF@!varFloat\n");
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
         // prvni operande je INT tak ho pretypuj
@@ -350,28 +350,28 @@ int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
         printf("MOVE TF@_tmp1 TF@_tmp\n");
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
-        printf("POPS GF@<varFloat>\n");
+        printf("POPS GF@!varFloat\n");
         printf("INT2FLOATS\n");
-        printf("PUSHS GF@<varFloat>\n");
-        printf("POPS TF@<tmp>\n");
-        printf("MOVE TF@<tmp1> TF@<tmp>\n");
+        printf("PUSHS GF@!varFloat\n");
+        printf("POPS TF@_tmp\n");
+        printf("MOVE TF@_tmp1 TF@_tmp\n");
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
         printf("INT2FLOATS\n");
-        printf("POPS <tmp>\n");
-        printf("MOVE GF@<tmp1> <tmp>\n");
+        printf("POPS TF@_tmp\n");
+        printf("MOVE TF@_tmp1 TF@_tmp\n");
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_NUMBER) {
-        printf("POPS <tmp>\n");
-        printf("MOVE GF@<tmp1> <tmp>\n");
+        printf("POPS TF@_tmp\n");
+        printf("MOVE TF@_tmp1 TF@_tmp\n");
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NIL && secondOp == DATA_TYPE_NIL) {
-        printf("POPS GF@<tmp>\n");
-        printf("MOVE GF@<tmp1> GF@<tmp>\n");
+        printf("POPS TF@_tmp>\n");
+        printf("MOVE TF@_tmp1 TF@_tmp\n");
         TypeStack_push(typeStack, DATA_TYPE_NIL);
     } else if (firstOp == DATA_TYPE_STRING && secondOp == DATA_TYPE_STRING) {
-        printf("POPS GF@<tmp>\n");
-        printf("MOVE GF@<tmp1> <tmp>\n");
+        printf("POPS TF@_tmp\n");
+        printf("MOVE TF@_tmp1 TF@_tmp\n");
         TypeStack_push(typeStack, DATA_TYPE_STRING);
     } else {
         return ERROR_SEM_COMPAT;
