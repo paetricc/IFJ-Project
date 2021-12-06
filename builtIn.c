@@ -319,12 +319,3 @@ void call_ord(Dynamic_string *str, int var){
     printf("MOVE TF@_cvar2 int@%d\n", var);
     printf("CALL $fnc_chr\n");
 }
-
-void movePrevious(DLList_Instruct *dlListInstruct) {
-    DLLElementPtr_Instruct pointer = dlListInstruct->firstElement;
-    while (pointer != NULL) {
-        printf("DEFVAR TF@_%s\n", pointer->instruction->str);
-        printf("MOVE TF@_%s LF@_%s\n", pointer->instruction->str, pointer->instruction->str);
-        pointer = pointer->nextElement;
-    }
-}
