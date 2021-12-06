@@ -18,10 +18,12 @@ void make_ord();
 void call_reads();
 void call_readi();
 void call_readn();
-void call_write();
+void call_write(char *);
 void call_toInteger(double var);
 void call_substr(Dynamic_string *str, int var1, int var2);
 void call_chr(int var);
 void call_ord(Dynamic_string *str, int var);
+
+void movePrevious(DLList_Instruct *);
 
 #endif //_BUILTIN_H

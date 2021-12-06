@@ -583,8 +583,12 @@ int get_token(Token *token, FILE *source_file ) {
                     break;
                 case STATE_DBL:
                     if (c >= '0' && c <= '9') {
-                        if (!(DS_Add_Tester(ptr_Str, c))) {return ERROR_COMPILER;}
+                        if (!(DS_Add_Tester(ptr_Str, c))) { return ERROR_COMPILER; }
                         state = STATE_DBL2;
+
+                    } else if (c == 'e' || c == 'E') {
+                        if (!(DS_Add_Tester(ptr_Str, c))) {return ERROR_COMPILER;}
+                        state = STATE_EXP;
                     } else {
                         state = STATE_ERROR;
                     }

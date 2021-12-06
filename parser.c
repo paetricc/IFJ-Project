@@ -25,6 +25,7 @@
  * Implemenotvana hybridem seznamu a zasobniku.
  */
 SLList_Frame *symTable;
+int ifCounter = 0;
 
 
 /**
@@ -75,11 +76,26 @@ int checkDeclaredFncs(bst_node_t *func) {
  * @return Typ chyby, ktera nastane
  */
 int writeFncCall(Token *token, FILE *sourceFile) {
-    // TODO
-    do {
-        get_non_white_token(token, sourceFile);
-    } while (token->ID != TOKEN_ID_RBR);
-    return ERROR_PASSED;
+    int error;
+    error = get_non_white_token(token, sourceFile);
+    while (token->ID != TOKEN_ID_RBR) {
+        if (token->ID == TOKEN_ID_ID) {
+            printf("WRITE TF@_%s\n", token->Value.string->str);
+            //call_write(token->Value.string);
+        } else if (token->ID == TOKEN_ID_FSTR) {
+            printf("PUSHFRAME\n");
+            call_write(converString(token->Value.string->str));
+            printf("POPFRAME\n");
+        }
+        error = get_non_white_token(token, sourceFile);
+        if (token->ID == TOKEN_ID_RBR)
+            break;
+        if (token->ID == TOKEN_ID_CMA)
+            error = get_non_white_token(token, sourceFile);
+        if (token->ID == TOKEN_ID_CMA || token->ID == TOKEN_ID_RBR)
+            return ERROR_SYNTAX;
+    }
+    return error;
 } // writeFncCall
 
 /**
@@ -186,6 +202,12 @@ int start(Token *token, FILE *sourceFile) {
         free(symTable);
         return error;
     }
+
+    printf(".IFJcode21\n");
+    //printf("JUMP $$main\n");
+
+    // brikule
+    make_write();
 
     // vse korektni - uplatnuju pravidlo a rozsiruju dalsi neterminal
     error = program(token, sourceFile); // aplikace pravidla 1
@@ -620,10 +642,8 @@ int fnc_call(Token *token, FILE *sourceFile) {
     if(node_idFnc == NULL) // funkce nebyla deklarovana ani definovana
         return ERROR_SEM_UNDEFINED;
 
-    // volani funkce write se osetri zvlast (promenny pocet parametru
-    if(!strcmp(node_idFnc->name->str, "write")) {
-        return writeFncCall(token, sourceFile);
-    }
+    // brikule
+    char *var = token->Value.string->str;
 
     // '('
     if ((error = get_non_white_token(token, sourceFile)))
@@ -632,6 +652,11 @@ int fnc_call(Token *token, FILE *sourceFile) {
 
     if (token->ID != TOKEN_ID_LBR)
         return ERROR_SYNTAX;
+
+    // volani funkce write se osetri zvlast (promenny pocet parametru
+    if(!strcmp(node_idFnc->name->str, "write")) {
+        return writeFncCall(token, sourceFile);
+    }
 
     // ukazatel na ukazatel na polozku v seznamu parametru
     SLLElementPtr_Param *param = (SLLElementPtr_Param *) malloc(sizeof(SLLElementPtr_Param));
@@ -653,6 +678,9 @@ int fnc_call(Token *token, FILE *sourceFile) {
 
     if (token->ID != TOKEN_ID_RBR)
         return ERROR_SYNTAX;
+
+    printf("CREATEFRAME\n");
+    printf("CALL $%s\n", var);
 
     return ERROR_PASSED;
 } // fnc_call
@@ -895,6 +923,18 @@ int fnc_def(Token *token, FILE *sourceFile) {
     if (node_idFnc == NULL)
         return ERROR_COMPILER;
 
+    // brikule
+    fpos_t last_read_pos;
+    fgetpos(sourceFile, &last_read_pos);
+    if((error = get_non_white_token(token, sourceFile)))
+        return error;
+    if(token->ID != TOKEN_ID_ID)
+        return ERROR_SYNTAX;
+
+    char *var = token->Value.string->str;
+    fsetpos(sourceFile, &last_read_pos);
+    // brikule
+
     // rozvinuti neterminalu fnc_head
     if ((error = fnc_head(token, sourceFile, node_idFnc))) {
         free(node_idFnc);
@@ -904,10 +944,11 @@ int fnc_def(Token *token, FILE *sourceFile) {
 
     // rozvinuti neterminalu fnc_def2
     printf("PUSHFRAME\n");
+    printf("CREATEFRAME\n");
     printf("#DEFINICE POMOCNYCH PROMENNYCH\n");
-    printf("DEFVAR TF@<tmp>\n");
-    printf("DEFVAR TF@<tmp1>\n");
-    printf("DEFVAR TF@<tmp2>\n");
+    printf("DEFVAR TF@_tmp\n");
+    printf("DEFVAR TF@_tmp1\n");
+    printf("DEFVAR TF@_tmp2\n");
     printf("#-----------------------------\n");
     if ((error = fnc_def2(token, sourceFile, node_idFnc))) {
         free(node_idFnc);
@@ -930,6 +971,9 @@ int fnc_def(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX;
     }
 
+    printf("POPFRAME\n");
+    printf("RETURN\n");
+    printf("LABEL $$end_fnc_%s\n", var);
     // odeberu ramec funkce
     SLL_Frame_Delete(symTable);
 
@@ -972,6 +1016,9 @@ int fnc_head(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
     } else { // funkce byla uz i definovanna - pokus o redefinici
         return ERROR_SEM_UNDEFINED;
     }
+
+    printf("JUMP $$end_fnc_%s\n", token->Value.string->str);
+    printf("LABEL $%s\n", token->Value.string->str);
 
     // '('
     if ((error = get_non_white_token(token, sourceFile)))
@@ -1569,6 +1616,8 @@ int var_dec(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX;
 
     char *var = token->Value.string->str;
+    printf("DEFVAR TF@_%s\n", var);
+
     fsetpos(sourceFile, &last_read_pos);
     // rozvinuti neterminalu var_def
     if ((error = var_def(token, sourceFile, node_idVar))) {
@@ -1773,9 +1822,20 @@ int if_(Token *token, FILE *sourceFile) {
     // vytvorim ramec pro blok if
     SLL_Frame_Insert(symTable);
 
+    printf("PUSHFRAME\n");
+    printf("CREATEFRAME\n");
+
+    DLList_Instruct *dll_instruct = (DLList_Instruct*) malloc(sizeof (DLList_Instruct));
+    DLL_Instruct_Init(dll_instruct);
+    getAllVar(dll_instruct, symTable);
+    movePrevious(dll_instruct);
+    free(dll_instruct);
+
     // rozvinu neterminal statements
     if ((error = statements(token, sourceFile)))
         return error;
+
+    printf("POPFRAME\n");
 
     // odstranim ramec pro blok if
     SLL_Frame_Delete(symTable);
@@ -1792,6 +1852,15 @@ int if_(Token *token, FILE *sourceFile) {
 
     // vytvorim ramec pro blok else
     SLL_Frame_Insert(symTable);
+    printf("JUMP !endif%d\n", ifCounter);
+    printf("LABEL !else%d\n", ifCounter);
+    printf("PUSHFRAME\n");
+    printf("CREATEFRAME\n");
+    dll_instruct = (DLList_Instruct*) malloc(sizeof (DLList_Instruct));
+    DLL_Instruct_Init(dll_instruct);
+    getAllVar(dll_instruct, symTable);
+    movePrevious(dll_instruct);
+    free(dll_instruct);
 
     // rozvinu neterminal statements
     if ((error = statements(token, sourceFile)))
@@ -1809,6 +1878,9 @@ int if_(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX;
     else if (token->Value.keyword != KEYWORD_END)
         return ERROR_SYNTAX;
+
+    printf("POPFRAME\n");
+    printf("LABEL !endif%d\n", ifCounter++);
 
     return ERROR_PASSED;
 } // if_

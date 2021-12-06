@@ -40,6 +40,8 @@ int isCorrect = 1;
 // pomocna promenna udavajici jaky kod vytiskneme
 TermsAndNonTerms decide;
 
+int elseCounter = 0;
+
 /**
  * @brief Preskoci netisknutelne znaky
  *
@@ -69,10 +71,10 @@ int skipNonPrintChar(Token *token, FILE *file) {
  * @return Upraveny string
  */
 char *converString(char *input) {
-    char *output = (char *)malloc(strlen(input)-1);
+    char *output = (char *)malloc(strlen(input));
     int positon = 0;
     int i;
-    for(i = 1; input[i] != '\0'; i++) {
+    for(i = 1; input[i+1] != '\0'; i++) {
         if (input[i] == '\\') {
             if(input[i+1] == '\\') {
                 output = (char *) realloc(output, strlen(input) + 4);
@@ -98,9 +100,12 @@ char *converString(char *input) {
                 output[positon++] = '0';
                 output[positon++] = '0';
                 output[positon++] = '9';
+            } else {
+                output[positon++] = input[i];
+                i--;
             }
-            i++;
-        } else if(input[i] <= 32 || input[i] == 35 || input[i] == 92) {
+            i+=1;
+        } else if(input[i] <= 32 || input[i] == 34 || input[i] == 92) {
             output = (char *) realloc(output, strlen(input) + 4);
             output[positon++] = '\\';
             output[positon++] = (char)((int)input[i]/100+48);
@@ -110,7 +115,7 @@ char *converString(char *input) {
             output[positon++] = input[i];
         }
     }
-    output[--positon] = '\0';
+    output[positon] = '\0';
     return output;
 }
 
@@ -341,8 +346,8 @@ int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
     firstOp = TypeStack_pop(typeStack);
     secondOp = TypeStack_pop(typeStack);
     if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
-        printf("POPS <tmp>\n");
-        printf("MOVE GF@<tmp1> <tmp>\n");
+        printf("POPS TF@_tmp\n");
+        printf("MOVE TF@_tmp1 TF@_tmp\n");
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
         printf("POPS GF@<varFloat>\n");
@@ -623,7 +628,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
                     freeStacks(termStack, typeStack);
                     return ERROR_SEM_UNDEFINED;
                 }
-                printf("PUSHS LF@%s\n", token->Value.string->str);
+                printf("PUSHS TF@_%s\n", token->Value.string->str);
                 if (ptr_node->varData->type == TYPE_STRING) {
                     TypeStack_push(typeStack, DATA_TYPE_STRING);
                 } else if (ptr_node->varData->type == TYPE_NUMBER) {
@@ -745,20 +750,22 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
 
     // neni tam rovnost nebo nerovnost
     if (!isCorrect) {
-        printf("POPS <tmp>\n");
-        printf("MOVE GF@<tmp2> <tmp>\n");
+        printf("POPS TF@_tmp\n");
+        printf("MOVE TF@_tmp2 TF@_tmp\n");
     } else {
-        printf("POPS TF@%s\n", var);
+        printf("POPS TF@_%s\n", var);
         //printf("POPS GF@<tmp>\n");
         //printf("MOVE LF@<var> GF@<tmp>\n");
     }
     // je tam rovnost nebo nerovnost
     switch (decide) {
         case EQ:
-            printf("JUMPIFEQS <label> GF@<tmp2> GF@<tmp1>\n");
+            //printf("PUSHS TF@_tmp1\n");
+            //printf("PUSHS TF@_tmp2\n");
+            printf("JUMPIFNEQ !else%d TF@_tmp2 TF@_tmp1\n", elseCounter++);
             break;
         case NEQ:
-            printf("JUMPIFNEQS <label>\n");
+            printf("JUMPIFEQ !else%d TF@_tmp2 TF@_tmp1\n", elseCounter++);
             break;
         case LT:
             printf("LTS\n");
@@ -787,6 +794,8 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
     }
     //uvolnim pamet zasobniku
     freeStacks(termStack, typeStack);
+    decide = USD;
+    isCorrect = 1;
     fsetpos(file, &last_read_pos);
     return ERROR_PASSED;
 }

@@ -106,7 +106,7 @@ void make_write(){
     printf("LABEL $Continue\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $end_fnc_write\n");
+    printf("LABEL $end_fnc_write\n\n");
 }
 
 /**
@@ -260,11 +260,11 @@ void call_readn(){
  * Funkce vytvori kod pro volani kodu pro vestavenou funkci write.
  *
  */
-void call_write(Dynamic_string *str){
+void call_write(char *str){
     printf("CREATEFRAME\n");
-    printf("DEFVAR TF@_cvar1\n");
-    printf("MOVE TF@_cvar1 %s\n", str->str);
-    printf("CALL $substr\n");
+    printf("DEFVAR TF@_cvar\n");
+    printf("MOVE TF@_cvar string@%s\n", str);
+    printf("CALL $fnc_write\n");
 }
 
 /**
@@ -318,4 +318,13 @@ void call_ord(Dynamic_string *str, int var){
     printf("DEFVAR TF@_cvar1\n");
     printf("MOVE TF@_cvar2 int@%d\n", var);
     printf("CALL $fnc_chr\n");
+}
+
+void movePrevious(DLList_Instruct *dlListInstruct) {
+    DLLElementPtr_Instruct pointer = dlListInstruct->firstElement;
+    while (pointer != NULL) {
+        printf("DEFVAR TF@_%s\n", pointer->instruction->str);
+        printf("MOVE TF@_%s LF@_%s\n", pointer->instruction->str, pointer->instruction->str);
+        pointer = pointer->nextElement;
+    }
 }

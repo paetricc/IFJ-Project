@@ -2,6 +2,8 @@
 #define _PARSER_H_
 
 #include "symtable.h"
+#include "builtIn.h"
+#include "expression.h"
 
 int parser(FILE *);
 
