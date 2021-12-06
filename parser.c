@@ -1248,6 +1248,8 @@ int var_defParam(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElem
     bst_insert(&(symTable->TopLocalElement->node), token->Value.string, false);
 
     node_idVar = bst_search(symTable->TopLocalElement->node, token->Value.string);
+    // nastaveni parametru jako inicializovany
+    setVarInit(node_idVar, true);
 
     // ':'
     if ((error = get_non_white_token(token, sourceFile)))
@@ -1364,8 +1366,14 @@ int return_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned
             else {
                 // aplikace pravidla 37
                 fsetpos(sourceFile, &lastReadPos);
-                if ((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, token->Value.string->str)))
-                    return error;
+                if(token->ID == TOKEN_ID_ID) {
+                    if ((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, token->Value.string->str)))
+                        return error;
+                }
+                else {
+                    if ((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, "ha")))
+                        return error;
+                }
                 *returned = true;
                 // TODO generovani kodu vraceni hodnoty
                 return error;
@@ -1811,11 +1819,10 @@ int if_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     SLL_Frame_Insert(symTable);
 
     // rozvinu neterminal statements
-    bool returnedInStatement = false;
-    if ((error = statements(token, sourceFile, fncRetType, &returnedInStatement)))
+    bool returnedInIf = false;
+    if ((error = statements(token, sourceFile, fncRetType, &returnedInIf)))
         return error;
 
-    *returned = (*returned) && returnedInStatement;
 
     // odstranim ramec pro blok if
     SLL_Frame_Delete(symTable);
@@ -1833,13 +1840,13 @@ int if_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     // vytvorim ramec pro blok else
     SLL_Frame_Insert(symTable);
 
-    returnedInStatement = false;
+    bool returnedInElse = false;
 
     // rozvinu neterminal statements
-    if ((error = statements(token, sourceFile, fncRetType, &returnedInStatement)))
+    if ((error = statements(token, sourceFile, fncRetType, &returnedInElse)))
         return error;
 
-    (*returned) = (*returned) && returnedInStatement;
+    (*returned) = returnedInIf && returnedInElse;
 
     // odstranim ramec pro blok else
     SLL_Frame_Delete(symTable);
@@ -1930,6 +1937,7 @@ int statements(Token *token, FILE *sourceFile, Data_type fncRetType, bool *retur
 
     if ((error = get_non_white_token(token, sourceFile)))
         // lexikalni nebo kompilatorova chyba
+
         return error;
 
     if (token->ID == TOKEN_ID_ID) { // id_var nebo id_fce
