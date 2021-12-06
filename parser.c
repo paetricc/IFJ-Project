@@ -1054,13 +1054,18 @@ int fnc_def2(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
         if (error)
             return error;
 
+        setFncDef(*node_idFnc, true);
+        // true, pokud funkce vratila hodnotu
+        bool returned = false;
+
         // rozvinuti neterminalu fnc_body
-        if ((error = fnc_body(token, sourceFile)))
+        if ((error = fnc_body(token, sourceFile, (*node_idFnc)->funcData->returnList->firstElement->type, &returned)))
             return error;
 
-        // rozvinuti neterminalu return
-        if ((error = return_(token, sourceFile, (*node_idFnc)->funcData->returnList->firstElement->type)))
-            return error;
+        if(!returned) { // funkce nevratila zadnou hodnoty
+            // TODO generovani kodu return nil
+        }
+
     } else { // id_fce, id_var, local, if, while, return nebo end
         // aplikace pravidla 28
 
@@ -1094,11 +1099,8 @@ int fnc_def2(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
         setFncDef(*node_idFnc, true);
 
         // rozvinuti neterminalu fnc_body
-        if ((error = fnc_body(token, sourceFile)))
-            return error;
-
-        // rozvinuti neterminalu return_void
-        if ((error = return_void(token, sourceFile)))
+        bool noNeedToReturn;
+        if ((error = fnc_body(token, sourceFile, TYPE_UNDEFINED, &noNeedToReturn)))
             return error;
     }
 
@@ -1330,7 +1332,7 @@ int var_def(Token *token, FILE *sourceFile, bst_node_t **node_idVar) {
  * @param fnc_ret_dataType Datovy typ, ktera ma funkce vracet
  * @return Typ erroru generovany analyzou
 */
-int return_(Token *token, FILE *sourceFile, Data_type fnc_ret_dataType) {
+int return_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     int error;
 
     // promenne pro pripadne vraceni cteni
@@ -1339,64 +1341,89 @@ int return_(Token *token, FILE *sourceFile, Data_type fnc_ret_dataType) {
 
     // aplikace pravidla 35
 
-    // return
     if ((error = get_non_white_token(token, sourceFile)))
         // lexikalni nebo kompilatorova chyba
         return error;
 
-    if (token->ID != TOKEN_ID_KEYWORD)
-        return ERROR_SYNTAX;
+    bst_node_t *node_idVar = NULL;
 
-    if(token->Value.keyword == KEYWORD_RETURN) { // return
-        // volani bottom-up SA (rozsireni neterminalu expr)
-        return exprSyntaxCheck(token, sourceFile, symTable, fnc_ret_dataType, NULL);
+    switch(token->ID) {
+        case TOKEN_ID_LBR: // '('
+        case TOKEN_ID_LEN: // '#'
+        case TOKEN_ID_INT0:
+        case TOKEN_ID_HEX2:
+        case TOKEN_ID_INT:
+        case TOKEN_ID_ZERO: // integer
+        case TOKEN_ID_DHEX2:
+        case TOKEN_ID_HEXP3:
+        case TOKEN_ID_DBL2:
+        case TOKEN_ID_EXP3: // number
+        case TOKEN_ID_FSTR: // string
+            if(fncRetType == TYPE_UNDEFINED)
+                return ERROR_SEM_TYPE_COUNT;
+            else {
+                // aplikace pravidla 37
+                fsetpos(sourceFile, &lastReadPos);
+                if ((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, token->Value.string->str)))
+                    return error;
+                *returned = true;
+                // TODO generovani kodu vraceni hodnoty
+                return error;
+            }
+
+        case TOKEN_ID_KEYWORD:
+            if(token->Value.keyword == KEYWORD_NIL) {
+                if(fncRetType == TYPE_UNDEFINED)
+                    return ERROR_SEM_TYPE_COUNT;
+                else {
+                    // aplikace pravidla 37
+                    fsetpos(sourceFile, &lastReadPos);
+                    if ((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, token->Value.string->str)))
+                        return error;
+                    *returned = true;
+                    // TODO generovani kodu vraceni nil
+                    return error;
+                }
+            }
+            else if(token->Value.keyword == KEYWORD_END || token->Value.keyword == KEYWORD_ELSE) {
+                // aplikace pravidla 36
+                if(fncRetType == TYPE_UNDEFINED) {
+                    fsetpos(sourceFile, &lastReadPos);
+                    return ERROR_PASSED;
+                }
+                else // funkce ma vracet hodnotu a nevraci
+                    return ERROR_SEM_TYPE_COUNT;
+            }
+            else
+                return ERROR_SYNTAX;
+
+        case TOKEN_ID_ID:
+            // vyhledam identifikator v tabulce
+            node_idVar = search_Iden(token->Value.string, symTable);
+            // nastaveni cteni pred identifikator, aby si to precetl volany
+            fsetpos(sourceFile, &lastReadPos);
+
+            if (node_idVar == NULL) // identifikator neexistuje
+                return ERROR_SEM_UNDEFINED;
+            else if (isFnc(node_idVar)) { // id_fnc
+                return ERROR_SEM_OTHERS;
+            }
+            else { // id_var
+                fsetpos(sourceFile, &lastReadPos);
+                // zavolani bottomup SA pro neterminal expr
+                if((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, token->Value.string->str))) // aplikace pravidla 48
+                    return error;
+                *returned = true;
+                return error;
+                // TODO generovani kodu - vraceni hodnoty vyrazu
+            }
+            break;
+
+        default:
+            return ERROR_SYNTAX;
     }
-    else if (token->Value.keyword == KEYWORD_END) {
-        // funkce ma vratit hodnotu. token return neprisel, ale prisel end => vrati hodnotu nil
-        // TODO generovani kodu - vratit hodnotu nil
-        fsetpos(sourceFile, &lastReadPos);
-        return ERROR_PASSED;
-    }
-    else // pro keyword neexistuje pravidlo
-        return ERROR_SYNTAX;
+
 } // return_
-
-
-/**
- * @brief Neterminal return_void.
- *
- * Implementuje pravidlo 36 a 37.
- *
- * @param token Token, ktery bude naplnen scannerem
- * @param sourceFile Zdrojovy soubor cteny scannerem
- * @return Typ erroru generovany analyzou
-*/
-int return_void(Token *token, FILE *sourceFile) {
-    int error;
-
-    // promenne pro pripadne vraceni cteni
-    fpos_t lastReadPos;
-    fgetpos(sourceFile, &lastReadPos);
-
-    if ((error = get_non_white_token(token, sourceFile)))
-        // lexikalni nebo kompilatorova chyba
-        return error;
-
-    if (token->ID != TOKEN_ID_KEYWORD) // pro token neexistuje pravidlo
-        return ERROR_SYNTAX;
-
-    if (token->Value.keyword == KEYWORD_END) {    // end
-        // nastavim cteni pred end, aby si ji precetl volajici
-        fsetpos(sourceFile, &lastReadPos);
-        return ERROR_PASSED; // aplikace pravidla 37
-    } else if (token->Value.keyword == KEYWORD_RETURN) {
-        // aplikace pravidla 36
-    } else { // pro prijaty token neexistuje pravidlo
-        return ERROR_SYNTAX;
-    }
-
-    return ERROR_PASSED;
-} // return_void
 
 
 /**
@@ -1408,7 +1435,7 @@ int return_void(Token *token, FILE *sourceFile) {
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
-int fnc_body(Token *token, FILE *sourceFile) {
+int fnc_body(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     int error;
 
     // promenne pro pripadne vraceni cteni
@@ -1420,6 +1447,7 @@ int fnc_body(Token *token, FILE *sourceFile) {
         return error;
 
     if (token->ID == TOKEN_ID_KEYWORD) { // local, if, while, return, nebo end
+        bool returnInBody = false;
         switch (token->Value.keyword) {
             case KEYWORD_LOCAL: // local
             case KEYWORD_IF: // if
@@ -1428,14 +1456,18 @@ int fnc_body(Token *token, FILE *sourceFile) {
                 fsetpos(sourceFile, &lastReadPos);
 
                 // rozvinu neterminal statement
-                if ((error = statement(token, sourceFile))) // aplikace pravidla 38
+                if ((error = statement(token, sourceFile, fncRetType, returned))) // aplikace pravidla 38
                     return error;
 
                 break;
 
-            case KEYWORD_END: // end
             case KEYWORD_RETURN: // return
-                // vratim cteni pred keyword, aby si ho precetl volajici
+                return return_(token, sourceFile, fncRetType, &returnInBody);
+                *returned = (*returned) || returnInBody;
+                break;
+
+            case KEYWORD_END: // end
+                // vratim cteni pred end, aby si ho precetl volajici
                 fsetpos(sourceFile, &lastReadPos);
 
                 return ERROR_PASSED; // aplikace pravidla 39
@@ -1449,13 +1481,13 @@ int fnc_body(Token *token, FILE *sourceFile) {
         fsetpos(sourceFile, &lastReadPos);
 
         // rozvinu neterminal statement
-        if ((error = statement(token, sourceFile))) // aplikace pravidla 38
+        if ((error = statement(token, sourceFile, fncRetType, returned))) // aplikace pravidla 38
             return error;
     } else { // pro prijaty token neexistuje pravidlo
         return ERROR_SYNTAX;
     }
 
-    return fnc_body(token, sourceFile);
+    return fnc_body(token, sourceFile, fncRetType, returned);
 } // fnc_body
 
 
@@ -1468,7 +1500,7 @@ int fnc_body(Token *token, FILE *sourceFile) {
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
-int statement(Token *token, FILE *sourceFile) {
+int statement(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     int error;
 
     // promenne pro pripadne vraceni cteni
@@ -1491,12 +1523,17 @@ int statement(Token *token, FILE *sourceFile) {
 
             case KEYWORD_IF: // if
                 // rozvinuti neterminalu if
-                error = if_(token, sourceFile); // aplikace pravidla 43
+                error = if_(token, sourceFile, fncRetType, returned); // aplikace pravidla 43
                 break;
 
             case KEYWORD_WHILE: // while
                 // rozvinuti neterminalu loop
-                error = loop(token, sourceFile); // aplikace pravidla 44
+                error = loop(token, sourceFile, fncRetType, returned); // aplikace pravidla 44
+                break;
+
+            case KEYWORD_RETURN: // return
+                // rozvinuti neterminalu return
+                error = return_(token, sourceFile, fncRetType, returned); // aplikace pravidla 44
                 break;
 
             default: // pro keyword neexistuje pravidlo
@@ -1533,7 +1570,7 @@ int statement(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX;
 
     // rozvinu neterminal var_assign
-    error = var_assign(token, sourceFile, typeVar(id_node), token->Value.string->str);
+    error = var_assign(token, sourceFile, id_node, token->Value.string->str);
     setVarInit(id_node, true);
 
     return error;
@@ -1608,7 +1645,7 @@ int var_dec_init(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *v
         // aplikace pravidla 46
 
         // rozvinuti neteminalu var_assign
-        error = var_assign(token, sourceFile, node_idVar->varData->type, var);
+        error = var_assign(token, sourceFile, node_idVar, var);
         // oznacim promennou z vyssi urovne za inicializovanou
         setVarInit(node_idVar, true);
         return error;
@@ -1651,7 +1688,7 @@ int var_dec_init(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *v
  * @param varType Datovy typ promenne
  * @return Typ erroru generovany analyzou
 */
-int var_assign(Token *token, FILE *sourceFile, Data_type varType, char *var) {
+int var_assign(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var) {
     int error;
 
     // promenne pro pripadne vraceni cteni
@@ -1678,8 +1715,8 @@ int var_assign(Token *token, FILE *sourceFile, Data_type varType, char *var) {
                 if(id->funcData->returnList->firstElement == NULL) { // funkce nevraci hodnotu
                     // TODO generovani kodu rovnou priradit promenne hodnotu nil
                 }
-                else if(id->funcData->returnList->firstElement->type != varType) {
-                    if(varType == TYPE_NUMBER && id->funcData->returnList->firstElement->type == TYPE_INTEGER) {
+                else if(id->funcData->returnList->firstElement->type != node_idVar->varData->type) {
+                    if(node_idVar->varData->type == TYPE_NUMBER && id->funcData->returnList->firstElement->type == TYPE_INTEGER) {
                         // TODO  pretypovat pozdejsi volani funkce z integer na number
                     }
                     else // navratova hodnota fce neni kompatibilni s typem promenne
@@ -1695,7 +1732,7 @@ int var_assign(Token *token, FILE *sourceFile, Data_type varType, char *var) {
             }
             else { // id_var
                 // zavolani bottomup SA pro neterminal expr
-                if((error = exprSyntaxCheck(token, sourceFile, symTable, varType, var))) // aplikace pravidla 48
+                if((error = exprSyntaxCheck(token, sourceFile, symTable, typeVar(node_idVar), var))) // aplikace pravidla 48
                     return error;
                 // TODO generovani kodu - prirazeni promenne vysledek vyrazu
             }
@@ -1717,7 +1754,7 @@ int var_assign(Token *token, FILE *sourceFile, Data_type varType, char *var) {
 
             //aplikace pravidla 48
             // volani bottom-up SA (rozsireni neterminalu expr)
-            if((error = exprSyntaxCheck(token, sourceFile, symTable, varType, var))) // aplikace pravidla 48
+            if((error = exprSyntaxCheck(token, sourceFile, symTable, typeVar(node_idVar), var))) // aplikace pravidla 48
                 return error;
             break;
 
@@ -1728,7 +1765,7 @@ int var_assign(Token *token, FILE *sourceFile, Data_type varType, char *var) {
 
                 //aplikace pravidla 48
                 // volani bottom-up SA (rozsireni neterminalu expr)
-                if((error = exprSyntaxCheck(token, sourceFile, symTable, varType, var))) // aplikace pravidla 48
+                if((error = exprSyntaxCheck(token, sourceFile, symTable, typeVar(node_idVar), var))) // aplikace pravidla 48
                     return error;
             } else // pro tento keyword neexistuje pravidlo
                 return ERROR_SYNTAX;
@@ -1751,7 +1788,7 @@ int var_assign(Token *token, FILE *sourceFile, Data_type varType, char *var) {
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
-int if_(Token *token, FILE *sourceFile) {
+int if_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     int error;
     // token if byl precten o uroven vyse => pokracuju dal
     // aplikace pravidla 50
@@ -1774,8 +1811,11 @@ int if_(Token *token, FILE *sourceFile) {
     SLL_Frame_Insert(symTable);
 
     // rozvinu neterminal statements
-    if ((error = statements(token, sourceFile)))
+    bool returnedInStatement = false;
+    if ((error = statements(token, sourceFile, fncRetType, &returnedInStatement)))
         return error;
+
+    *returned = (*returned) && returnedInStatement;
 
     // odstranim ramec pro blok if
     SLL_Frame_Delete(symTable);
@@ -1793,9 +1833,13 @@ int if_(Token *token, FILE *sourceFile) {
     // vytvorim ramec pro blok else
     SLL_Frame_Insert(symTable);
 
+    returnedInStatement = false;
+
     // rozvinu neterminal statements
-    if ((error = statements(token, sourceFile)))
+    if ((error = statements(token, sourceFile, fncRetType, &returnedInStatement)))
         return error;
+
+    (*returned) = (*returned) && returnedInStatement;
 
     // odstranim ramec pro blok else
     SLL_Frame_Delete(symTable);
@@ -1823,7 +1867,7 @@ int if_(Token *token, FILE *sourceFile) {
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
-int loop(Token *token, FILE *sourceFile) {
+int loop(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     int error;
     // token while byl precten o uroven vyse => pokracuju dal
     // aplikace pravidla 51
@@ -1845,8 +1889,10 @@ int loop(Token *token, FILE *sourceFile) {
     // vytvorim ramec pro blok do
     SLL_Frame_Insert(symTable);
 
+
+    bool dontCheckReturnInLoop;
     // rozvinu neterminal statements
-    if ((error = statements(token, sourceFile)))
+    if ((error = statements(token, sourceFile, fncRetType, &dontCheckReturnInLoop)))
         return error;
 
     // vytvorim ramec pro blok do
@@ -1875,7 +1921,7 @@ int loop(Token *token, FILE *sourceFile) {
  * @param sourceFile Zdrojovy soubor cteny scannerem
  * @return Typ erroru generovany analyzou
 */
-int statements(Token *token, FILE *sourceFile) {
+int statements(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     int error;
 
     // promenne pro pripadne vraceni cteni
@@ -1898,8 +1944,14 @@ int statements(Token *token, FILE *sourceFile) {
                 return ERROR_PASSED; // aplikace pravidla 52
 
             case KEYWORD_LOCAL:
+            case KEYWORD_IF:
+            case KEYWORD_WHILE:
                 // nastavim cteni pred keyword, aby si to precetl volajici
                 fsetpos(sourceFile, &lastReadPos);
+                break;
+
+            case KEYWORD_RETURN: // return
+                return return_(token, sourceFile, fncRetType, returned);
                 break;
 
             default: // pro prijaty token neexistuje pravidlo
@@ -1909,10 +1961,10 @@ int statements(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX;
 
     // rozvinuti neterminalu statement
-    if ((error = statement(token, sourceFile))) // aplikace pravidla 53
+    if ((error = statement(token, sourceFile, fncRetType, returned))) // aplikace pravidla 53
         return error;
 
-    return statements(token, sourceFile);
+    return statements(token, sourceFile, fncRetType, returned);
 } // statements
 
 
