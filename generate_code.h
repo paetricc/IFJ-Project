@@ -16,6 +16,22 @@ void make_PUSHFRAME();
 
 void make_POPFRAME();
 
+void make_ADDS();
+
+void make_SUBS();
+
+void make_MULS();
+
+void make_DIVS();
+
+void make_IDIVS();
+
+void make_LTS();
+
+void make_GTS();
+
+void make_EQS();
+
 void make_CALL(Dynamic_string *string);
 
 void make_JUMP_end_fnc(Dynamic_string *string);
@@ -59,5 +75,13 @@ void make_INT2FLOATS();
 void make_FLOAT2INTS();
 
 void make_POPSandPUSH_float();
+
+void make_PUSHS_LF(Dynamic_string *string);
+
+void make_POPS_LF(Dynamic_string *string);
+
+void make_PUSHS_TF(Dynamic_string *string);
+
+void make_POPS_TF(Dynamic_string *string);
 
 #endif //_GENERATE_CODE_H
