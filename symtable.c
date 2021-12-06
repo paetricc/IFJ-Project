@@ -429,36 +429,31 @@ void SLL_Frame_Dispose(SLList_Frame *listFrame){
  */
 bst_node_t *search_Iden(Dynamic_string *string, SLList_Frame *listFrame){
     //pomocne ukazatele
-    SLList_Frame *elemPtr;
-    elemPtr = listFrame;
-    SLList_Frame *pElemPtr = (SLList_Frame *) malloc(sizeof(SLList_Frame));
+    SLLElementPtr_Frame elemPtr = NULL;
+    elemPtr = listFrame->TopLocalElement;
+    SLLElementPtr_Frame pElemPtr = NULL;
     bst_node_t *treePtr;
 
     if (listFrame->TopLocalElement != NULL){
-        pElemPtr->globalElement = listFrame->globalElement;
-        while (elemPtr->TopLocalElement->previousElement != elemPtr->globalElement){ //hleda v lokalnich framech
-            pElemPtr->TopLocalElement = elemPtr->TopLocalElement->previousElement;
-            if((treePtr = bst_search(elemPtr->TopLocalElement->node, string))){      //prohleda jejich BVS
-                free(pElemPtr);
+        while (elemPtr->previousElement != listFrame->globalElement){ //hleda v lokalnich framech
+            pElemPtr = elemPtr->previousElement;
+            if((treePtr = bst_search(elemPtr->node, string))){      //prohleda jejich BVS
                 return treePtr;
             } else{
                 elemPtr = pElemPtr;
             }
         }
-        if (elemPtr->TopLocalElement->previousElement == elemPtr->globalElement){ //hleda v prvnim lokalnim framu
-            if ((treePtr = bst_search(elemPtr->TopLocalElement->node, string))){  //prohleda jeho BVS
-                free(pElemPtr);
+        if (elemPtr->previousElement == listFrame->globalElement){ //hleda v prvnim lokalnim framu
+            if ((treePtr = bst_search(elemPtr->node, string))){  //prohleda jeho BVS
                 return treePtr;
             }
         }
     }
     if(listFrame->globalElement != NULL){                                           //prohleda globalni frame
-        if ((treePtr = bst_search(elemPtr->globalElement->node, string))){          //prohleda jeho BVS
-            free(pElemPtr);
+        if ((treePtr = bst_search(listFrame->globalElement->node, string))){          //prohleda jeho BVS
             return treePtr;
         }
     }
-    free(pElemPtr);
     return NULL;            //pokud nenasel ani jeden uzel
 }
 
