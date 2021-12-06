@@ -619,31 +619,38 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
         }
         // jedna se o identifikator?
         if (token->ID == TOKEN_ID_ID && p_table[(top->data - 4)][vstup - 4] != H && vstup != USD) {
-            ptr_node = search_Iden(token->Value.string, listFrame);
-            // nasel jsem ho?
-            if (ptr_node != NULL) {
-                // pokud to neni to promenna a je inicializovane?
-                // muze to ale byt buldin funkce (write, readi, ...)
-                if (isFnc(ptr_node) || !isInitVar(ptr_node)) {
+            /* chujoviny zacinaji tady */
+            //ptr_node = search_Iden(token->Value.string, listFrame);
+            SLLElementPtr_Frame *ptrFrame = (SLLElementPtr_Frame *) malloc(sizeof(SLLElementPtr_Frame));
+            if(!ptrFrame) return ERROR_COMPILER;
+            (*ptrFrame) = listFrame->TopLocalElement;
+            // iterace ramci dokud ptrFrame neni global && dokud !isInitVar(bst_search((*ptrFrame)->node, token->Value.string)))
+
+            while(true) {
+                if ((*ptrFrame) == listFrame->globalElement) {
+                    free(ptrFrame);
                     freeStacks(termStack, typeStack);
                     return ERROR_SEM_UNDEFINED;
                 }
-                printf("PUSHS TF@_%s\n", token->Value.string->str);
-                if (ptr_node->varData->type == TYPE_STRING) {
-                    TypeStack_push(typeStack, DATA_TYPE_STRING);
-                } else if (ptr_node->varData->type == TYPE_NUMBER) {
-                    TypeStack_push(typeStack, DATA_TYPE_NUMBER);
-                } else if (ptr_node->varData->type == TYPE_INTEGER) {
-                    TypeStack_push(typeStack, DATA_TYPE_INTEGER);
-                } else {
-                    freeStacks(termStack, typeStack);
-                    return ERROR_SEM_UNDEFINED;
+                ptr_node = bst_search((*ptrFrame)->node, token->Value.string);
+                if (ptr_node != NULL && isInitVar(ptr_node)) {
+                    printf("PUSHS TF@_%s\n", token->Value.string->str);
+                    if (ptr_node->varData->type == TYPE_STRING) {
+                        TypeStack_push(typeStack, DATA_TYPE_STRING);
+                    } else if (ptr_node->varData->type == TYPE_NUMBER) {
+                        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+                    } else if (ptr_node->varData->type == TYPE_INTEGER) {
+                        TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+                    } else {
+                        freeStacks(termStack, typeStack);
+                        return ERROR_SEM_UNDEFINED;
+                    }
+                    break;
                 }
-            } else {
-                // nenasel, takze klasika. Yeetni error
-                freeStacks(termStack, typeStack);
-                return ERROR_SEM_UNDEFINED;
+                (*ptrFrame) = (*ptrFrame)->previousElement;
             }
+
+            /* chujoviny konci tady */
         }
         // podle pravidla v tabulce rozhodnu co budu delat
         switch (p_table[(top->data - 4)][vstup - 4]) {
@@ -792,6 +799,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
         default:
             break;
     }
+    isCorrect = 1;
     //uvolnim pamet zasobniku
     freeStacks(termStack, typeStack);
     decide = USD;
