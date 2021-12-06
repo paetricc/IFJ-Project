@@ -29,8 +29,8 @@ int return_void(Token *, FILE *);
 int fnc_body(Token *, FILE *);  
 int statement(Token *, FILE *);
 int var_dec(Token *, FILE *);
-int var_dec_init(Token *, FILE *, bst_node_t *);
-int var_assign(Token *, FILE *, Data_type);
+int var_dec_init(Token *, FILE *, bst_node_t *, char *);
+int var_assign(Token *, FILE *, Data_type, char *);
 int if_(Token *, FILE *);
 int loop(Token *, FILE *);
 int statements(Token *, FILE *);
@@ -38,5 +38,6 @@ int statements(Token *, FILE *);
 /*  pomocne funkce  */
 int get_non_white_token(Token *, FILE *);
 int checkDeclaredFncs(bst_node_t *);
+int writeFncCall(Token *, FILE *);
 
 #endif
