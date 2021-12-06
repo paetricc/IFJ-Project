@@ -3,6 +3,7 @@
 
 #include "symtable.h"
 #include "builtIn.h"
+#include "generate_code.h"
 #include "expression.h"
 
 int parser(FILE *);

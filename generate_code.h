@@ -20,4 +20,6 @@ void make_CREATEFRAME_TMP();
 
 void make_endOfFunc(Dynamic_string *string);
 
+void movePrevious(DLList_Instruct *dlListInstruct);
+
 #endif //_GENERATE_CODE_H

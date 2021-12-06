@@ -61,3 +61,16 @@ void make_endOfFunc(Dynamic_string *string){
     printf("RETURN\n");
     printf("LABEL $$end_fnc_%s\n", string->str);
 }
+
+/**
+ * Funkce vytvori kod pro nahrani vsech promennych do noveho ramce.
+ *
+ */
+void movePrevious(DLList_Instruct *dlListInstruct) {
+    DLLElementPtr_Instruct pointer = dlListInstruct->firstElement;
+    while (pointer != NULL) {
+        printf("DEFVAR TF@_%s\n", pointer->instruction->str);
+        printf("MOVE TF@_%s LF@_%s\n", pointer->instruction->str, pointer->instruction->str);
+        pointer = pointer->nextElement;
+    }
+}
