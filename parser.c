@@ -80,6 +80,11 @@ int writeFncCall(Token *token, FILE *sourceFile) {
     error = get_non_white_token(token, sourceFile);
     while (token->ID != TOKEN_ID_RBR) {
         if (token->ID == TOKEN_ID_ID) {
+            // vyhledam promennou
+            bst_node_t *node_idVar = search_Iden(token->Value.string, symTable);
+            if(node_idVar == NULL || isFnc(node_idVar)) // promenna neexistuje, nebo jde o funkci
+                return ERROR_SEM_UNDEFINED;
+
             printf("WRITE TF@_%s\n", token->Value.string->str);
             //call_write(token->Value.string);
         } else if (token->ID == TOKEN_ID_FSTR) {
@@ -1353,7 +1358,7 @@ int var_def(Token *token, FILE *sourceFile, bst_node_t **node_idVar) {
         return ERROR_SYNTAX;
 
     // overeni, ze identifikator zatim neexistuje
-    if (bst_search(symTable->TopLocalElement->node, token->Value.string) != NULL)
+    if (bst_search(symTable->TopLocalElement->node, token->Value.string) != NULL || bst_search(symTable->globalElement->node, token->Value.string) != NULL)
         return ERROR_SEM_UNDEFINED;
     // vlozeni identifikatoru do symtable
     bst_insert(&(symTable->TopLocalElement->node), token->Value.string, false);
