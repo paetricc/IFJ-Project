@@ -85,7 +85,8 @@ int writeFncCall(Token *token, FILE *sourceFile) {
             if(node_idVar == NULL || isFnc(node_idVar)) // promenna neexistuje, nebo jde o funkci
                 return ERROR_SEM_UNDEFINED;
 
-            printf("WRITE TF@_%s\n", token->Value.string->str);
+            make_WRITE_TF(token->Value.string);
+            //printf("WRITE TF@_%s\n", token->Value.string->str);
             //call_write(token->Value.string);
         } else if (token->ID == TOKEN_ID_FSTR) {
             printf("PUSHFRAME\n");
@@ -209,7 +210,7 @@ int start(Token *token, FILE *sourceFile) {
     }
 
     printf(".IFJcode21\n");
-    printf("DEFVAR GF@!varFloat\n");
+    printf("DEFVAR GF@&varFloat\n");
     //printf("JUMP $$main\n");
 
     // brikule
@@ -951,12 +952,7 @@ int fnc_def(Token *token, FILE *sourceFile) {
 
     // rozvinuti neterminalu fnc_def2
     printf("PUSHFRAME\n");
-    printf("CREATEFRAME\n");
-    printf("#DEFINICE POMOCNYCH PROMENNYCH\n");
-    printf("DEFVAR TF@_tmp\n");
-    printf("DEFVAR TF@_tmp1\n");
-    printf("DEFVAR TF@_tmp2\n");
-    printf("#-----------------------------\n");
+    make_CREATEFRAME_TMP();
     if ((error = fnc_def2(token, sourceFile, node_idFnc))) {
         free(node_idFnc);
         return error;
@@ -1668,7 +1664,7 @@ int var_dec(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX;
 
     char *var = token->Value.string->str;
-    printf("DEFVAR TF@_%s\n", var);
+    make_DEFVAR_TF(token->Value.string);
 
     fsetpos(sourceFile, &last_read_pos);
     // rozvinuti neterminalu var_def

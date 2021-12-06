@@ -219,7 +219,7 @@ void make_FLOAT2INTS(){
  *
  */
 void make_POPSandPUSH_float(){
-    printf("POPS TF@&varFloat\n");
+    printf("POPS GF@&varFloat\n");
     printf("INT2FLOATS\n");
-    printf("PUSHS TF@&varFloat\n");
+    printf("PUSHS GF@&varFloat\n");
 }

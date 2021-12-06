@@ -232,13 +232,11 @@ int checkDataTypes_ADD_SUB_MUL_DIV(TypeStack *typeStack) {
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
         // druhe operande je INT tak vyndej druhy ho pretypuj
-        printf("POPS GF@!varFloat\n");
-        printf("INT2FLOATS\n");
-        printf("PUSHS GF@!varFloat\n");
+        make_POPSandPUSH_float();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
         // prvni operande je INT tak ho pretypuj
-        printf("INT2FLOATS\n");
+        make_INT2FLOATS();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_NUMBER) {
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
@@ -346,32 +344,24 @@ int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
     firstOp = TypeStack_pop(typeStack);
     secondOp = TypeStack_pop(typeStack);
     if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
-        printf("POPS TF@_tmp\n");
-        printf("MOVE TF@_tmp1 TF@_tmp\n");
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
-        printf("POPS GF@!varFloat\n");
-        printf("INT2FLOATS\n");
-        printf("PUSHS GF@!varFloat\n");
-        printf("POPS TF@_tmp\n");
-        printf("MOVE TF@_tmp1 TF@_tmp\n");
+        make_POPSandPUSH_float();
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
-        printf("INT2FLOATS\n");
-        printf("POPS TF@_tmp\n");
-        printf("MOVE TF@_tmp1 TF@_tmp\n");
+        make_INT2FLOATS();
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_NUMBER) {
-        printf("POPS TF@_tmp\n");
-        printf("MOVE TF@_tmp1 TF@_tmp\n");
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NIL && secondOp == DATA_TYPE_NIL) {
-        printf("POPS TF@_tmp>\n");
-        printf("MOVE TF@_tmp1 TF@_tmp\n");
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_NIL);
     } else if (firstOp == DATA_TYPE_STRING && secondOp == DATA_TYPE_STRING) {
-        printf("POPS TF@_tmp\n");
-        printf("MOVE TF@_tmp1 TF@_tmp\n");
+        make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_STRING);
     } else {
         return ERROR_SEM_COMPAT;
@@ -634,7 +624,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
                 }
                 ptr_node = bst_search((*ptrFrame)->node, token->Value.string);
                 if (ptr_node != NULL && isInitVar(ptr_node)) {
-                    printf("PUSHS TF@_%s\n", token->Value.string->str);
+                    printf("PUSHS TF@&%s\n", token->Value.string->str);
                     if (ptr_node->varData->type == TYPE_STRING) {
                         TypeStack_push(typeStack, DATA_TYPE_STRING);
                     } else if (ptr_node->varData->type == TYPE_NUMBER) {
@@ -736,14 +726,14 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
             return ERROR_SEM_ASSIGN;
         }
         if (typeStack->topElement->data == DATA_TYPE_NUMBER)
-            printf("FLOAT2INTS\n");
+            return ERROR_SEM_ASSIGN;
     } else if (retData == TYPE_NUMBER) {
         if (typeStack->topElement->data == DATA_TYPE_STRING) {
             freeStacks(termStack, typeStack);
             return ERROR_SEM_ASSIGN;
         }
         if (typeStack->topElement->data == DATA_TYPE_INTEGER)
-            printf("INT2FLOATS\n");
+            make_INT2FLOATS();
     } else if (retData == TYPE_STRING) {
         if (typeStack->topElement->data == DATA_TYPE_INTEGER) {
             freeStacks(termStack, typeStack);
@@ -757,10 +747,9 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
 
     // neni tam rovnost nebo nerovnost
     if (!isCorrect) {
-        printf("POPS TF@_tmp\n");
-        printf("MOVE TF@_tmp2 TF@_tmp\n");
+        make_POPSandMOVE_tmp2();
     } else {
-        printf("POPS TF@_%s\n", var);
+        printf("POPS TF@&%s\n", var);
         //printf("POPS GF@<tmp>\n");
         //printf("MOVE LF@<var> GF@<tmp>\n");
     }
@@ -769,10 +758,10 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
         case EQ:
             //printf("PUSHS TF@_tmp1\n");
             //printf("PUSHS TF@_tmp2\n");
-            printf("JUMPIFNEQ !else%d TF@_tmp2 TF@_tmp1\n", elseCounter++);
+            printf("JUMPIFNEQ !else%d TF@&tmp2 TF@&tmp1\n", elseCounter++);
             break;
         case NEQ:
-            printf("JUMPIFEQ !else%d TF@_tmp2 TF@_tmp1\n", elseCounter++);
+            printf("JUMPIFEQ !else%d TF@&tmp2 TF@&tmp1\n", elseCounter++);
             break;
         case LT:
             printf("LTS\n");
