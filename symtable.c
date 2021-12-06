@@ -305,11 +305,11 @@ void bst_dispose(bst_node_t **tree){
  *
  * @param tree Ukazatel na koren BVS.
  */
-void bst_preorder(bst_node_t *tree) {
+void bst_preorder(bst_node_t *tree, DLList_Instruct *listInstruct) {
     if (tree != NULL){
-        printf("%s\n", tree->name->str);
-        bst_preorder(tree->left);
-        bst_preorder(tree->right);      //vytiskne uzel, rekurzivne se zavola pro levy a pravy podstrom
+        DLL_Instruct_InsertFirst(listInstruct, tree->name);
+        bst_preorder(tree->left, listInstruct);
+        bst_preorder(tree->right, listInstruct);      //vytiskne uzel, rekurzivne se zavola pro levy a pravy podstrom
     } else{
         return;
     }
@@ -462,6 +462,19 @@ bst_node_t *search_Iden(Dynamic_string *string, SLList_Frame *listFrame){
     return NULL;            //pokud nenasel ani jeden uzel
 }
 
+void getAllVar(DLList_Instruct *listInstruct, SLList_Frame *listFrame){
+    SLList_Frame *elemPtr;
+    elemPtr = listFrame;
+    SLList_Frame *pElemPtr = (SLList_Frame *) malloc(sizeof(SLList_Frame));
+    pElemPtr->globalElement = listFrame->globalElement;
+    while (elemPtr->TopLocalElement->previousElement != listFrame->globalElement){
+        pElemPtr->TopLocalElement = elemPtr->TopLocalElement->previousElement;
+        bst_preorder(elemPtr->TopLocalElement->node, listInstruct);
+        elemPtr = pElemPtr;
+    }
+    bst_preorder(elemPtr->TopLocalElement->node, listInstruct);
+    free(pElemPtr);
+}
 /**
  * Funkce pro ziskani dat, jestli je uzel pro funkci nebo pro promenne
  * .
