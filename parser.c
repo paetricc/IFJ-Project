@@ -127,7 +127,7 @@ int start(Token *token, FILE *sourceFile) {
     if (token->ID != TOKEN_ID_FSTR)
         return ERROR_SYNTAX;
     else if (strcmp(token->Value.string->str, "\"ifj21\""))
-        return ERROR_SYNTAX;
+        return ERROR_SEM_OTHERS;
 
     // nainicializovani symtable
     symTable = (SLList_Frame *) malloc(sizeof(SLList_Frame));
