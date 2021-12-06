@@ -1,7 +1,12 @@
 chyba ve scanneru pri komentari -- nejaky text [narazano na zavorku ale jen jednu]
 
+legenda: X - neprojde, D - hotovo
+
 [ ] Ondroid 001 - Chyba u podminky - nefunkcni a~=nil
-[ ] Ondroid 003 - Chyba pretypovani ve vyrazu z number na integer
+[D] Ondroid 003 - Chyba pretypovani ve vyrazu z number na integer
+[ ] Ondroid 008 - Mensi nez
+[ ] Ondroid 009 - Mensi rovno nez
+[ ] Ondrios 011 - Konkatenace stringu
 [X] Ondroid 013 - Nema prochazet - dat. typ nil
 [X] Ondroid 014 - Nema prochazet - dat. typ nil
 [X] Ondroid 015 - Nema prochazet - dat. typ nil
