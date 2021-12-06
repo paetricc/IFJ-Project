@@ -13,9 +13,14 @@
 
 #include "generate_code.h"
 
-void make_header(){
+
+void make_header() {
     printf(".IFJcode2021\n");
+    printf("DEFVAR GF@&varFloat\n");
+    printf("DEFVAR GF@&varBool\n");
 }
+
+/** Jednoslovne funkce*/
 void make_CREATEFRAME(){
     printf("CREATEFRAME\n");
 }
@@ -24,6 +29,36 @@ void make_PUSHFRAME(){
 }
 void make_POPFRAME(){
     printf("POPFRAME\n");
+}
+void make_INT2FLOATS(){
+    printf("INT2FLOATS\n");
+}
+void make_FLOAT2INTS(){
+    printf("FLOAT2INTS\n");
+}
+void make_ADDS(){
+    printf("ADDS\n");
+}
+void make_SUBS(){
+    printf("SUBS\n");
+}
+void make_MULS(){
+    printf("MULS\n");
+}
+void make_DIVS(){
+    printf("DIVS\n");
+}
+void make_IDIVS(){
+    printf("IDIVS\n");
+}
+void make_LTS(){
+    printf("LTS\n");
+}
+void make_GTS(){
+    printf("GTS\n");
+}
+void make_EQS(){
+    printf("EQS\n");
 }
 
 /**
@@ -206,14 +241,6 @@ void make_POPSandMOVE_tmp2(){
     printf("MOVE TF@&tmp2 TF@&tmp\n");
 }
 
-void make_INT2FLOATS(){
-    printf("INT2FLOATS\n");
-}
-
-void make_FLOAT2INTS(){
-    printf("FLOAT2INTS\n");
-}
-
 /**
  * Funkce vytvori kod pro POPS a PUSH promenne na pretypovani na float.
  *
@@ -255,4 +282,36 @@ void make_insertNILcompare() {
     printf("MOVE TF@&tmp TF@&tmp1\n");
     call_NILcompare();
     printf("MOVE TF@&tmp1 TF@&tmp\n");
+}
+
+/**
+ * Funkce vytvori kod pro PUSHS promenne localframu.
+ *
+ */
+void make_PUSHS_LF(Dynamic_string *string){
+    printf("PUSHS LF@&%s\n", string->str);
+}
+
+/**
+ * Funkce vytvori kod pro POPS promenne localframu.
+ *
+ */
+void make_POPS_LF(Dynamic_string *string){
+    printf("POPS LF@&%s\n", string->str);
+}
+
+/**
+ * Funkce vytvori kod pro PUSHS promenne temporaryframu.
+ *
+ */
+void make_PUSHS_TF(Dynamic_string *string){
+    printf("PUSHS TF@&%s\n", string->str);
+}
+
+/**
+ * Funkce vytvori kod pro POPS promenne temporaryframu.
+ *
+ */
+void make_POPS_TF(Dynamic_string *string){
+    printf("POPS TF@&%s\n", string->str);
 }
