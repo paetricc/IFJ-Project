@@ -108,7 +108,7 @@ void make_DEFVAR_LF(Dynamic_string *string){
  * Funkce vytvori kod pro nastaveni na nil pro promenou localframu.
  *
  */
-void make_MOVE_TF_nil(Dynamic_string *string){
+void make_MOVE_LF_nil(Dynamic_string *string){
     printf("#NASTAVENI PROMENNE _%s NA NIL\n", string->str);
     printf("MOVE LF@&%s nil@nil\n", string->str);
 }
@@ -176,14 +176,14 @@ void make_endOfFunc(Dynamic_string *string){
  *
  */
 void movePrevious(DLList_Instruct *dlListInstruct) {
-    printf("#DEKLAROVANI PREDCHOZICH PROMENNYCH\n")
+    printf("#DEKLAROVANI PREDCHOZICH PROMENNYCH\n");
     DLLElementPtr_Instruct pointer = dlListInstruct->firstElement;
     while (pointer != NULL) {
         printf("DEFVAR TF@&%s\n", pointer->instruction->str);
         printf("MOVE TF@&%s LF@&%s\n", pointer->instruction->str, pointer->instruction->str);
         pointer = pointer->nextElement;
     }
-    printf("#------------------------------\n")
+    printf("#------------------------------\n");
 }
 
 /**
