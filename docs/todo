@@ -28,7 +28,7 @@ legenda: X - neprojde, D - hotovo
 [D] Rostik 013 - Doplnit predani parametru funkci
 [X] Rostik 031 - Nema prochazet- vraceni vice hodnot funkce
 [D] Rostik 036 - Neprochazi zrejme kvuli instrukcim
-[ ] Rostik 041 - dat. typ nil
+[X] Rostik 041 - nil se nevypisuje :)
 [X] Rostik 042 - Nema prochazet- vraceni vice hodnot funkce
 [X] Rostik 044 - Nema prochazet- vraceni vice hodnot funkce
 
