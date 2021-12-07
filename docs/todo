@@ -25,7 +25,7 @@ legenda: X - neprojde, D - hotovo
 [ ] Rostik 009 - Porovnavani hodnoty s nil v podmince
 [?] Rostik 010 - Funguje - nevim co je to za chybu
 [ ] Rostik 011 - Chyba u podminky - porovnani hodnoty s nil
-[ ] Rostik 013 - Doplnit vraceni hodnoty nil
+[D] Rostik 013 - Doplnit predani parametru funkci
 [X] Rostik 031 - Nema prochazet- vraceni vice hodnot funkce
 [D] Rostik 036 - Neprochazi zrejme kvuli instrukcim
 [X] Rostik 041 - Nema prochazet- dat. typ nil - mohlo by se upravit a vyzkouset znovu
