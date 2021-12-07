@@ -763,6 +763,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
             printf("JUMPIFNEQS !else%d\n", elseCounter++);
             break;
         case LTE:
+            make_insertNILcompare();
             printf("PUSHS TF@&tmp2\n");
             printf("PUSHS TF@&tmp1\n");
             printf("GTS\n");
@@ -779,6 +780,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
             printf("JUMPIFNEQS !else%d\n", elseCounter++);
             break;
         case GTE:
+            make_insertNILcompare();
             printf("PUSHS TF@&tmp2\n");
             printf("PUSHS TF@&tmp1\n");
             printf("LTS\n");
