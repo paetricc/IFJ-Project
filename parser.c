@@ -632,6 +632,32 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
             } // switch
             break; // KEYWORD_STRING
 
+        case KEYWORD_NIL: // aplikace pravidla 15
+            switch (dataSwitch) {
+                case VAR_TYPE:
+                    setVarType(node_id, TYPE_NIL);
+                    break;
+
+                case PARAM_TYPE:
+                    if(!isDecFnc(node_id)) {
+                        if (param != NULL) // funkce byla deklarovana a prave ji definuju => parametr byl byt vytvoren a pridam mu jmeno
+                            param->type = TYPE_NIL;
+                        else // funkci prave deklaruju => parametr musim vytvorit
+                            SLL_Param_Insert(TYPE_NIL, node_id->name, node_id);
+                    }
+                    else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
+                        error = (param->type == TYPE_NIL ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
+                    break;
+
+                case RET_TYPE:
+                    if(!isDecFnc(node_id))
+                        error = SLL_Return_Insert(TYPE_STRING, node_id);
+                    else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
+                        error = (node_id->funcData->returnList->firstElement->type == TYPE_NIL ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
+                    break;
+            } // switch
+            break; // KEYWORD_STRING
+
         default:
             return ERROR_SYNTAX; // nevalidni klicove slovo
     } // switch
@@ -864,6 +890,9 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
 
     // uzel s promennou/funkci
     bst_node_t *node_idVar = NULL;
+
+    printf("DEFVAR TF@&%s\n", (*param)->name->str);
+
     switch (token->ID) {
         case TOKEN_ID_ID: // id_var
             // aplikace pravidla 21
@@ -889,11 +918,15 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
             if((*param)->type != TYPE_INTEGER) {
                 if((*param)->type == TYPE_NUMBER) { // ocekavam number, davam mu integer
                     // TODO generovani kodu - int2float
+                    printf("MOVE TF@&%s float@%lld\n", (*param)->name->str, token->Value.Integer);
                 }
                 else // datove typy nejsou kompatibilni
                     return ERROR_SEM_TYPE_COUNT;
             }
-            // TODO generovani kodu pro integer
+            else {
+                // TODO generovani kodu pro integer
+                printf("MOVE TF@&%s int@%lld\n", (*param)->name->str, token->Value.Integer);
+            }
             break;
 
         case TOKEN_ID_DHEX2:
@@ -904,6 +937,7 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
             if((*param)->type != TYPE_NUMBER) // datove typy nejsou kompatibilni
                 return ERROR_SEM_TYPE_COUNT;
             // TODO generace kodu pro number
+            printf("MOVE TF@&%s float@%a\n", (*param)->name->str, token->Value.Double);
             break;
 
         case TOKEN_ID_FSTR: // str_value
@@ -911,12 +945,14 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
             if((*param)->type != TYPE_STRING) // datove typy nejsou kompatibilni
                 return ERROR_SEM_TYPE_COUNT;
             // TODO generace kodu pro string
+            printf("MOVE TF@&%s string@%s\n", (*param)->name->str, converString(token->Value.string->str));
             break;
 
         case TOKEN_ID_KEYWORD: // nil
             if (token->Value.keyword == KEYWORD_NIL) {
                 // aplikace pravidal 25
                 // TODO generovani kodu pro nil
+                printf("MOVE TF@&%s nil@nil\n", (*param)->name->str);
             } else // pro keyword neexistuje pravidlo
                 return ERROR_SYNTAX;
             break;
@@ -972,6 +1008,17 @@ int fnc_def(Token *token, FILE *sourceFile) {
     // rozvinuti neterminalu fnc_def2
     printf("PUSHFRAME\n");
     make_CREATEFRAME_TMP();
+
+    // prekopirovani parametru z LF do TF
+    DLList_Instruct *dll_istInstruct = (DLList_Instruct *) malloc(sizeof(DLList_Instruct));
+    if (dll_istInstruct == NULL)
+        return ERROR_COMPILER;
+    DLL_Instruct_Init(dll_istInstruct);
+    getAllVar(dll_istInstruct, symTable);
+    movePrevious(dll_istInstruct);
+    DLL_Instruct_Dispose(dll_istInstruct);
+    free(dll_istInstruct);
+
     if ((error = fnc_def2(token, sourceFile, node_idFnc))) {
         free(node_idFnc);
         return error;
@@ -1031,9 +1078,8 @@ int fnc_head(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
 
     if (*node_idFnc == NULL) {
         bst_insert(&(symTable->globalElement->node), token->Value.string, true);
-        *node_idFnc = bst_search(symTable->globalElement->node,token->Value.string);
-    }
-    else if (isDecFnc(*node_idFnc) && !isDefFnc(*node_idFnc)) { // funkce byla uz deklarovana
+        *node_idFnc = bst_search(symTable->globalElement->node, token->Value.string);
+    } else if (isDecFnc(*node_idFnc) && !isDefFnc(*node_idFnc)) { // funkce byla uz deklarovana
 
     } else { // funkce byla uz i definovanna - pokus o redefinici
         return ERROR_SEM_UNDEFINED;
@@ -1054,19 +1100,18 @@ int fnc_head(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
 
     // ukazatel na prvni parametr
     SLLElementPtr_Param *param = (SLLElementPtr_Param *) malloc(sizeof(SLLElementPtr_Param));
-    if(param == NULL)
+    if (param == NULL)
         return ERROR_COMPILER;
     *param = (*node_idFnc)->funcData->paramList->firstElement;
 
     // rozvinu neterminal params_def
-    if(isDecFnc(*node_idFnc)) {
+    if (isDecFnc(*node_idFnc)) {
         // u deklarovane funkce musim kontrolovat pocet a typ paremtru jeji definice
         if ((error = params_def(token, sourceFile, *node_idFnc, param))) {
             free(param);
             return error;
         }
-    }
-    else {
+    } else {
         // nedeklarovana funkce ma prazdny seznam parametru
         if ((error = params_def(token, sourceFile, *node_idFnc, param))) {
             free(param);
