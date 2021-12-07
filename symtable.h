@@ -135,7 +135,7 @@ int bst_insert(bst_node_t **tree, Dynamic_string *string, bool isFnc);
 
 void bst_dispose(bst_node_t **tree);
 
-void bst_preorder(bst_node_t *tree, DLList_Instruct *listInstruct);
+int bst_by_preorder_add(bst_node_t *tree, DLList_Instruct *listInstruct);
 
 void SLL_Frame_Init(SLList_Frame *listFrame);
 
@@ -149,7 +149,7 @@ void SLL_Frame_DeleteGlobal(SLList_Frame *listFrame);
 
 bst_node_t *search_Iden(Dynamic_string *, SLList_Frame *listFrame);
 
-void getAllVar(DLList_Instruct *listInstruct, SLList_Frame *listFrame);
+int getAllVar(DLList_Instruct *listInstruct, SLList_Frame *listFrame);
 
 void setFncDec(bst_node_t *tree, bool dec);
 
