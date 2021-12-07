@@ -1,0 +1,1 @@
+Wrong data type using division
