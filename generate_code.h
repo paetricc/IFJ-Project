@@ -60,7 +60,9 @@ void make_MOVE_TF_nil(Dynamic_string *string);
 
 void make_WRITE_LF(Dynamic_string *string);
 
-void make_WRITE_TF(Dynamic_string *string);
+void make_WRITE_TF();
+
+void makeWriteCall(Dynamic_string *string);
 
 void make_CREATEFRAME_TMP();
 

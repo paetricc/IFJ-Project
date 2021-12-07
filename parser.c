@@ -85,7 +85,8 @@ int writeFncCall(Token *token, FILE *sourceFile) {
             if(node_idVar == NULL || isFnc(node_idVar)) // promenna neexistuje, nebo jde o funkci
                 return ERROR_SEM_UNDEFINED;
 
-            make_WRITE_TF(token->Value.string);
+            //printf("CALL $makeWRITE\n");
+            makeWriteCall(token->Value.string);
             //printf("WRITE TF@_%s\n", token->Value.string->str);
             //call_write(token->Value.string);
         } else if (token->ID == TOKEN_ID_FSTR) {
@@ -215,7 +216,8 @@ int start(Token *token, FILE *sourceFile) {
     printf("DEFVAR GF@&varFloat\n");
     printf("DEFVAR GF@&varBool\n");
     printf("DEFVAR GF@&if\n");
-    printf("DEFVAR GF@&varType");
+    printf("DEFVAR GF@&varType\n");
+    make_WRITE_TF();
     //printf("JUMP $$main\n");
 
     // brikule
