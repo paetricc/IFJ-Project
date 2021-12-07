@@ -5,4 +5,4 @@ run:
 	$(CC) $(CFLAGS) *.c -o $(NAME)
 
 clean:
-	-rm -f *.o scanner $(NAME)
+	-rm -f *.o $(NAME)
