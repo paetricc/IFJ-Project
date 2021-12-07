@@ -305,14 +305,18 @@ void bst_dispose(bst_node_t **tree){
  *
  * @param tree Ukazatel na koren BVS.
  */
-void bst_preorder(bst_node_t *tree, DLList_Instruct *listInstruct) {
+int bst_by_preorder_add(bst_node_t *tree, DLList_Instruct *listInstruct) {
     if (tree != NULL){
-        DLL_Instruct_InsertFirst(listInstruct, tree->name);
-        bst_preorder(tree->left, listInstruct);
-        bst_preorder(tree->right, listInstruct);      //vytiskne uzel, rekurzivne se zavola pro levy a pravy podstrom
-    } else{
-        return;
+        int error;
+        error = DLL_Instruct_InsertFirst(listInstruct, tree->name);
+        if (error == ERROR_PASSED){
+            bst_by_preorder_add(tree->left, listInstruct);
+            bst_by_preorder_add(tree->right, listInstruct);      //vytiskne uzel, rekurzivne se zavola pro levy a pravy podstrom
+        } else{
+            return ERROR_COMPILER;
+        }
     }
+    return ERROR_PASSED;
 }
 
 /**
@@ -457,15 +461,19 @@ bst_node_t *search_Iden(Dynamic_string *string, SLList_Frame *listFrame){
     return NULL;            //pokud nenasel ani jeden uzel
 }
 
-void getAllVar(DLList_Instruct *listInstruct, SLList_Frame *listFrame) {
+int getAllVar(DLList_Instruct *listInstruct, SLList_Frame *listFrame) {
     SLLElementPtr_Frame elemPtr = listFrame->TopLocalElement;
     SLLElementPtr_Frame pElemPtr = NULL;
+    int error;
     while (elemPtr->previousElement != listFrame->globalElement) {
         pElemPtr = elemPtr->previousElement;
-        bst_preorder(elemPtr->node, listInstruct);
+        error = bst_by_preorder_add(elemPtr->node, listInstruct);
+        if (error == ERROR_COMPILER){
+            return ERROR_COMPILER;
+        }
         elemPtr = pElemPtr;
     }
-    bst_preorder(elemPtr->node, listInstruct);
+    return bst_by_preorder_add(elemPtr->node, listInstruct);
 }
 /**
  * Funkce pro ziskani dat, jestli je uzel pro funkci nebo pro promenne
