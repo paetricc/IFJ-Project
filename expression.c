@@ -38,7 +38,7 @@ Token_ID prev;
 // pomocna promenna kontrolujici zda bylo jiz pouzti {==, ~=, <, >, <=, >=}
 int isCorrect = 1;
 // pomocna promenna udavajici jaky kod vytiskneme
-TermsAndNonTerms decide;
+TermsAndNonTerms decide = USD;
 
 int elseCounter = 0;
 
@@ -737,7 +737,10 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
     if (!isCorrect) {
         make_POPSandMOVE_tmp2();
     } else {
-        printf("POPS TF@&%s\n", var);
+        if (retData != TYPE_UNDEFINED)
+            printf("POPS TF@&%s\n", var);
+        else
+            printf("POPS GF@&if\n");
         //printf("POPS GF@<tmp>\n");
         //printf("MOVE LF@<var> GF@<tmp>\n");
     }
@@ -784,6 +787,10 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
             printf("JUMPIFNEQS !else%d\n", elseCounter++);
             break;
         default:
+            if (!(strcmp(var, "if"))) {
+                printf("TYPE GF@&varType GF@&if\n");
+                printf("JUMPIFEQ !else%d GF@&varType string@nil\n", elseCounter++);
+            }
             break;
     }
     isCorrect = 1;

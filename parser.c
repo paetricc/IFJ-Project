@@ -214,6 +214,8 @@ int start(Token *token, FILE *sourceFile) {
     printf(".IFJcode21\n");
     printf("DEFVAR GF@&varFloat\n");
     printf("DEFVAR GF@&varBool\n");
+    printf("DEFVAR GF@&if\n");
+    printf("DEFVAR GF@&varType");
     //printf("JUMP $$main\n");
 
     // brikule
@@ -1858,7 +1860,7 @@ int if_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     // aplikace pravidla 50
 
     // volani bottom-up SA (rozsireni neterminalu expr)
-    if ((error = exprSyntaxCheck(token, sourceFile, symTable, TYPE_UNDEFINED, "cus")))
+    if ((error = exprSyntaxCheck(token, sourceFile, symTable, TYPE_UNDEFINED, "if")))
         return error;
 
     // then
@@ -1960,7 +1962,7 @@ int loop(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     // aplikace pravidla 51
 
     // volani bottom-up SA (rozsireni neterminalu expr)
-    if ((error = exprSyntaxCheck(token, sourceFile, symTable, TYPE_UNDEFINED, "cus")))
+    if ((error = exprSyntaxCheck(token, sourceFile, symTable, TYPE_UNDEFINED, "loop")))
         return error;
 
     // do

@@ -457,18 +457,15 @@ bst_node_t *search_Iden(Dynamic_string *string, SLList_Frame *listFrame){
     return NULL;            //pokud nenasel ani jeden uzel
 }
 
-void getAllVar(DLList_Instruct *listInstruct, SLList_Frame *listFrame){
-    SLList_Frame *elemPtr;
-    elemPtr = listFrame;
-    SLList_Frame *pElemPtr = (SLList_Frame *) malloc(sizeof(SLList_Frame));
-    pElemPtr->globalElement = listFrame->globalElement;
-    while (elemPtr->TopLocalElement->previousElement != listFrame->globalElement){
-        pElemPtr->TopLocalElement = elemPtr->TopLocalElement->previousElement;
-        bst_preorder(elemPtr->TopLocalElement->node, listInstruct);
+void getAllVar(DLList_Instruct *listInstruct, SLList_Frame *listFrame) {
+    SLLElementPtr_Frame elemPtr = listFrame->TopLocalElement;
+    SLLElementPtr_Frame pElemPtr = NULL;
+    while (elemPtr->previousElement != listFrame->globalElement) {
+        pElemPtr = elemPtr->previousElement;
+        bst_preorder(elemPtr->node, listInstruct);
         elemPtr = pElemPtr;
     }
-    bst_preorder(elemPtr->TopLocalElement->node, listInstruct);
-    free(pElemPtr);
+    bst_preorder(elemPtr->node, listInstruct);
 }
 /**
  * Funkce pro ziskani dat, jestli je uzel pro funkci nebo pro promenne
