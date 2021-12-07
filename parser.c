@@ -559,8 +559,12 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
                     break;
 
                 case PARAM_TYPE:
-                    if(!isDecFnc(node_id))
-                        error = SLL_Param_Insert(TYPE_INTEGER, node_id->name, node_id);
+                    if(!isDecFnc(node_id)) {
+                        if (param != NULL) // funkce byla deklarovana a prave ji definuju => parametr byl byt vytvoren a pridam mu jmeno
+                            param->type = TYPE_INTEGER;
+                        else // funkci prave deklaruju => parametr musim vytvorit
+                            SLL_Param_Insert(TYPE_STRING, node_id->name, node_id);
+                    }
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
                         error = (param->type == TYPE_INTEGER ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
                     break;
@@ -581,8 +585,12 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
                     break;
 
                 case PARAM_TYPE:
-                    if(!isDecFnc(node_id))
-                        error = SLL_Param_Insert(TYPE_NUMBER, node_id->name, node_id);
+                    if(!isDecFnc(node_id)) {
+                        if(param != NULL) // funkce byla deklarovana a prave ji definuju => parametr byl byt vytvoren a pridam mu jmeno
+                            param->type = TYPE_NUMBER;
+                        else // funkci prave deklaruju => parametr musim vytvorit
+                            SLL_Param_Insert(TYPE_STRING, node_id->name, node_id);
+                    }
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
                         error = (param->type == TYPE_NUMBER ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
                     break;
@@ -603,8 +611,12 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
                     break;
 
                 case PARAM_TYPE:
-                    if(!isDecFnc(node_id))
-                        error = SLL_Param_Insert(TYPE_STRING, node_id->name, node_id);
+                    if(!isDecFnc(node_id)) {
+                        if (param != NULL) // funkce byla deklarovana a prave ji definuju => parametr byl byt vytvoren a pridam mu jmeno
+                            param->type = TYPE_STRING;
+                        else // funkci prave deklaruju => parametr musim vytvorit
+                            SLL_Param_Insert(TYPE_STRING, node_id->name, node_id);
+                    }
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
                         error = (param->type == TYPE_STRING ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
                     break;
@@ -1055,7 +1067,7 @@ int fnc_head(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
     }
     else {
         // nedeklarovana funkce ma prazdny seznam parametru
-        if ((error = params_def(token, sourceFile, *node_idFnc, NULL))) {
+        if ((error = params_def(token, sourceFile, *node_idFnc, param))) {
             free(param);
             return error;
         }
@@ -1307,6 +1319,19 @@ int var_defParam(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElem
     // nastaveni parametru jako inicializovany
     setVarInit(node_idVar, true);
 
+
+    if(!isDecFnc(node_idFnc)) { // pokud funkce nebyla deklarovana, vytvorim ji hned parametr a priradim mu jeho jmeno
+        if((error = SLL_Param_Insert(TYPE_UNDEFINED, token->Value.string, node_idFnc)))
+            return error;
+        // ulozim si prave pridany parametr
+        (*param) = node_idFnc->funcData->paramList->firstElement;
+        while((*param)->nextElement != NULL)
+            (*param) = (*param)->nextElement;
+    }
+    else { // funkce byla deklarovana => priradim parametru jen jmeno
+        (*param)->name = token->Value.string;
+    }
+
     // ':'
     if ((error = get_non_white_token(token, sourceFile)))
         // lexikalni nebo kompilatorova chyba
@@ -1327,7 +1352,7 @@ int var_defParam(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElem
     }
     else {
         // funkce neni deklarovana => ulozeni dat.typu parametru k id funkce
-        if((error = data_type(token, sourceFile, node_idFnc, NULL, PARAM_TYPE)))
+        if((error = data_type(token, sourceFile, node_idFnc, *param, PARAM_TYPE)))
             return error;
     }
     fsetpos(sourceFile, &lastReadPos);
