@@ -358,7 +358,7 @@ void make_STRLEN(){
 
 /**
  * Funkce vytvori kod pro cely LT.
- *
+ * Potreba dat do funkce inkrementovanou hodnotu
  */
 void make_LT_all(int elseCounter){
     printf("PUSHS TF@&tmp2\n");
@@ -370,7 +370,7 @@ void make_LT_all(int elseCounter){
 
 /**
  * Funkce vytvori kod pro cely LTE.
- *
+ * Potreba dat do funkce inkrementovanou hodnotu
  */
 void make_LTE_all(int elseCounter){
     printf("PUSHS TF@&tmp2\n");
@@ -383,7 +383,7 @@ void make_LTE_all(int elseCounter){
 
 /**
  * Funkce vytvori kod pro cely GT.
- *
+ * Potreba dat do funkce inkrementovanou hodnotu
  */
 void make_GT_all(int elseCounter){
     printf("PUSHS TF@&tmp2\n");
@@ -395,7 +395,7 @@ void make_GT_all(int elseCounter){
 
 /**
  * Funkce vytvori kod pro cely GTE.
- *
+ * Potreba dat do funkce inkrementovanou hodnotu
  */
 void make_GTE_all(int elseCounter){
     printf("PUSHS TF@&tmp2\n");
@@ -408,7 +408,7 @@ void make_GTE_all(int elseCounter){
 
 /**
  * Funkce vytvori kod pro if porovnavajici s nil.
- *
+ * Potreba dat do funkce inkrementovanou hodnotu
  */
 void make_IF_nil(int elseCounter){
     printf("TYPE GF@&varType GF@&if\n");
@@ -417,7 +417,7 @@ void make_IF_nil(int elseCounter){
 
 /**
  * Funkce vytvori kod pro EQ.
- *
+ * Potreba dat do funkce inkrementovanou hodnotu
  */
 void make_EQ(int elseCounter){
     printf("JUMPIFNEQ !else%d TF@&tmp2 TF@&tmp1\n", elseCounter);
@@ -425,7 +425,7 @@ void make_EQ(int elseCounter){
 
 /**
  * Funkce vytvori kod pro NEQ.
- *
+ * Potreba dat do funkce inkrementovanou hodnotu
  */
 void make_NEQ(int elseCounter){
     printf("JUMPIFEQ !else%d TF@&tmp2 TF@&tmp1\n", elseCounter);
