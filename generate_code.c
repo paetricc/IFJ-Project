@@ -18,6 +18,8 @@ void make_header() {
     printf(".IFJcode2021\n");
     printf("DEFVAR GF@&varFloat\n");
     printf("DEFVAR GF@&varBool\n");
+    printf("DEFVAR GF@&if\n");
+    printf("DEFVAR GF@&varType\n");
 }
 
 /** Jednoslovne funkce*/
@@ -60,7 +62,9 @@ void make_GTS(){
 void make_EQS(){
     printf("EQS\n");
 }
-
+void make_NOTS(){
+    printf("NOTS\n");
+}
 /**
  * Funkce vytvori kod pro volani funkce.
  *
@@ -314,4 +318,115 @@ void make_PUSHS_TF(Dynamic_string *string){
  */
 void make_POPS_TF(Dynamic_string *string){
     printf("POPS TF@&%s\n", string->str);
+}
+
+/**
+ * Funkce vytvori kod pro POPS if.
+ *
+ */
+void make_POPS_GF_if(){
+    printf("POPS GF@&if\n");
+}
+
+/**
+ * Funkce vytvori kod pro PUSHS nil.
+ *
+ */
+void make_PUSH_nil(){
+    printf("PUSHS nil@nil\n");
+}
+
+/**
+ * Funkce vytvori kod pro CONCAT.
+ *
+ */
+void make_CONTAT(){
+    printf("POPS TF@&tmp2\n");
+    printf("CONCAT TF@&tmp  TF@&tmp2 TF@&tmp1\n");
+    printf("PUSHS TF@&tmp\n");
+}
+
+/**
+ * Funkce vytvori kod pro STRLEN.
+ *
+ */
+void make_STRLEN(){
+    printf("POPS TF@&tmp1\n");
+    printf("STRLEN TF@&tmp TF@&tmp1\n");
+    printf("PUSHS TF@&tmp\n");
+}
+
+/**
+ * Funkce vytvori kod pro cely LT.
+ *
+ */
+void make_LT_all(int elseCounter){
+    printf("PUSHS TF@&tmp2\n");
+    printf("PUSHS TF@&tmp1\n");
+    printf("LTS\n");
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS !else%d\n", elseCounter);
+}
+
+/**
+ * Funkce vytvori kod pro cely LTE.
+ *
+ */
+void make_LTE_all(int elseCounter){
+    printf("PUSHS TF@&tmp2\n");
+    printf("PUSHS TF@&tmp1\n");
+    printf("GTS\n");
+    printf("NOTS\n");
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS !else%d\n", elseCounter);
+}
+
+/**
+ * Funkce vytvori kod pro cely GT.
+ *
+ */
+void make_GT_all(int elseCounter){
+    printf("PUSHS TF@&tmp2\n");
+    printf("PUSHS TF@&tmp1\n");
+    printf("GTS\n");
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS !else%d\n", elseCounter);
+}
+
+/**
+ * Funkce vytvori kod pro cely GTE.
+ *
+ */
+void make_GTE_all(int elseCounter){
+    printf("PUSHS TF@&tmp2\n");
+    printf("PUSHS TF@&tmp1\n");
+    printf("LTS\n");
+    printf("NOTS\n");
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS !else%d\n", elseCounter);
+}
+
+/**
+ * Funkce vytvori kod pro if porovnavajici s nil.
+ *
+ */
+void make_IF_nil(int elseCounter){
+    printf("TYPE GF@&varType GF@&if\n");
+    printf("JUMPIFEQ !else%d GF@&varType string@nil\n", elseCounter);
+}
+
+/**
+ * Funkce vytvori kod pro EQ.
+ *
+ */
+void make_EQ(int elseCounter){
+    printf("JUMPIFNEQ !else%d TF@&tmp2 TF@&tmp1\n", elseCounter);
+}
+
+/**
+ * Funkce vytvori kod pro NEQ.
+ *
+ */
+void make_EQ(int elseCounter){
+    printf("JUMPIFEQ !else%d TF@&tmp2 TF@&tmp1\n", elseCounter);
 }
