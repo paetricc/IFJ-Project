@@ -209,7 +209,7 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms(Token *token, TypeStack *t
 
 /**
  * @brief Kontrola kompatibility datoych typu
- *  ADD, SUB, MUL, DIV respektive v tomto poradi +, -, *, /
+ *  ADD, SUB, MUL, DIV respektive v tomto poradi +, -, *
  *
  * @details Po zpracovani vlozi na zasobnik vysledny datovy typ
  *  | <firstOp>  | <- topElement
@@ -219,17 +219,59 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms(Token *token, TypeStack *t
  *  |   ......   |
  *  |___BOTTOM___|
  *  tedy vyraz odpovida:
- *  <secondOp> {+,-,*,/} <firstOp>
+ *  <secondOp> {+,-,*} <firstOp>
  *
  * @param typeStack Zasobnik datovych typu
  * @return Typ erroru generovany analyzou
  */
-int checkDataTypes_ADD_SUB_MUL_DIV(TypeStack *typeStack) {
+int checkDataTypes_ADD_SUB_MUL(TypeStack *typeStack) {
     DataTypes firstOp, secondOp;
     firstOp = TypeStack_pop(typeStack);
     secondOp = TypeStack_pop(typeStack);
     if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+    } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
+        // druhe operande je INT tak vyndej druhy ho pretypuj
+        make_POPSandPUSH_float();
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
+        // prvni operande je INT tak ho pretypuj
+        make_INT2FLOATS();
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_NUMBER) {
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
+    } else {
+        return ERROR_SEM_COMPAT;
+    }
+    return ERROR_PASSED;
+}
+
+/**
+ * @brief Kontrola kompatibility datoveho typu
+ *  DIV respektive /
+ *
+ * @details Po zpracovani vlozi na zasobnik vysledny datovy typ
+ *  | <firstOp>  | <- topElement
+ *  |------------|
+ *  | <secondOp> |
+ *  |------------|
+ *  |   ......   |
+ *  |___BOTTOM___|
+ *  tedy vyraz odpovida:
+ *  <secondOp> {/} <firstOp>
+ *
+ * @param typeStack Zasobnik datovych typu
+ * @return Typ erroru generovany analyzou
+ */
+int checkDataTypes_DIV(TypeStack *typeStack) {
+    DataTypes firstOp, secondOp;
+    firstOp = TypeStack_pop(typeStack);
+    secondOp = TypeStack_pop(typeStack);
+    if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
+        // oba operandy jsou int tak je pretypuj
+        make_POPSandPUSH_float();
+        make_INT2FLOATS();
+        TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
         // druhe operande je INT tak vyndej druhy ho pretypuj
         make_POPSandPUSH_float();
@@ -449,25 +491,25 @@ int checkRulesAndApply(TermStack *termStack, TypeStack *typeStack) {
     } else if (ptr->data == EXP && ptr->previousElement->data == ADD &&
                ptr->previousElement->previousElement->data == EXP &&
                ptr->previousElement->previousElement->previousElement->data == R) {
-        if (checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
+        if (checkDataTypes_ADD_SUB_MUL(typeStack)) return ERROR_SEM_COMPAT;
         make_ADDS();
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == SUB &&
                ptr->previousElement->previousElement->data == EXP &&
                ptr->previousElement->previousElement->previousElement->data == R) {
-        if (checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
+        if (checkDataTypes_ADD_SUB_MUL(typeStack)) return ERROR_SEM_COMPAT;
         make_SUBS();
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == MUL &&
                ptr->previousElement->previousElement->data == EXP &&
                ptr->previousElement->previousElement->previousElement->data == R) {
-        if (checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
+        if (checkDataTypes_ADD_SUB_MUL(typeStack)) return ERROR_SEM_COMPAT;
         make_MULS();
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DIV &&
                ptr->previousElement->previousElement->data == EXP &&
                ptr->previousElement->previousElement->previousElement->data == R) {
-        if (checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
+        if (checkDataTypes_DIV(typeStack)) return ERROR_SEM_COMPAT;
         make_DIVS();
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DIV2 &&

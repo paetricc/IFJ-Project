@@ -13,7 +13,9 @@ int skipNonPrintChar(Token *, FILE * );
 
 int checkRulesAndApply( TermStack *, TypeStack * );
 
-int checkDataTypes_ADD_SUB_MUL_DIV( TypeStack * );
+int checkDataTypes_ADD_SUB_MUL( TypeStack * );
+
+int checkDataTypes_DIV( TypeStack *);
 
 int checkDataTypes_DIV2( TypeStack * );
 
