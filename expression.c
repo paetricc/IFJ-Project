@@ -659,6 +659,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
                 }
                 (*ptrFrame) = (*ptrFrame)->previousElement;
             }
+            free(ptrFrame);
             /* chujoviny konci tady */
         }
         // podle pravidla v tabulce rozhodnu co budu delat

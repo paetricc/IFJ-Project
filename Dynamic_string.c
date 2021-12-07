@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include "Dynamic_string.h"
 
-#define DYN_STR_LEN 8
+#define DYN_STR_LEN 1
 
 bool DS_Init(Dynamic_string *string){
 
@@ -28,7 +28,7 @@ bool DS_Init(Dynamic_string *string){
 bool DS_Add(Dynamic_string *string, char c){
 
     unsigned int n_size = string->length + DYN_STR_LEN;
-    if (!(string->str = (char *) realloc(string->str, n_size))){
+    if (!(string->str = (char *) realloc(string->str, n_size + 1))){
         return false;
     }
     string->alloc = n_size;
