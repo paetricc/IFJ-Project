@@ -450,45 +450,37 @@ int checkRulesAndApply(TermStack *termStack, TypeStack *typeStack) {
                ptr->previousElement->previousElement->data == EXP &&
                ptr->previousElement->previousElement->previousElement->data == R) {
         if (checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
-        // TODO instrukce ADDS
-        printf("ADDS\n");
+        make_ADDS();
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == SUB &&
                ptr->previousElement->previousElement->data == EXP &&
                ptr->previousElement->previousElement->previousElement->data == R) {
         if (checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
-        // TODO instrukce SUBS
-        printf("SUBS\n");
+        make_SUBS();
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == MUL &&
                ptr->previousElement->previousElement->data == EXP &&
                ptr->previousElement->previousElement->previousElement->data == R) {
         if (checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
-        // TODO istrukce MULS
-        printf("MULS\n");
+        make_MULS();
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DIV &&
                ptr->previousElement->previousElement->data == EXP &&
                ptr->previousElement->previousElement->previousElement->data == R) {
         if (checkDataTypes_ADD_SUB_MUL_DIV(typeStack)) return ERROR_SEM_COMPAT;
-        // TODO istrukce DIVS
-        printf("DIVS\n");
+        make_DIVS();
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DIV2 &&
                ptr->previousElement->previousElement->data == EXP &&
                ptr->previousElement->previousElement->previousElement->data == R) {
         if (checkDataTypes_DIV2(typeStack)) return ERROR_SEM_COMPAT;
-        // TODO instrukce IDIVS
-        printf("IDIVS\n");
+        make_IDIVS();
         TermStack_applyReduce(termStack);
     } else if (ptr->data == EXP && ptr->previousElement->data == DDOT &&
                ptr->previousElement->previousElement->data == EXP &&
                ptr->previousElement->previousElement->previousElement->data == R) {
         if (checkDataTypes_DDOT(typeStack)) return ERROR_SEM_COMPAT;
-        // TODO instrukce CONCAT (POPS <str1>(firstOp), POPS <str2>(secondOp), CONCAT <var> <str2> <str1> PUSHS <var>(str2..str1))
-        printf("POPS TF@&tmp2\n");
-        printf("CONCAT TF@&tmp TF@&tmp2 TF@&tmp1\n");
-        printf("PUSHS TF@&tmp\n");
+        make_CONTAT();
         TermStack_applyReduce(termStack);
     } else if (ptr->data == RBR && ptr->previousElement->data == EXP &&
                ptr->previousElement->previousElement->data == LBR &&
@@ -532,10 +524,7 @@ int checkRulesAndApply(TermStack *termStack, TypeStack *typeStack) {
         } else {
             return ERROR_SEM_COMPAT;
         }
-        // TODO intrukce STRLEN (POPS <str>(firstOp), STRLEN <var> <str>, PUSHS <var>)
-        printf("POPS TF@&tmp1 \n");
-        printf("STRLEN TF@&tmp TF@&tmp1\n");
-        printf("PUSHS TF@&tmp\n");
+        make_STRLEN();
         TermStack_applyReduce(termStack);
     } else {
         return ERROR_SYNTAX;
@@ -612,7 +601,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
                 }
                 ptr_node = bst_search((*ptrFrame)->node, token->Value.string);
                 if (ptr_node != NULL && isInitVar(ptr_node)) {
-                    printf("PUSHS TF@&%s\n", token->Value.string->str);
+                    make_PUSHS_TF(token->Value.string);
                     if (ptr_node->varData->type == TYPE_STRING) {
                         TypeStack_push(typeStack, DATA_TYPE_STRING);
                     } else if (ptr_node->varData->type == TYPE_NUMBER) {
@@ -663,16 +652,19 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
                 //      PUSHS <symb>
                 if(isNew) {
                     if(token->ID == TOKEN_ID_INT || token->ID == TOKEN_ID_INT0 || token->ID == TOKEN_ID_ZERO )
+                        //make_PUSHS_int(token->Value.Integer);
                         printf("PUSHS int@%lld\n", token->Value.Integer);
                     if(token->ID == TOKEN_ID_DBL2 || token->ID == TOKEN_ID_EXP3 || token->ID == TOKEN_ID_DHEX2 || token->ID == TOKEN_ID_HEXP3)
+                        //make_PUSHS_float(token->Value.Double);
                         printf("PUSHS float@%a\n", token->Value.Double);
                     if(token->ID == TOKEN_ID_FSTR) {
                         char *str = converString(token->Value.string->str);
+                        //make_PUSHS_string(str);
                         printf("PUSHS string@%s\n", str);
                         free(str);
                     }
                     if(token->Value.keyword == KEYWORD_NIL)
-                        printf("PUSHS nil@nil\n");
+                        make_PUSHS_nil();
                 }
                 TermStack_insertReduce(termStack, top);
                 TermStack_push(termStack, vstup);
@@ -738,60 +730,39 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
         make_POPSandMOVE_tmp2();
     } else {
         if (retData != TYPE_UNDEFINED)
-            printf("POPS TF@&%s\n", var);
+            make_POPS_TF(var);
         else
-            printf("POPS GF@&if\n");
+            make_POPS_GF_if();
         //printf("POPS GF@<tmp>\n");
         //printf("MOVE LF@<var> GF@<tmp>\n");
     }
     // je tam rovnost nebo nerovnost
     switch (decide) {
         case EQ:
-            //printf("PUSHS TF@_tmp1\n");
-            //printf("PUSHS TF@_tmp2\n");
-            printf("JUMPIFNEQ !else%d TF@&tmp2 TF@&tmp1\n", elseCounter++);
+            make_EQ(elseCounter++);
             break;
         case NEQ:
-            printf("JUMPIFEQ !else%d TF@&tmp2 TF@&tmp1\n", elseCounter++);
+            make_NEQ(elseCounter++);
             break;
         case LT:
             make_insertNILcompare();
-            printf("PUSHS TF@&tmp2\n");
-            printf("PUSHS TF@&tmp1\n");
-            printf("LTS\n");
-            printf("PUSHS bool@true\n");
-            printf("JUMPIFNEQS !else%d\n", elseCounter++);
+            make_LT_all(elseCounter++);
             break;
         case LTE:
             make_insertNILcompare();
-            printf("PUSHS TF@&tmp2\n");
-            printf("PUSHS TF@&tmp1\n");
-            printf("GTS\n");
-            printf("NOTS\n");
-            printf("PUSHS bool@true\n");
-            printf("JUMPIFNEQS !else%d\n", elseCounter++);
+            make_LTE_all(elseCounter++);
             break;
         case GT:
             make_insertNILcompare();
-            printf("PUSHS TF@&tmp2\n");
-            printf("PUSHS TF@&tmp1\n");
-            printf("GTS\n");
-            printf("PUSHS bool@true\n");
-            printf("JUMPIFNEQS !else%d\n", elseCounter++);
+            make_GT_all(elseCounter++);
             break;
         case GTE:
             make_insertNILcompare();
-            printf("PUSHS TF@&tmp2\n");
-            printf("PUSHS TF@&tmp1\n");
-            printf("LTS\n");
-            printf("NOTS\n");
-            printf("PUSHS bool@true\n");
-            printf("JUMPIFNEQS !else%d\n", elseCounter++);
+            make_GTE_all(elseCounter++);
             break;
         default:
             if (!(strcmp(var, "if"))) {
-                printf("TYPE GF@&varType GF@&if\n");
-                printf("JUMPIFEQ !else%d GF@&varType string@nil\n", elseCounter++);
+                make_IF_nil(elseCounter++);
             }
             break;
     }
