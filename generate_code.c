@@ -313,11 +313,35 @@ void make_PUSHS_TF(Dynamic_string *string){
 }
 
 /**
+ * Funkce vytvori kod pro PUSHS int.
+ *
+ */
+void make_PUSHS_int(long long int Integer){
+    printf("PUSHS int@&%lld\n", Integer);
+}
+
+/**
+ * Funkce vytvori kod pro PUSHS float.
+ *
+ */
+void make_PUSHS_float(double DoubleVal){
+    printf("PUSHS float@&%a\n", DoubleVal);
+}
+
+/**
+ * Funkce vytvori kod pro PUSHS string.
+ *
+ */
+void make_PUSHS_string(char *str){
+    printf("PUSHS string@&%s\n", str);
+}
+
+/**
  * Funkce vytvori kod pro POPS promenne temporaryframu.
  *
  */
-void make_POPS_TF(Dynamic_string *string){
-    printf("POPS TF@&%s\n", string->str);
+void make_POPS_TF(char *var){
+    printf("POPS TF@&%s\n", var);
 }
 
 /**
@@ -332,7 +356,7 @@ void make_POPS_GF_if(){
  * Funkce vytvori kod pro PUSHS nil.
  *
  */
-void make_PUSH_nil(){
+void make_PUSHS_nil(){
     printf("PUSHS nil@nil\n");
 }
 

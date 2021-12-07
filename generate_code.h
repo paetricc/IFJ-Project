@@ -90,7 +90,13 @@ void make_POPS_LF(Dynamic_string *string);
 
 void make_PUSHS_TF(Dynamic_string *string);
 
-void make_POPS_TF(Dynamic_string *string);
+void make_PUSHS_int(long long int Integer);
+
+void make_PUSHS_float(double DoubleVal);
+
+void make_PUSHS_string(char *str);
+
+void make_POPS_TF(char *var);
 
 void make_POPS_GF_if();
 
