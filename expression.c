@@ -766,6 +766,11 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
             freeStacks(termStack, typeStack);
             return ERROR_SEM_ASSIGN;
         }
+    } else if (retData == TYPE_NIL) {
+        if (typeStack->topElement->data != DATA_TYPE_NIL) {
+            freeStacks(termStack, typeStack);
+            return ERROR_SEM_ASSIGN;
+        }
     }
 
     // neni tam rovnost nebo nerovnost
