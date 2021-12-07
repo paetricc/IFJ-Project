@@ -171,6 +171,7 @@ void make_substr(){
     printf("POPFRAME\n");
     printf("RETURN\n");
     printf("LABEL $end_fnc_substr\n");
+    printf("#------------------------------\n");
 }
 
 /**
@@ -290,7 +291,7 @@ void call_substr(Dynamic_string *str, int var1, int var2){
     printf("MOVE TF@_cvar2 int@%d\n", var1);
     printf("DEFVAR TF@_cvar3\n");
     printf("MOVE TF@_cvar3 int@%d\n", var2);
-    printf("CALL $substr\n");
+    printf("CALL $fnc_substr\n");
 }
 
 /**

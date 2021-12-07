@@ -26,7 +26,7 @@
  */
 SLList_Frame *symTable;
 int ifCounter = 0;
-
+int loopCounter = 0;
 
 /**
  * @brief Nacita tokeny dokud je v nich nektery bily znak, nebo az se narazi na EOF.
@@ -220,6 +220,8 @@ int start(Token *token, FILE *sourceFile) {
 
     // brikule
     make_write();
+    make_reads();
+    make_substr();
     make_NILcompare();
 
     // vse korektni - uplatnuju pravidlo a rozsiruju dalsi neterminal
@@ -682,7 +684,6 @@ int fnc_call(Token *token, FILE *sourceFile) {
     if(!strcmp(node_idFnc->name->str, "write")) {
         return writeFncCall(token, sourceFile);
     }
-
     // ukazatel na ukazatel na polozku v seznamu parametru
     SLLElementPtr_Param *param = (SLLElementPtr_Param *) malloc(sizeof(SLLElementPtr_Param));
     if(param == NULL)
@@ -1448,11 +1449,11 @@ int return_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned
                 // aplikace pravidla 37
                 fsetpos(sourceFile, &lastReadPos);
                 if(token->ID == TOKEN_ID_ID) {
-                    if ((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, token->Value.string->str)))
+                    if ((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, token->Value.string->str, NULL)))
                         return error;
                 }
                 else {
-                    if ((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, "ha")))
+                    if ((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, "ha", NULL)))
                         return error;
                 }
                 *returned = true;
@@ -1467,7 +1468,7 @@ int return_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned
                 else {
                     // aplikace pravidla 37
                     fsetpos(sourceFile, &lastReadPos);
-                    if ((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, token->Value.string->str)))
+                    if ((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, token->Value.string->str, NULL)))
                         return error;
                     *returned = true;
                     // TODO generovani kodu vraceni nil
@@ -1500,7 +1501,7 @@ int return_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned
             else { // id_var
                 fsetpos(sourceFile, &lastReadPos);
                 // zavolani bottomup SA pro neterminal expr
-                if((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, token->Value.string->str))) // aplikace pravidla 48
+                if((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, token->Value.string->str, NULL))) // aplikace pravidla 48
                     return error;
                 *returned = true;
                 return error;
@@ -1823,7 +1824,7 @@ int var_assign(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var
             }
             else { // id_var
                 // zavolani bottomup SA pro neterminal expr
-                if((error = exprSyntaxCheck(token, sourceFile, symTable, typeVar(node_idVar), var))) // aplikace pravidla 48
+                if((error = exprSyntaxCheck(token, sourceFile, symTable, typeVar(node_idVar), var, NULL))) // aplikace pravidla 48
                     return error;
                 // TODO generovani kodu - prirazeni promenne vysledek vyrazu
             }
@@ -1845,7 +1846,7 @@ int var_assign(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var
 
             //aplikace pravidla 48
             // volani bottom-up SA (rozsireni neterminalu expr)
-            if((error = exprSyntaxCheck(token, sourceFile, symTable, typeVar(node_idVar), var))) // aplikace pravidla 48
+            if((error = exprSyntaxCheck(token, sourceFile, symTable, typeVar(node_idVar), var, NULL))) // aplikace pravidla 48
                 return error;
             break;
 
@@ -1856,7 +1857,7 @@ int var_assign(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var
 
                 //aplikace pravidla 48
                 // volani bottom-up SA (rozsireni neterminalu expr)
-                if((error = exprSyntaxCheck(token, sourceFile, symTable, typeVar(node_idVar), var))) // aplikace pravidla 48
+                if((error = exprSyntaxCheck(token, sourceFile, symTable, typeVar(node_idVar), var, NULL))) // aplikace pravidla 48
                     return error;
             } else // pro tento keyword neexistuje pravidlo
                 return ERROR_SYNTAX;
@@ -1885,7 +1886,7 @@ int if_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     // aplikace pravidla 50
 
     // volani bottom-up SA (rozsireni neterminalu expr)
-    if ((error = exprSyntaxCheck(token, sourceFile, symTable, TYPE_UNDEFINED, "if")))
+    if ((error = exprSyntaxCheck(token, sourceFile, symTable, TYPE_UNDEFINED, "if", NULL)))
         return error;
 
     // then
@@ -1986,8 +1987,23 @@ int loop(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     // token while byl precten o uroven vyse => pokracuju dal
     // aplikace pravidla 51
 
+    printf("PUSHFRAME\n");
+    printf("CREATEFRAME\n");
+    DLList_Instruct *dll_instruct = (DLList_Instruct*) malloc(sizeof (DLList_Instruct));
+    DLL_Instruct_Init(dll_instruct);
+    getAllVar(dll_instruct, symTable);
+    movePrevious(dll_instruct);
+    DLL_Instruct_Dispose(dll_instruct);
+    free(dll_instruct);
+    printf("#VYTVORENI DOCASNYCH PROMENNYCH\n");
+    printf("DEFVAR TF@&tmp\n");
+    printf("DEFVAR TF@&tmp1\n");
+    printf("DEFVAR TF@&tmp2\n");
+    printf("#----------------\n");
+    printf("LABEL !loop%d\n", loopCounter);
+
     // volani bottom-up SA (rozsireni neterminalu expr)
-    if ((error = exprSyntaxCheck(token, sourceFile, symTable, TYPE_UNDEFINED, "loop")))
+    if ((error = exprSyntaxCheck(token, sourceFile, symTable, TYPE_UNDEFINED, "loop", &loopCounter)))
         return error;
 
     // do
@@ -2002,7 +2018,6 @@ int loop(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
 
     // vytvorim ramec pro blok do
     SLL_Frame_Insert(symTable);
-
 
     bool dontCheckReturnInLoop;
     // rozvinu neterminal statements
@@ -2021,6 +2036,9 @@ int loop(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
         return ERROR_SYNTAX;
     else if (token->Value.keyword != KEYWORD_END)
         return ERROR_SYNTAX;
+    printf("JUMP !loop%d\n", --loopCounter);
+    printf("LABEL !endLoop%d\n", loopCounter);
+    printf("POPFRAME\n");
 
     return ERROR_PASSED;
 } // loop

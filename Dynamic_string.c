@@ -27,8 +27,8 @@ bool DS_Init(Dynamic_string *string){
 
 bool DS_Add(Dynamic_string *string, char c){
 
-    unsigned int n_size = string->length + DYN_STR_LEN;
-    if (!(string->str = (char *) realloc(string->str, n_size + 1))){
+    unsigned int n_size = string->length;
+    if (!(string->str = (char *) realloc(string->str, n_size + 30))){
         return false;
     }
     string->alloc = n_size;

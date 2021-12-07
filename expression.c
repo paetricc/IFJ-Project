@@ -399,6 +399,12 @@ int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
     } else if (firstOp == DATA_TYPE_STRING && secondOp == DATA_TYPE_STRING) {
         make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_STRING);
+    } else if (firstOp == DATA_TYPE_NIL && secondOp == DATA_TYPE_STRING) {
+        make_POPSandMOVE_tmp1();
+        TypeStack_push(typeStack, DATA_TYPE_STRING);
+    } else if (firstOp == DATA_TYPE_STRING && secondOp == DATA_TYPE_NIL) {
+        make_POPSandMOVE_tmp1();
+        TypeStack_push(typeStack, DATA_TYPE_STRING);
     } else {
         return ERROR_SEM_COMPAT;
     }
@@ -593,7 +599,7 @@ int SA_isOK(TermStack *stack) {
  * @param file Ukazatel na zdrojovy soubor
  * @return int Typ erroru generovany analyzou
  */
-int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type retData, char *var) {
+int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type retData, char *var, int *loopCounter) {
     bool isNew = true;
     int error;
     bst_node_t *ptr_node = NULL;
@@ -782,30 +788,73 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
     // je tam rovnost nebo nerovnost
     switch (decide) {
         case EQ:
-            make_EQ(elseCounter++);
-            break;
+            if (!(strcmp(var, "if")))
+                make_EQ(elseCounter++);
+            if(!(strcmp(var, "loop")))
+                printf("JUMPIFNEQ !endLoop%d TF@&tmp2 TF@&tmp1\n", (*loopCounter)++);
+                break;
         case NEQ:
-            make_NEQ(elseCounter++);
+            if (!(strcmp(var, "if")))
+                make_NEQ(elseCounter++);
+            if(!(strcmp(var, "loop"))) {
+                printf("JUMPIFEQ !endLoop%d TF@&tmp2 TF@&tmp1\n", (*loopCounter)++);
+            }
             break;
         case LT:
             make_insertNILcompare();
-            make_LT_all(elseCounter++);
+            if (!(strcmp(var, "if")))
+                make_LT_all(elseCounter++);
+            if(!(strcmp(var, "loop"))) {
+                printf("PUSHS TF@&tmp2\n");
+                printf("PUSHS TF@&tmp1\n");
+                printf("LTS\n");
+                printf("PUSHS bool@true\n");
+                printf("JUMPIFNEQS !endLoop%d\n", (*loopCounter)++);
+            }
             break;
         case LTE:
             make_insertNILcompare();
-            make_LTE_all(elseCounter++);
+            if (!(strcmp(var, "if")))
+                make_LTE_all(elseCounter++);
+            if(!(strcmp(var, "loop"))) {
+                printf("PUSHS TF@&tmp2\n");
+                printf("PUSHS TF@&tmp1\n");
+                printf("GTS\n");
+                printf("NOTS\n");
+                printf("PUSHS bool@true\n");
+                printf("JUMPIFNEQS !endLoop%d\n", (*loopCounter)++);
+            }
             break;
         case GT:
             make_insertNILcompare();
-            make_GT_all(elseCounter++);
+            if (!(strcmp(var, "if")))
+                make_GT_all(elseCounter++);
+            if(!(strcmp(var, "loop"))) {
+                printf("PUSHS TF@&tmp2\n");
+                printf("PUSHS TF@&tmp1\n");
+                printf("GTS\n");
+                printf("PUSHS bool@true\n");
+                printf("JUMPIFNEQS !endLoop%d\n", (*loopCounter)++);
+            }
             break;
         case GTE:
             make_insertNILcompare();
-            make_GTE_all(elseCounter++);
+            if (!(strcmp(var, "if")))
+                make_GTE_all(elseCounter++);
+            if(!(strcmp(var, "loop"))) {
+                printf("PUSHS TF@&tmp2\n");
+                printf("PUSHS TF@&tmp1\n");
+                printf("LTS\n");
+                printf("NOTS\n");
+                printf("PUSHS bool@true\n");
+                printf("JUMPIFNEQS !endLoop%d\n", (*loopCounter)++);
+            }
             break;
         default:
             if (!(strcmp(var, "if"))) {
                 make_IF_nil(elseCounter++);
+            } else if (!(strcmp(var, "loop"))) {
+
             }
             break;
     }

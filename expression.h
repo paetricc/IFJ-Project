@@ -7,7 +7,7 @@
 
 TermsAndNonTerms convertTokenType_To_TermsAndNonTerms( Token *, TypeStack *);
 
-int exprSyntaxCheck( Token *, FILE *, SLList_Frame *, Data_type, char * );
+int exprSyntaxCheck( Token *, FILE *, SLList_Frame *, Data_type, char *, int * );
 
 int skipNonPrintChar(Token *, FILE * );
 
