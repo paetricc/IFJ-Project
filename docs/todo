@@ -7,9 +7,9 @@ legenda: X - neprojde, D - hotovo
 [D] Ondroid 008 - Vetsi nez
 [D] Ondroid 009 - Vetsi rovno nez
 [D] Ondrios 011 - Konkatenace stringu
-[X] Ondroid 013 - Nema prochazet - dat. typ nil
-[X] Ondroid 014 - Nema prochazet - dat. typ nil
-[X] Ondroid 015 - Nema prochazet - dat. typ nil
+[ ] Ondroid 013 - dat. typ nil
+[ ] Ondroid 014 - dat. typ nil
+[ ] Ondroid 015 - dat. typ nil
 [X] Ondroid 016 - Nema prochazet - prace s neinicializovanou promennou
 [D] Ondroid 018 - Porovnavani hodnoty s nilem - ocekava error 8
 [D] Ondroid 021 - Blokovy kometnar nebyl ukoncen -> lexikalni chyba
@@ -18,16 +18,18 @@ legenda: X - neprojde, D - hotovo
 [X] Ondroid 024 - Nema prochazet - vraceni vice hodnot funkce
 
 [X] Rostik 001 - Nema prochazet - vraceni vice hodnot funkce
-[X] Rostik 003 - Nema prochazet - datovy typ nil
-[X] Rostik 004 - Nema prochazet - datovy typ nil
-[X] Rostik 005 - Nema prochazet - datovy typ nil
-[X] Rostik 007 - Nema prochazet - datovy typ nil
+[D] Rostik 003 - datovy typ nil
+[D] Rostik 004 - datovy typ nil
+[D] Rostik 005 - datovy typ nil
+[D] Rostik 007 - datovy typ nil
 [ ] Rostik 009 - Porovnavani hodnoty s nil v podmince
 [?] Rostik 010 - Funguje - nevim co je to za chybu
 [ ] Rostik 011 - Chyba u podminky - porovnani hodnoty s nil
 [D] Rostik 013 - Doplnit predani parametru funkci
 [X] Rostik 031 - Nema prochazet- vraceni vice hodnot funkce
 [D] Rostik 036 - Neprochazi zrejme kvuli instrukcim
-[X] Rostik 041 - Nema prochazet- dat. typ nil - mohlo by se upravit a vyzkouset znovu
+[ ] Rostik 041 - dat. typ nil
 [X] Rostik 042 - Nema prochazet- vraceni vice hodnot funkce
 [X] Rostik 044 - Nema prochazet- vraceni vice hodnot funkce
+
+doplnit prirazeni navratove hodnoty funkce do promenne

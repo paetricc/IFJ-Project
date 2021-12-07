@@ -15,6 +15,7 @@ typedef enum {
     TYPE_INTEGER,
     TYPE_NUMBER,
     TYPE_STRING,
+    TYPE_NIL
 }Data_type;
 
 /**

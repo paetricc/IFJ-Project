@@ -630,6 +630,32 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
             } // switch
             break; // KEYWORD_STRING
 
+        case KEYWORD_NIL: // aplikace pravidla 15
+            switch (dataSwitch) {
+                case VAR_TYPE:
+                    setVarType(node_id, TYPE_NIL);
+                    break;
+
+                case PARAM_TYPE:
+                    if(!isDecFnc(node_id)) {
+                        if (param != NULL) // funkce byla deklarovana a prave ji definuju => parametr byl byt vytvoren a pridam mu jmeno
+                            param->type = TYPE_NIL;
+                        else // funkci prave deklaruju => parametr musim vytvorit
+                            SLL_Param_Insert(TYPE_NIL, node_id->name, node_id);
+                    }
+                    else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
+                        error = (param->type == TYPE_NIL ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
+                    break;
+
+                case RET_TYPE:
+                    if(!isDecFnc(node_id))
+                        error = SLL_Return_Insert(TYPE_STRING, node_id);
+                    else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
+                        error = (node_id->funcData->returnList->firstElement->type == TYPE_NIL ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
+                    break;
+            } // switch
+            break; // KEYWORD_STRING
+
         default:
             return ERROR_SYNTAX; // nevalidni klicove slovo
     } // switch
