@@ -32,6 +32,8 @@ void make_GTS();
 
 void make_EQS();
 
+void make_NOTS();
+
 void make_CALL(Dynamic_string *string);
 
 void make_JUMP_end_fnc(Dynamic_string *string);
@@ -89,5 +91,27 @@ void make_POPS_LF(Dynamic_string *string);
 void make_PUSHS_TF(Dynamic_string *string);
 
 void make_POPS_TF(Dynamic_string *string);
+
+void make_POPS_GF_if();
+
+void make_PUSHS_nil();
+
+void make_CONTAT();
+
+void make_STRLEN();
+
+void make_LT_all(int elseCounter);
+
+void make_LTE_all(int elseCounter);
+
+void make_GT_all(int elseCounter);
+
+void make_GTE_all(int elseCounter);
+
+void make_IF_nil(int elseCounter);
+
+void make_EQ(int elseCounter);
+
+void make_NEQ(int elseCounter);
 
 #endif //_GENERATE_CODE_H
