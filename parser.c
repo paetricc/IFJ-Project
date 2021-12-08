@@ -79,6 +79,13 @@ int writeFncCall(Token *token, FILE *sourceFile) {
     int error = ERROR_PASSED;
     error = get_non_white_token(token, sourceFile);
     while (token->ID != TOKEN_ID_RBR) {
+        if (token->ID == TOKEN_ID_INT || token->ID == TOKEN_ID_INT0 || token->ID == TOKEN_ID_ZERO) {
+            printf("WRITE int@%lld\n", token->Value.Integer);
+        }
+        if (token->ID == TOKEN_ID_DBL2 || token->ID == TOKEN_ID_DHEX2 || token->ID == TOKEN_ID_EXP3 ||
+            token->ID == TOKEN_ID_HEXP3 || token->ID == TOKEN_ID_HEX2) {
+            printf("WRITE float@%a\n", token->Value.Double);
+        }
         if (token->ID == TOKEN_ID_ID) {
             // vyhledam promennou
             bst_node_t *node_idVar = search_Iden(token->Value.string, symTable);

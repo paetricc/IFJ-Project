@@ -32,7 +32,7 @@ legenda: X - neprojde, D - hotovo, N - nedame
 [X] Rostik 031 - Nema prochazet- vraceni vice hodnot funkce
 [ ] Rostik 033 - Vraceni hodnot
 [D] Rostik 036 - Neprochazi zrejme kvuli instrukcim
-[X] Rostik 041 - nil se nevypisuje :)
+[D] Rostik 041 - nil se nevypisuje :)
 [X] Rostik 042 - Nema prochazet- vraceni vice hodnot funkce
 [X] Rostik 044 - Nema prochazet- vraceni vice hodnot funkce
 

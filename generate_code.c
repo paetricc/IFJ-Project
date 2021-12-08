@@ -641,7 +641,7 @@ void make_LOOP_JUMP(int loopCounter) {
  *
  */
 void make_MOVE_TF_FLOAT_INT2FLOAT(Dynamic_string *stringTF , long long int x) {
-    printf("MOVE TF@&%s float@%lld\n", stringTF->str, x);
+    printf("MOVE TF@&%s float@%a\n", stringTF->str, (double )x);
 }
 
 /**
@@ -649,7 +649,7 @@ void make_MOVE_TF_FLOAT_INT2FLOAT(Dynamic_string *stringTF , long long int x) {
  *
  */
 void make_MOVE_TF_FLOAT(Dynamic_string *stringTF , double x) {
-    printf("MOVE TF@&%s float@%a\n", stringTF->str, x);
+    printf("MOVE TF@&%s float@%a\n", stringTF->str, (double)x);
 }
 
 /**

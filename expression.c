@@ -77,25 +77,25 @@ char *converString(char *input) {
     for(i = 1; input[i+1] != '\0'; i++) {
         if (input[i] == '\\') {
             if(input[i+1] == '\\') {
-                output = (char *) realloc(output, strlen(input) + 5);
+                output = (char *) realloc(output, strlen(input) + 30);
                 output[positon++] = '\\';
                 output[positon++] = '0';
                 output[positon++] = '9';
                 output[positon++] = '2';
             } else if (input[i+1] == '"') {
-                output = (char *) realloc(output, strlen(input) + 5);
+                output = (char *) realloc(output, strlen(input) + 30);
                 output[positon++] = '\\';
                 output[positon++] = '0';
                 output[positon++] = '3';
                 output[positon++] = '4';
             } else if (input[i+1] == 'n') {
-                output = (char *) realloc(output, strlen(input) + 5);
+                output = (char *) realloc(output, strlen(input) + 30);
                 output[positon++] = '\\';
                 output[positon++] = '0';
                 output[positon++] = '1';
                 output[positon++] = '0';
             } else if (input[i+1] == 't') {
-                output = (char *) realloc(output, strlen(input) + 5);
+                output = (char *) realloc(output, strlen(input) + 30);
                 output[positon++] = '\\';
                 output[positon++] = '0';
                 output[positon++] = '0';
