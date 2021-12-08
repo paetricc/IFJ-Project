@@ -218,8 +218,7 @@ TermsAndNonTerms convertTokenType_To_TermsAndNonTerms(Token *token, TypeStack *t
  *  |------------|
  *  |   ......   |
  *  |___BOTTOM___|
- *  tedy vyraz odpovida:
- *  <secondOp> {+,-,*} <firstOp>
+ *  tedy vyraz odpovida: <secondOp> {+,-,*} <firstOp>
  *
  * @param typeStack Zasobnik datovych typu
  * @return Typ erroru generovany analyzou
@@ -257,8 +256,7 @@ int checkDataTypes_ADD_SUB_MUL(TypeStack *typeStack) {
  *  |------------|
  *  |   ......   |
  *  |___BOTTOM___|
- *  tedy vyraz odpovida:
- *  <secondOp> {/} <firstOp>
+ *  tedy vyraz odpovida: <secondOp> {/} <firstOp>
  *
  * @param typeStack Zasobnik datovych typu
  * @return Typ erroru generovany analyzou
@@ -273,11 +271,11 @@ int checkDataTypes_DIV(TypeStack *typeStack) {
         make_INT2FLOATS();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
-        // druhe operande je INT tak vyndej druhy ho pretypuj
+        // druhy operand je INT tak vyndej druhy ho pretypuj
         make_POPSandPUSH_float();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
-        // prvni operande je INT tak ho pretypuj
+        // prvni operand je INT tak ho pretypuj
         make_INT2FLOATS();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_NUMBER) {
@@ -299,8 +297,7 @@ int checkDataTypes_DIV(TypeStack *typeStack) {
  *  |------------|
  *  |   ......   |
  *  |___BOTTOM___|
- *  tedy vyraz odpovida:
- *  <secondOp> {//} <firstOp>
+ *  tedy vyraz odpovida: <secondOp> {//} <firstOp>
  *
  * @param typeStack Zasobnik datovych typu
  * @return Typ erroru generovany analyzou
@@ -326,8 +323,7 @@ int checkDataTypes_DIV2(TypeStack *typeStack) {
  *  |------------|
  *  |   ......   |
  *  |___BOTTOM___|
- *  tedy vyraz odpovida:
- *  <secondOp> {<,>} <firstOp>
+ *  tedy vyraz odpovida: <secondOp> {<,>} <firstOp>
  *
  * @details Po zpracovani vlozi na zasobnik vysledny datovy typ
  *
@@ -369,8 +365,7 @@ int checkDataTypes_LT_GT(TypeStack *typeStack) {
  *  |------------|
  *  |   ......   |
  *  |___BOTTOM___|
- *  tedy vyraz odpovida:
- *  <secondOp> {==, ~=} <firstOp>
+ *  tedy vyraz odpovida: <secondOp> {==, ~=} <firstOp>
  *
  * @param typeStack Zasobnik datovych typu
  * @return Typ erroru generovany analyzou
@@ -434,8 +429,7 @@ int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
  *  |------------|
  *  |   ......   |
  *  |___BOTTOM___|
- *  tedy vyraz odpovida:
- *  <secondOp> {<=, >=} <firstOp>
+ *  tedy vyraz odpovida: <secondOp> {<=, >=} <firstOp>
  *
  * @param typeStack Zasobnik datovych typu
  * @return Typ erroru generovany analyzou
@@ -496,7 +490,7 @@ int checkDataTypes_DDOT(TypeStack *typeStack) {
 }
 
 /**
- * @brief Gramaticka pravidla
+ * @brief Gramaticka pravidla a nasledne volani kontroly datoveho typu
  * 
  * @param termStack Ukazatel na strukturu jednosmerne vazaneho seznamu
  * @return int Typ erroru generovany analyzou
@@ -609,6 +603,10 @@ int SA_isOK(TermStack *stack) {
  * 
  * @param token Struktura tokenu
  * @param file Ukazatel na zdrojovy soubor
+ * @param listFrame Ukazatel na tabulku symbolu
+ * @param retData Datovy typ do ktereho se ma vysledny vyraz priradit
+ * @param var Nazev promenne do ktere se ma vysledny vyraz priradit
+ * @param loopCounter Ukazatel na citac cyklu
  * @return int Typ erroru generovany analyzou
  */
 int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type retData, char *var, int *loopCounter) {
@@ -708,8 +706,6 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
                 break;
                 // vlozim znak redukce
             case R:
-                // TODO instrukce pushnuti na zasobnik kdyz operand
-                //      PUSHS <symb>
                 if(isNew) {
                     if(token->ID == TOKEN_ID_INT || token->ID == TOKEN_ID_INT0 || token->ID == TOKEN_ID_ZERO )
                         printf("PUSHS int@%lld\n", token->Value.Integer);
