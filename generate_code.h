@@ -70,6 +70,8 @@ void make_endOfFunc(Dynamic_string *string);
 
 void movePrevious(DLList_Instruct *dlListInstruct);
 
+void moveAfter(DLList_Instruct *dlListInstruct);
+
 void make_POPSandMOVE_tmp1();
 
 void make_POPSandMOVE_tmp2();

@@ -159,6 +159,7 @@ void make_MOVE_LF_nil(Dynamic_string *string){
 void make_DEFVAR_TF(Dynamic_string *string){
     printf("#DEKLARACE PROMENNE %s V TEMPORARYFRAMU\n", string->str);
     printf("DEFVAR TF@&%s\n", string->str);
+    printf("MOVE TF@&%s nil@nil\n", string->str);
 }
 
 /**
@@ -242,6 +243,19 @@ void movePrevious(DLList_Instruct *dlListInstruct) {
         pointer = pointer->nextElement;
     }
     printf("#------------------------------\n");
+}
+
+void moveAfter(DLList_Instruct *dlListInstruct) {
+    printf("#DISTRIBUCE ZMENY DOLU\n");
+    DLLElementPtr_Instruct pointer = dlListInstruct->firstElement;
+    while (pointer != NULL) {
+        printf("MOVE GF@&desAct TF@&%s\n", pointer->instruction->str);
+        printf("MOVE GF@&desPrev LF@&%s\n", pointer->instruction->str);
+        printf("CALL $distrbute\n");
+        printf("MOVE LF@&%s GF@&desPrev\n", pointer->instruction->str);
+        pointer = pointer->nextElement;
+    }
+    printf("#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 }
 
 /**
