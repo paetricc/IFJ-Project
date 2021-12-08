@@ -898,3 +898,5 @@ void freeStacks(TermStack *termStack, TypeStack *typeStack) {
     TermStack_dispose(termStack);
     free(termStack);
 }
+
+/** @endcode */

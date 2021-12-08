@@ -217,3 +217,5 @@ void TermStack_dispose( TermStack *stack ) {
         TermStack_pop(stack);
     }
 }
+
+/** @endcode */

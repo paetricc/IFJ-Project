@@ -133,3 +133,5 @@ void TypeStack_dispose( TypeStack *stack ) {
         TypeStack_pop(stack);
     }
 }
+
+/** @endcode */

@@ -1,3 +1,13 @@
+/**
+ * Projekt: IFJ2021
+ *
+ * @brief Zasobnik pro terminaly a neterminaly
+ *
+ * @details Zasobnik je implementovany jednosmerne vazanym seznamem
+ *
+ * @author Tomáš Bártů xbartu11@stud.fit.vutbr.cz
+ */
+
 #ifndef __TERM_STACK__
 #define __TERM_STACK__
 
@@ -54,3 +64,5 @@ void TermStack_error( int );
 void TermStack_dispose( TermStack * );
 
 #endif
+
+/** @endcode */

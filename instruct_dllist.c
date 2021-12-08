@@ -304,3 +304,5 @@ int DLL_Instruct_Move(DLList_Instruct *listInstruct, int countOfElem, int positi
     }
     return ERROR_PASSED;
 }
+
+/** @endcode */
