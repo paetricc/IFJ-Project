@@ -405,6 +405,16 @@ int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
     } else if (firstOp == DATA_TYPE_STRING && secondOp == DATA_TYPE_NIL) {
         make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_STRING);
+    } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NIL) {
+
+    } else if (firstOp == DATA_TYPE_NIL && secondOp == DATA_TYPE_INTEGER) {
+        make_POPSandMOVE_tmp1();
+        TypeStack_push(typeStack, DATA_TYPE_NIL);
+    } else if (firstOp == DATA_TYPE_NIL && secondOp == DATA_TYPE_NUMBER) {
+        make_POPSandMOVE_tmp1();
+        TypeStack_push(typeStack, DATA_TYPE_NIL);
+    } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_NIL) {
+
     } else {
         return ERROR_SEM_COMPAT;
     }
@@ -648,7 +658,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
                     return ERROR_SEM_UNDEFINED;
                 }
                 ptr_node = bst_search((*ptrFrame)->node, token->Value.string);
-                if (ptr_node != NULL && isInitVar(ptr_node)) {
+                if (ptr_node != NULL && (isInitVar(ptr_node) || !strcmp(var, "if") || !strcmp(var, "while"))) {
                     make_PUSHS_TF(token->Value.string);
                     if (ptr_node->varData->type == TYPE_STRING) {
                         TypeStack_push(typeStack, DATA_TYPE_STRING);
@@ -656,6 +666,8 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
                         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
                     } else if (ptr_node->varData->type == TYPE_INTEGER) {
                         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
+                    } else if (ptr_node->varData->type == TYPE_NIL) {
+                        TypeStack_push(typeStack, DATA_TYPE_NIL);
                     } else {
                         free(ptrFrame);
                         freeStacks(termStack, typeStack);
@@ -793,11 +805,11 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
     // je tam rovnost nebo nerovnost
     switch (decide) {
         case EQ:
-            if (!(strcmp(var, "if")))
+    if (!(strcmp(var, "if")))
                 make_EQ(elseCounter++);
             if(!(strcmp(var, "loop")))
                 printf("JUMPIFNEQ !endLoop%d TF@&tmp2 TF@&tmp1\n", (*loopCounter)++);
-                break;
+            break;
         case NEQ:
             if (!(strcmp(var, "if")))
                 make_NEQ(elseCounter++);
@@ -884,3 +896,5 @@ void freeStacks(TermStack *termStack, TypeStack *typeStack) {
     TermStack_dispose(termStack);
     free(termStack);
 }
+
+/** @endcode */

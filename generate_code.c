@@ -159,6 +159,7 @@ void make_MOVE_LF_nil(Dynamic_string *string){
 void make_DEFVAR_TF(Dynamic_string *string){
     printf("#DEKLARACE PROMENNE %s V TEMPORARYFRAMU\n", string->str);
     printf("DEFVAR TF@&%s\n", string->str);
+    printf("MOVE TF@&%s nil@nil\n", string->str);
 }
 
 /**
@@ -182,9 +183,28 @@ void make_WRITE_LF(Dynamic_string *string){
  * Funkce vytvori kod pro vypsani v temporyframu.
  *
  */
-void make_WRITE_TF(Dynamic_string *string){
-    printf("#VYPSANI %s V TEMPORARYFRAMU\n", string->str);
-    printf("WRITE TF@&%s\n", string->str);
+void make_WRITE_TF(){
+    printf("JUMP !fnc_call_end\n");
+    printf("LABEL !fnc_call\n");
+    printf("DEFVAR TF@&varType\n");
+    printf("TYPE TF@&varType TF@&typeVar\n");
+    printf("JUMPIFEQ !writeNil TF@&varType string@nil\n");
+    printf("WRITE TF@&typeVar\n");
+    printf("JUMP !writeNilEnd\n");
+    printf("LABEL !writeNil\n");
+    printf("WRITE string@nil\n");
+    printf("LABEL !writeNilEnd\n");
+    printf("RETURN\n");
+    printf("LABEL !fnc_call_end\n");
+}
+
+void makeWriteCall(Dynamic_string *string) {
+    printf("PUSHFRAME\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@&typeVar\n");
+    printf("MOVE TF@&typeVar LF@&%s\n", string->str);
+    printf("CALL !fnc_call\n");
+    printf("POPFRAME\n");
 }
 /**
  * Funkce vytvori kod pro pomocne promenne.
@@ -223,6 +243,19 @@ void movePrevious(DLList_Instruct *dlListInstruct) {
         pointer = pointer->nextElement;
     }
     printf("#------------------------------\n");
+}
+
+void moveAfter(DLList_Instruct *dlListInstruct) {
+    printf("#DISTRIBUCE ZMENY DOLU\n");
+    DLLElementPtr_Instruct pointer = dlListInstruct->firstElement;
+    while (pointer != NULL) {
+        printf("MOVE GF@&desAct TF@&%s\n", pointer->instruction->str);
+        printf("MOVE GF@&desPrev LF@&%s\n", pointer->instruction->str);
+        printf("CALL $distrbute\n");
+        printf("MOVE LF@&%s GF@&desPrev\n", pointer->instruction->str);
+        pointer = pointer->nextElement;
+    }
+    printf("#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 }
 
 /**
@@ -454,3 +487,5 @@ void make_EQ(int elseCounter){
 void make_NEQ(int elseCounter){
     printf("JUMPIFEQ !else%d TF@&tmp2 TF@&tmp1\n", elseCounter);
 }
+
+/** @endcode */

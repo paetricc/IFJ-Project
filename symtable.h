@@ -1,3 +1,11 @@
+/**
+ * Projekt: IFJ2021
+ *
+ * @brief Implementace Tabulky symbolu.
+ *
+ * @author Vít Janeček xjanec30@stud.fit.vutbr.cz
+*/
+
 #ifndef _SYMTABLE_H
 #define _SYMTABLE_H
 
@@ -176,6 +184,6 @@ Data_type typeVar(bst_node_t *tree);
 
 int setBuildInFuns(SLLElementPtr_Frame globalElement);
 
-//nejake funkce na vraceni hodnoty parametru a returnu
-
 #endif
+
+/** @endcode */

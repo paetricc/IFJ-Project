@@ -648,3 +648,5 @@ int get_token(Token *token, FILE *source_file ) {
 
         return ERROR_PASSED;
     }
+
+/** @endcode */

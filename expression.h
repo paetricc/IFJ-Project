@@ -1,3 +1,11 @@
+/**
+ * Projekt: IFJ2021
+ *
+ * @brief Syntaktická analýza zdola nahoru
+ *
+ * @author Tomáš Bártů xbartu11@stud.fit.vutbr.cz
+ */
+
 #include "term_stack.h"
 #include "type_stack.h"
 #include "error.h"
@@ -32,3 +40,5 @@ int SA_isOK( TermStack * );
 char *converString(char *);
 
 void freeStacks( TermStack *, TypeStack * );
+
+/** @endcode */

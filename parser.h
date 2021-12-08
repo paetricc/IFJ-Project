@@ -1,3 +1,11 @@
+/**
+ * Projekt: IFJ2021
+ *
+ * @brief Implementace top-down syntakticke anylzy shora dolu.
+ *
+ * @author Šimon Vacek xvacek10@stud.fit.vutbr.cz
+*/
+
 #ifndef _PARSER_H_
 #define _PARSER_H_
 
@@ -43,3 +51,5 @@ int checkDeclaredFncs(bst_node_t *);
 int writeFncCall(Token *, FILE *);
 
 #endif
+
+/** @endcode */

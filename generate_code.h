@@ -1,4 +1,10 @@
-
+/**
+ * Projekt: IFJ2021
+ *
+ * @brief Implementace generovani kodu a vestavenych funkci.
+ *
+ * @author Vít Janeček xjanec30@stud.fit.vutbr.cz
+*/
 
 #ifndef _GENERATE_CODE_H
 #define _GENERATE_CODE_H
@@ -60,13 +66,17 @@ void make_MOVE_TF_nil(Dynamic_string *string);
 
 void make_WRITE_LF(Dynamic_string *string);
 
-void make_WRITE_TF(Dynamic_string *string);
+void make_WRITE_TF();
+
+void makeWriteCall(Dynamic_string *string);
 
 void make_CREATEFRAME_TMP();
 
 void make_endOfFunc(Dynamic_string *string);
 
 void movePrevious(DLList_Instruct *dlListInstruct);
+
+void moveAfter(DLList_Instruct *dlListInstruct);
 
 void make_POPSandMOVE_tmp1();
 
@@ -121,3 +131,5 @@ void make_EQ(int elseCounter);
 void make_NEQ(int elseCounter);
 
 #endif //_GENERATE_CODE_H
+
+/** @endcode */

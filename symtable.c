@@ -6,7 +6,6 @@
  * @author Vít Janeček xjanec30@stud.fit.vutbr.cz
 */
 
-#include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -691,3 +690,5 @@ int setBuildInFuns(SLLElementPtr_Frame globalElement){
     free(id);
     return error;
 }
+
+/** @endcode */

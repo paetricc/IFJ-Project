@@ -63,3 +63,5 @@ void DS_Free(Dynamic_string *string){
     free(string->str);
     free(string);
 }
+
+/** @endcode */
