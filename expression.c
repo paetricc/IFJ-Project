@@ -231,11 +231,11 @@ int checkDataTypes_ADD_SUB_MUL(TypeStack *typeStack) {
     if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_INTEGER) {
         TypeStack_push(typeStack, DATA_TYPE_INTEGER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_INTEGER) {
-        // druhe operande je INT tak vyndej druhy ho pretypuj
+        // druhy operand je INT tak vyndej druhy ho pretypuj
         make_POPSandPUSH_float();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NUMBER) {
-        // prvni operande je INT tak ho pretypuj
+        // prvni operand je INT tak ho pretypuj
         make_INT2FLOATS();
         TypeStack_push(typeStack, DATA_TYPE_NUMBER);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_NUMBER) {
@@ -641,15 +641,12 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
             freeStacks(termStack, typeStack);
             return ERROR_RUNTIME_DIV_ZERO;
         }
+
         // jedna se o identifikator?
         if (token->ID == TOKEN_ID_ID && p_table[(top->data - 4)][vstup - 4] != H && vstup != USD) {
-            /* chujoviny zacinaji tady */
-            //ptr_node = search_Iden(token->Value.string, listFrame);
             SLLElementPtr_Frame *ptrFrame = (SLLElementPtr_Frame *) malloc(sizeof(SLLElementPtr_Frame));
             if(!ptrFrame) return ERROR_COMPILER;
             (*ptrFrame) = listFrame->TopLocalElement;
-            // iterace ramci dokud ptrFrame neni global && dokud !isInitVar(bst_search((*ptrFrame)->node, token->Value.string)))
-
             ptr_node = bst_search(listFrame->globalElement->node, token->Value.string);
             bool doLoop = ptr_node == NULL;
 
@@ -680,8 +677,8 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
                 (*ptrFrame) = (*ptrFrame)->previousElement;
             }
             free(ptrFrame);
-            /* chujoviny konci tady */
         }
+
         // podle pravidla v tabulce rozhodnu co budu delat
         switch (p_table[(top->data - 4)][vstup - 4]) {
             // terminaly jsou si rovny
@@ -715,14 +712,11 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
                 //      PUSHS <symb>
                 if(isNew) {
                     if(token->ID == TOKEN_ID_INT || token->ID == TOKEN_ID_INT0 || token->ID == TOKEN_ID_ZERO )
-                        //make_PUSHS_int(token->Value.Integer);
                         printf("PUSHS int@%lld\n", token->Value.Integer);
                     if(token->ID == TOKEN_ID_DBL2 || token->ID == TOKEN_ID_EXP3 || token->ID == TOKEN_ID_DHEX2 || token->ID == TOKEN_ID_HEXP3)
-                        //make_PUSHS_float(token->Value.Double);
                         printf("PUSHS float@%a\n", token->Value.Double);
                     if(token->ID == TOKEN_ID_FSTR) {
                         char *str = converString(token->Value.string->str);
-                        //make_PUSHS_string(str);
                         printf("PUSHS string@%s\n", str);
                         free(str);
                     }
@@ -760,7 +754,6 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
                 return ERROR_SYNTAX;
         }
     } while (vstup != USD || !SA_isOK(termStack)); // opakuji dokud vstup neni $ a dokud muzu redukovat
-    //if(listFrame->globalElement->node->funcData->returnList->firstElement->type != typeStack->topElement->data) return ERROR_SEM_TYPE_COUNT;
 
     //kontrola vyslednych datovych typu
     if(retData == TYPE_INTEGER) {
@@ -801,8 +794,6 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
             make_POPS_TF(var);
         else
             make_POPS_GF_if();
-        //printf("POPS GF@<tmp>\n");
-        //printf("MOVE LF@<var> GF@<tmp>\n");
     }
     // je tam rovnost nebo nerovnost
     switch (decide) {
