@@ -526,7 +526,7 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
                         if (param != NULL) // funkce byla deklarovana a prave ji definuju => parametr byl byt vytvoren a pridam mu jmeno
                             param->type = TYPE_INTEGER;
                         else // funkci prave deklaruju => parametr musim vytvorit
-                            SLL_Param_Insert(TYPE_STRING, node_id->name, node_id);
+                            SLL_Param_Insert(TYPE_INTEGER, node_id->name, node_id);
                     }
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
                         error = (param->type == TYPE_INTEGER ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
@@ -552,7 +552,7 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
                         if(param != NULL) // funkce byla deklarovana a prave ji definuju => parametr byl byt vytvoren a pridam mu jmeno
                             param->type = TYPE_NUMBER;
                         else // funkci prave deklaruju => parametr musim vytvorit
-                            SLL_Param_Insert(TYPE_STRING, node_id->name, node_id);
+                            SLL_Param_Insert(TYPE_NUMBER, node_id->name, node_id);
                     }
                     else // fce byla deklarovana => musim zkontrolovat dat. typy deklarace a definice
                         error = (param->type == TYPE_NUMBER ? ERROR_PASSED : ERROR_SEM_UNDEFINED);
