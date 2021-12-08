@@ -1811,7 +1811,7 @@ int var_assign(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var
             else if (isFnc(id)) { // id_fnc
                 // test, zda vraci funkce spravny datovy typ
                 if(id->funcData->returnList->firstElement == NULL) { // funkce nevraci hodnotu
-                    // TODO generovani kodu rovnou priradit promenne hodnotu nil
+                    printf("MOVE TF@&%s nil@nil\n", var);
                 }
                 else if(id->funcData->returnList->firstElement->type != node_idVar->varData->type) {
                     if(node_idVar->varData->type == TYPE_NUMBER && id->funcData->returnList->firstElement->type == TYPE_INTEGER) {
@@ -1827,12 +1827,12 @@ int var_assign(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var
                 // rozvinuti neterminalu fnc_call
                 if((error = fnc_call(token, sourceFile))) // aplikace pravidla 49
                     return error;
+                printf("MOVE TF@&%s GF@*return\n", var);
             }
             else { // id_var
                 // zavolani bottomup SA pro neterminal expr
                 if((error = exprSyntaxCheck(token, sourceFile, symTable, typeVar(node_idVar), var, NULL))) // aplikace pravidla 48
                     return error;
-                // TODO generovani kodu - prirazeni promenne vysledek vyrazu
             }
             break;
 
