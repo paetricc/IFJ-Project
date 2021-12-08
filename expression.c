@@ -406,7 +406,8 @@ int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
         make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_STRING);
     } else if (firstOp == DATA_TYPE_INTEGER && secondOp == DATA_TYPE_NIL) {
-
+        make_POPSandMOVE_tmp1();
+        TypeStack_push(typeStack, DATA_TYPE_NIL);
     } else if (firstOp == DATA_TYPE_NIL && secondOp == DATA_TYPE_INTEGER) {
         make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_NIL);
@@ -414,7 +415,8 @@ int checkDataTypes_EQ_NEQ(TypeStack *typeStack) {
         make_POPSandMOVE_tmp1();
         TypeStack_push(typeStack, DATA_TYPE_NIL);
     } else if (firstOp == DATA_TYPE_NUMBER && secondOp == DATA_TYPE_NIL) {
-
+        make_POPSandMOVE_tmp1();
+        TypeStack_push(typeStack, DATA_TYPE_NIL);
     } else {
         return ERROR_SEM_COMPAT;
     }
