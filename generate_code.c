@@ -297,6 +297,7 @@ void call_NILcompare() {
 }
 
 void make_NILcompare() {
+    printf("#---------- pomocna NILcompare ----------\n");
     printf("JUMP $$endNILcompare\n");
     printf("LABEL $fnc_NILcompare\n");
     printf("PUSHFRAME\n");
@@ -310,6 +311,7 @@ void make_NILcompare() {
     printf("LABEL $errorNil\n");
     printf("EXIT int@8\n");
     printf("LABEL $$endNILcompare\n");
+    printf("#------------------------------\n\n");
 }
 
 void make_insertNILcompare() {
