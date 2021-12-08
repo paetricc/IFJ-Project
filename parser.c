@@ -84,17 +84,13 @@ int writeFncCall(Token *token, FILE *sourceFile) {
             bst_node_t *node_idVar = search_Iden(token->Value.string, symTable);
             if(node_idVar == NULL || isFnc(node_idVar)) // promenna neexistuje, nebo jde o funkci
                 return ERROR_SEM_UNDEFINED;
-
-            //printf("CALL $makeWRITE\n");
             makeWriteCall(token->Value.string);
-            //printf("WRITE TF@_%s\n", token->Value.string->str);
-            //call_write(token->Value.string);
         } else if (token->ID == TOKEN_ID_FSTR) {
-            printf("PUSHFRAME\n");
+            make_PUSHFRAME();
             char *output = converString(token->Value.string->str);
             call_write(output);
             free(output);
-            printf("POPFRAME\n");
+            make_POPFRAME();
         }
         error = get_non_white_token(token, sourceFile);
         if (token->ID == TOKEN_ID_RBR)
@@ -156,34 +152,7 @@ int start(Token *token, FILE *sourceFile) {
         return error;
     }
 
-    printf(".IFJcode21\n");
-    printf("DEFVAR GF@&varFloat\n");
-    printf("DEFVAR GF@&varBool\n");
-    printf("DEFVAR GF@&if\n");
-    printf("DEFVAR GF@&varType\n");
-    printf("DEFVAR GF@*return\n");
-    printf("MOVE GF@*return nil@nil\n");
-    printf("DEFVAR GF@&desAct\n");
-    printf("DEFVAR GF@&desPrev\n");
-    make_WRITE_TF();
-    //printf("JUMP $$main\n");
-
-    make_write();
-    make_reads();
-    make_readi();
-    make_readn();
-    make_substr();
-    make_toInteger();
-    make_ord();
-    make_chr();
-    make_NILcompare();
-    printf("JUMP $$distributeEnd\n");
-    printf("LABEL $distrbute\n");
-    printf("JUMPIFEQ !disCheck GF@&desAct GF@&desPrev\n");
-    printf("MOVE GF@&desPrev GF@&desAct\n");
-    printf("LABEL !disCheck\n");
-    printf("RETURN\n");
-    printf("LABEL $$distributeEnd\n");
+    make_header();
 
     // vse korektni - uplatnuju pravidlo a rozsiruju dalsi neterminal
     error = program(token, sourceFile); // aplikace pravidla 1
@@ -678,9 +647,9 @@ int fnc_call(Token *token, FILE *sourceFile) {
     *param = node_idFnc->funcData->paramList->firstElement;
 
     if(symTable->TopLocalElement != NULL)
-        printf("PUSHFRAME\n");
+        make_PUSHFRAME();
 
-    printf("CREATEFRAME\n");
+    make_CREATEFRAME();
 
 
     // rozvinuti neterminalu value
@@ -698,10 +667,10 @@ int fnc_call(Token *token, FILE *sourceFile) {
     if (token->ID != TOKEN_ID_RBR)
         return ERROR_SYNTAX;
 
-    printf("CALL $%s\n", var);
+    make_CALL(var);
 
     if(symTable->TopLocalElement != NULL)
-        printf("POPFRAME\n");
+        make_POPFRAME();
 
 
     return ERROR_PASSED;
@@ -860,7 +829,7 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
     // uzel s promennou/funkci
     bst_node_t *node_idVar = NULL;
 
-    printf("DEFVAR TF@&%s\n", (*param)->name->str);
+    make_DEFVAR_TF((*param)->name);
 
     switch (token->ID) {
         case TOKEN_ID_ID: // id_var
@@ -872,14 +841,14 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
             // overeni datovych typu
             if(typeVar(node_idVar) != (*param)->type) {
                 if((*param)->type == TYPE_NUMBER && typeVar(node_idVar) == TYPE_INTEGER) {
-                    printf("MOVE TF@&%s LF@&%s\n", (*param)->name->str, token->Value.string->str);
-                    printf("INT2FLOAT TF@&%s TF@&%s\n", (*param)->name->str, (*param)->name->str);
+                    make_MOVE_TF_to_LF((*param)->name, token->Value.string);
+                    make_INT2FLOAT_TF_TF((*param)->name);
                 }
                 else // promenne nemaji kompatibilni typy
                     return ERROR_SEM_TYPE_COUNT;
             }
             else { // datove typy jsou kompatibilni
-                printf("MOVE TF@&%s LF@&%s\n", (*param)->name->str, token->Value.string->str);
+                make_MOVE_TF_to_LF((*param)->name, token->Value.string);
             }
             break;
 
@@ -890,15 +859,13 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
             // aplikace pravidla 22
             if((*param)->type != TYPE_INTEGER) {
                 if((*param)->type == TYPE_NUMBER) { // ocekavam number, davam mu integer
-                    // TODO generovani kodu - int2float
-                    printf("MOVE TF@&%s float@%lld\n", (*param)->name->str, token->Value.Integer);
+                    make_MOVE_TF_FLOAT_INT2FLOAT((*param)->name, token->Value.Integer);
                 }
                 else // datove typy nejsou kompatibilni
                     return ERROR_SEM_TYPE_COUNT;
             }
             else {
-                // TODO generovani kodu pro integer
-                printf("MOVE TF@&%s int@%lld\n", (*param)->name->str, token->Value.Integer);
+                make_MOVE_TF_INT((*param)->name, token->Value.Integer);
             }
             break;
 
@@ -909,23 +876,20 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
             // aplikace pravidla 23
             if((*param)->type != TYPE_NUMBER) // datove typy nejsou kompatibilni
                 return ERROR_SEM_TYPE_COUNT;
-            // TODO generace kodu pro number
-            printf("MOVE TF@&%s float@%a\n", (*param)->name->str, token->Value.Double);
+            make_MOVE_TF_FLOAT((*param)->name, token->Value.Double);
             break;
 
         case TOKEN_ID_FSTR: // str_value
             // aplikace pravidla 24
             if((*param)->type != TYPE_STRING) // datove typy nejsou kompatibilni
                 return ERROR_SEM_TYPE_COUNT;
-            // TODO generace kodu pro string
-            printf("MOVE TF@&%s string@%s\n", (*param)->name->str, converString(token->Value.string->str));
+            make_MOVE_TF_STRING((*param)->name, converString(token->Value.string->str));
             break;
 
         case TOKEN_ID_KEYWORD: // nil
             if (token->Value.keyword == KEYWORD_NIL) {
                 // aplikace pravidal 25
-                // TODO generovani kodu pro nil
-                printf("MOVE TF@&%s nil@nil\n", (*param)->name->str);
+                make_MOVE_TF_nil((*param)->name->str);
             } else // pro keyword neexistuje pravidlo
                 return ERROR_SYNTAX;
             break;
@@ -979,7 +943,7 @@ int fnc_def(Token *token, FILE *sourceFile) {
 
 
     // rozvinuti neterminalu fnc_def2
-    printf("PUSHFRAME\n");
+    make_PUSHFRAME();
     make_CREATEFRAME_TMP();
 
     // prekopirovani parametru z LF do TF
@@ -1013,9 +977,7 @@ int fnc_def(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX;
     }
 
-    printf("POPFRAME\n");
-    printf("RETURN\n");
-    printf("LABEL $$end_fnc_%s\n", var);
+    make_endOfFunc(var);
     // odeberu ramec funkce
     SLL_Frame_Delete(symTable);
 
@@ -1057,9 +1019,8 @@ int fnc_head(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
     } else { // funkce byla uz i definovanna - pokus o redefinici
         return ERROR_SEM_UNDEFINED;
     }
-
-    printf("JUMP $$end_fnc_%s\n", token->Value.string->str);
-    printf("LABEL $%s\n", token->Value.string->str);
+    make_JUMP_end_fnc(token->Value.string);
+    make_LABEL_fnc(token->Value.string);
 
     // '('
     if ((error = get_non_white_token(token, sourceFile)))
@@ -1150,7 +1111,7 @@ int fnc_def2(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
             return error;
 
         if(!returned) { // funkce nevratila zadnou hodnoty
-            printf("MOVE GF@*return nil@nil\n");
+            make_MOVE_RETURN_NIL();
         }
 
     } else { // id_fce, id_var, local, if, while, return nebo end
@@ -1449,7 +1410,7 @@ int return_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned
 
     bst_node_t *node_idVar = NULL;
 
-    printf("DEFVAR TF@&return\n");
+    make_TF_RETURN();
 
     switch(token->ID) {
         case TOKEN_ID_LBR: // '('
@@ -1523,14 +1484,13 @@ int return_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned
                 if((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, "return", NULL))) // aplikace pravidla 48
                     return error;
                 *returned = true;
-                // TODO generovani kodu - vraceni hodnoty vyrazu
             }
             break;
 
         default:
             return ERROR_SYNTAX;
     }
-    printf("MOVE GF@*return TF@&return\n");
+    make_TF_RETURN_to_GF();
     return error;
 } // return_
 
@@ -1825,7 +1785,7 @@ int var_assign(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var
             else if (isFnc(id)) { // id_fnc
                 // test, zda vraci funkce spravny datovy typ
                 if(id->funcData->returnList->firstElement == NULL) { // funkce nevraci hodnotu
-                    printf("MOVE TF@&%s nil@nil\n", var);
+                    make_MOVE_TF_nil(var);
                 }
                 else if(id->funcData->returnList->firstElement->type != node_idVar->varData->type) {
                     if(node_idVar->varData->type == TYPE_NUMBER && id->funcData->returnList->firstElement->type == TYPE_INTEGER) {
@@ -1840,7 +1800,9 @@ int var_assign(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var
                 // rozvinuti neterminalu fnc_call
                 if((error = fnc_call(token, sourceFile))) // aplikace pravidla 49
                     return error;
-                printf("MOVE TF@&%s GF@*return\n", var);
+
+                make_MOVE_GF_return_to_TF(var);
+
             }
             else { // id_var
                 // zavolani bottomup SA pro neterminal expr
@@ -1921,8 +1883,8 @@ int if_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     // vytvorim ramec pro blok if
     SLL_Frame_Insert(symTable);
 
-    printf("PUSHFRAME\n");
-    printf("CREATEFRAME\n");
+    make_PUSHFRAME();
+    make_CREATEFRAME();
 
     DLList_Instruct *dll_instruct = (DLList_Instruct*) malloc(sizeof (DLList_Instruct));
     DLL_Instruct_Init(dll_instruct);
@@ -1938,7 +1900,7 @@ int if_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     moveAfter(dll_instruct);
     DLL_Instruct_Dispose(dll_instruct);
     free(dll_instruct);
-    printf("POPFRAME\n");
+    make_POPFRAME();
 
     // odstranim ramec pro blok if
     SLL_Frame_Delete(symTable);
@@ -1955,10 +1917,10 @@ int if_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
 
     // vytvorim ramec pro blok else
     SLL_Frame_Insert(symTable);
-    printf("JUMP !endif%d\n", ifCounter);
-    printf("LABEL !else%d\n", ifCounter);
-    printf("PUSHFRAME\n");
-    printf("CREATEFRAME\n");
+    make_JUMP_end_if(ifCounter);
+    make_LABEL_else(ifCounter);
+    make_PUSHFRAME();
+    make_CREATEFRAME();
     dll_instruct = (DLList_Instruct*) malloc(sizeof (DLList_Instruct));
     DLL_Instruct_Init(dll_instruct);
     getAllVar(dll_instruct, symTable);
@@ -1987,8 +1949,8 @@ int if_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     else if (token->Value.keyword != KEYWORD_END)
         return ERROR_SYNTAX;
 
-    printf("POPFRAME\n");
-    printf("LABEL !endif%d\n", ifCounter++);
+    make_POPFRAME();
+    make_LABEL_endif(ifCounter++);
 
     return ERROR_PASSED;
 } // if_
@@ -2008,18 +1970,13 @@ int loop(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     // token while byl precten o uroven vyse => pokracuju dal
     // aplikace pravidla 51
 
-    printf("PUSHFRAME\n");
-    printf("CREATEFRAME\n");
+    make_PUSHFRAME();
+    make_CREATEFRAME();
     DLList_Instruct *dll_instruct = (DLList_Instruct*) malloc(sizeof (DLList_Instruct));
     DLL_Instruct_Init(dll_instruct);
     getAllVar(dll_instruct, symTable);
     movePrevious(dll_instruct);
-    printf("#VYTVORENI DOCASNYCH PROMENNYCH\n");
-    printf("DEFVAR TF@&tmp\n");
-    printf("DEFVAR TF@&tmp1\n");
-    printf("DEFVAR TF@&tmp2\n");
-    printf("#----------------\n");
-    printf("LABEL !loop%d\n", loopCounter);
+    make_LOOP_TMP(loopCounter);
 
     // volani bottom-up SA (rozsireni neterminalu expr)
     if ((error = exprSyntaxCheck(token, sourceFile, symTable, TYPE_UNDEFINED, "loop", &loopCounter)))
@@ -2058,9 +2015,7 @@ int loop(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     moveAfter(dll_instruct);
     DLL_Instruct_Dispose(dll_instruct);
     free(dll_instruct);
-    printf("JUMP !loop%d\n", --loopCounter);
-    printf("LABEL !endLoop%d\n", loopCounter);
-    printf("POPFRAME\n");
+    make_LOOP_JUMP(loopCounter);
 
     return ERROR_PASSED;
 } // loop
@@ -2139,8 +2094,6 @@ int parser(FILE *sourceFile) {
     int error = ERROR_PASSED;
 		error = start(token, sourceFile);
 
-    // TODO hazi segfault
-    //DS_Free(token->Value.string);
     free(token);
     return error;
 }
