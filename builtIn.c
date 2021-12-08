@@ -116,13 +116,12 @@ void make_write(){
 void make_toInteger(){
     printf("#builtIn toInteger()\n");
     printf("JUMP $end_fnc_toInteger\n");
-    printf("LABEL $fnc_toInteger\n");
+    printf("LABEL $tointeger\n");
     printf("PUSHFRAME\n");
-    printf("DEFVAR LF@*return\n");
-    printf("MOVE LF@*return nil@nil\n");
-    printf("DEFVAR LF@_var1\n");
-    printf("MOVE LF@_var1 LF@_cvar1\n");
-    printf("FLOAT2INT LF@*return LF@_var1\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@&f\n");
+    printf("MOVE TF@&f LF@&f\n");
+    printf("FLOAT2INT GF@*return TF@&f\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
     printf("LABEL $end_fnc_toInteger\n");

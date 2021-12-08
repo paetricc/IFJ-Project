@@ -145,66 +145,10 @@ int start(Token *token, FILE *sourceFile) {
         return ERROR_COMPILER;
     // vytvoreni globalniho ramce
     SLL_Frame_Insert(symTable);
-    /* nacteni vestavenych funkci */
-    // dynamic string pro jmena vestavenych funkci
-    Dynamic_string *str = (Dynamic_string *) malloc(sizeof(Dynamic_string));
-    if(str == NULL)
-        return ERROR_COMPILER;
 
-    /* Naplneni stromu vestavenymi funkcemi */
+    // vlozeni vestavenych funkci do symtable
+    error = setBuildInFuns(symTable->globalElement);
 
-    // ord()
-    str->str = "ord";
-    error = setBuildInFun(symTable, str, TYPE_STRING, TYPE_INTEGER, TYPE_UNDEFINED, TYPE_INTEGER);
-
-    // chr()
-    if(!error) {
-        str->str = "chr";
-        error = setBuildInFun(symTable, str, TYPE_INTEGER, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_STRING);
-    }
-
-    // reads()
-    if(!error) {
-        str->str = "reads";
-        error = setBuildInFun(symTable, str, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_STRING);
-    }
-
-    // readn()
-    if(!error) {
-        str->str = "readn";
-        error = setBuildInFun(symTable, str, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_NUMBER);
-    }
-
-    // tointeger()
-    if(!error) {
-        str->str = "tointeger";
-        error = setBuildInFun(symTable, str, TYPE_NUMBER, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_INTEGER);
-    }
-
-    // readi()
-    if(!error) {
-        str->str = "readi";
-        error = setBuildInFun(symTable, str, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_INTEGER);
-    }
-
-    // substr()
-    if(!error) {
-        str->str = "substr";
-        error = setBuildInFun(symTable, str, TYPE_STRING, TYPE_NUMBER, TYPE_NUMBER, TYPE_STRING);
-    }
-
-    // write()
-    if(!error) {
-        str->str = "write";
-        error = bst_insert(&(symTable->globalElement->node), str, true);
-        if(!error) {
-            bst_node_t *wr = bst_search(symTable->globalElement->node, str);
-            setFncDec(wr, true);
-            setFncDef(wr, true);
-        }
-    }
-
-    free(str);
     if(error) { // doslo k chybe prirazeni pameti
         SLL_Frame_Dispose(symTable);
         free(symTable);
@@ -215,13 +159,19 @@ int start(Token *token, FILE *sourceFile) {
     printf("DEFVAR GF@&varFloat\n");
     printf("DEFVAR GF@&varBool\n");
     printf("DEFVAR GF@&if\n");
-    printf("DEFVAR GF@&varType");
+    printf("DEFVAR GF@&varType\n");
+    printf("DEFVAR GF@*return\n");
+    printf("MOVE GF@*return nil@nil\n");
     //printf("JUMP $$main\n");
 
-    // brikule
     make_write();
     make_reads();
+    make_readi();
+    make_readn();
     make_substr();
+    make_toInteger();
+    make_ord();
+    make_chr();
     make_NILcompare();
 
     // vse korektni - uplatnuju pravidlo a rozsiruju dalsi neterminal

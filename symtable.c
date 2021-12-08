@@ -550,25 +550,144 @@ Data_type typeVar(bst_node_t *tree) {
  * @param listFrame Ukazatel na Tabulku symbolu.
  * @return Vraci ERROR_PASSED, jestlize se pridani povedlo, jinak ERROR_COMPILER.
  */
-int setBuildInFun(SLList_Frame *listFrame, Dynamic_string *string, Data_type param1, Data_type param2, Data_type param3, Data_type return1){
-    int error = 0;
-    bst_node_t *tree;
-    if ((bst_insert(&(listFrame->globalElement->node), string, true)) == ERROR_COMPILER){       //prida uzel s vestavenou funkci
+int setBuildInFuns(SLLElementPtr_Frame globalElement){
+    Dynamic_string *id = (Dynamic_string *) malloc(sizeof(Dynamic_string));
+    if(id == NULL)
         return ERROR_COMPILER;
+    int error = ERROR_PASSED;
+    bst_node_t *node_fnc;
+
+    // ord()
+    id->str = "ord";
+    error = bst_insert(&(globalElement->node), id, true);
+    if(error) {
+        free(id);
+        return error;
     }
-    tree = search_Iden(string, listFrame);
-    setFncDef(tree, true);                       //nastavi ji na definovanou
-    if (param1 != TYPE_UNDEFINED){
-        error = SLL_Param_Insert(param1, string, tree);
+    node_fnc = bst_search(globalElement->node, id);
+    id->str = "s";
+    if(!error)
+        error = SLL_Param_Insert(TYPE_STRING, id, node_fnc);
+    id->str = "i";
+    if(!error)
+        error = SLL_Param_Insert(TYPE_INTEGER, id, node_fnc);
+    if(!error)
+        error = SLL_Return_Insert(TYPE_INTEGER, node_fnc);
+    setFncDec(node_fnc, true);
+    setFncDef(node_fnc, true);
+
+
+    // chr()
+    id->str = "chr";
+    error = bst_insert(&(globalElement->node), id, true);
+    if(error) {
+        free(id);
+        return error;
     }
-    if (!error && (param2 != TYPE_UNDEFINED)){
-        error = SLL_Param_Insert(param2, string, tree);
+    node_fnc = bst_search(globalElement->node, id);
+    id->str = "i";
+    if(!error)
+        error = SLL_Param_Insert(TYPE_INTEGER, id, node_fnc);
+    if(!error)
+        error = SLL_Return_Insert(TYPE_STRING, node_fnc);
+    setFncDec(node_fnc, true);
+    setFncDef(node_fnc, true);
+
+
+    // reads()
+    id->str = "reads";
+    error = bst_insert(&(globalElement->node), id, true);
+    if(error) {
+        free(id);
+        return error;
     }
-    if (!error && (param3 != TYPE_UNDEFINED)){
-        error = SLL_Param_Insert(param3, string, tree);
+    node_fnc = bst_search(globalElement->node, id);
+    if(!error)
+        error = SLL_Return_Insert(TYPE_STRING, node_fnc);
+    setFncDec(node_fnc, true);
+    setFncDef(node_fnc, true);
+
+
+    // readn()
+    id->str = "readn";
+    error = bst_insert(&(globalElement->node), id, true);
+    if(error) {
+        free(id);
+        return error;
     }
-    if (!error && (return1 != TYPE_UNDEFINED)){
-        error = SLL_Return_Insert(return1, tree);
+    node_fnc = bst_search(globalElement->node, id);
+    if(!error)
+        error = SLL_Return_Insert(TYPE_NUMBER, node_fnc);
+    setFncDec(node_fnc, true);
+    setFncDef(node_fnc, true);
+
+
+    // tointeger()
+    id->str = "tointeger";
+    error = bst_insert(&(globalElement->node), id, true);
+    if(error) {
+        free(id);
+        return error;
     }
+    node_fnc = bst_search(globalElement->node, id);
+    id->str = "f";
+    if(!error)
+        error = SLL_Param_Insert(TYPE_NUMBER, id, node_fnc);
+    if(!error)
+        error = SLL_Return_Insert(TYPE_INTEGER, node_fnc);
+    setFncDec(node_fnc, true);
+    setFncDef(node_fnc, true);
+
+
+    // readi()
+    id->str = "readi";
+    error = bst_insert(&(globalElement->node), id, true);
+    if(error) {
+        free(id);
+        return error;
+    }
+    node_fnc = bst_search(globalElement->node, id);
+    if(!error)
+        error = SLL_Return_Insert(TYPE_INTEGER, node_fnc);
+    setFncDec(node_fnc, true);
+    setFncDef(node_fnc, true);
+
+
+    // substr()
+    id->str = "substr";
+    error = bst_insert(&(globalElement->node), id, true);
+    if(error) {
+        free(id);
+        return error;
+    }
+    node_fnc = bst_search(globalElement->node, id);
+    id->str = "s";
+    if(!error)
+        error = SLL_Param_Insert(TYPE_STRING, id, node_fnc);
+    id->str = "i";
+    if(!error)
+        error = SLL_Param_Insert(TYPE_NUMBER, id, node_fnc);
+    id->str = "j";
+    if(!error)
+        error = SLL_Param_Insert(TYPE_NUMBER, id, node_fnc);
+    if(!error)
+        error = SLL_Return_Insert(TYPE_STRING, node_fnc);
+    setFncDec(node_fnc, true);
+    setFncDef(node_fnc, true);
+
+
+    // write()
+    if(!error) {
+        id->str = "write";
+        error = bst_insert(&(globalElement->node), id, true);
+        if(!error) {
+            node_fnc = bst_search(globalElement->node, id);
+            setFncDec(node_fnc, true);
+            setFncDef(node_fnc, true);
+        }
+    }
+
+
+    free(id);
     return error;
 }
