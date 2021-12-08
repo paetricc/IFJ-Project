@@ -1,3 +1,10 @@
+/**
+ * Projekt: IFJ2021
+ *
+ * @brief Implementace DLListu pro instrukce.
+ *
+ * @author Vít Janeček xjanec30@stud.fit.vutbr.cz
+*/
 
 #ifndef _INSTRUCT_DLLIST_H
 
@@ -76,3 +83,5 @@ int DLL_Instruct_Move(DLList_Instruct *, int countOfElem, int positionOFDestinat
 #define _INSTRUCT_DLLIST_H
 
 #endif //IFJ_PROJECT_INSTRUCT_DLLIST_H
+
+/** @endcode */

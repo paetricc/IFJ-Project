@@ -2181,3 +2181,5 @@ int parser(FILE *sourceFile) {
     free(token);
     return error;
 }
+
+/** @endcode */
