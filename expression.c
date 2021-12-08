@@ -47,6 +47,7 @@ int elseCounter = 0;
  *
  * @param token Struktura tokenu
  * @param file Ukazatel na zdrojovy soubor
+ * @return Navratova chyva
  */
 int skipNonPrintChar(Token *token, FILE *file) {
     int error = ERROR_PASSED;
