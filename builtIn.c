@@ -17,7 +17,7 @@
  *
  */
 void make_reads(){
-    printf("#builtIn reads()\n");
+    printf("#---------- builtIn reads() ----------\n");
     printf("JUMP $end_reads\n");
     printf("LABEL $reads\n");
     printf("PUSHFRAME\n");
@@ -31,6 +31,7 @@ void make_reads(){
     printf("POPFRAME\n");
     printf("RETURN\n");
     printf("LABEL $end_reads\n");
+    printf("#------------------------------\n\n");
 }
 
 /**
@@ -38,7 +39,7 @@ void make_reads(){
  *
  */
 void make_readi(){
-    printf("#builtIn readi()\n");
+    printf("#---------- builtIn readi() ----------\n");
     printf("JUMP $end_readi\n");
     printf("LABEL $readi\n");
     printf("PUSHFRAME\n");
@@ -52,6 +53,7 @@ void make_readi(){
     printf("POPFRAME\n");
     printf("RETURN\n");
     printf("LABEL $end_readi\n");
+    printf("#------------------------------\n\n");
 }
 
 /**
@@ -59,7 +61,7 @@ void make_readi(){
  *
  */
 void make_readn(){
-    printf("#builtIn readn()\n");
+    printf("#---------- builtIn readn() ----------\n");
     printf("JUMP $end_readn\n");
     printf("LABEL $readn\n");
     printf("PUSHFRAME\n");
@@ -73,6 +75,7 @@ void make_readn(){
     printf("POPFRAME\n");
     printf("RETURN\n");
     printf("LABEL $end_readn\n");
+    printf("#------------------------------\n\n");
 }
 
 /**
@@ -80,7 +83,7 @@ void make_readn(){
  *
  */
 void make_write(){
-    printf("#builtIn write()\n");
+    printf("#---------- builtIn write() ----------\n");
     printf("JUMP $end_fnc_write\n");
     printf("LABEL $fnc_write\n");
     printf("PUSHFRAME\n");
@@ -103,7 +106,8 @@ void make_write(){
     printf("LABEL $ContinueWrite\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $end_fnc_write\n\n");
+    printf("LABEL $end_fnc_write\n");
+    printf("#------------------------------\n\n");
 }
 
 /**
@@ -111,7 +115,7 @@ void make_write(){
  *
  */
 void make_toInteger(){
-    printf("#builtIn tointeger()\n");
+    printf("#---------- builtIn tointeger() ----------\n");
     printf("JUMP $end_tointeger\n");
     printf("LABEL $tointeger\n");
     printf("PUSHFRAME\n");
@@ -122,6 +126,7 @@ void make_toInteger(){
     printf("POPFRAME\n");
     printf("RETURN\n");
     printf("LABEL $end_tointeger\n");
+    printf("#------------------------------\n\n");
 }
 
 /**
@@ -129,7 +134,7 @@ void make_toInteger(){
  *
  */
 void make_substr(){
-    printf("#builtIn substr()\n");
+    printf("#---------- builtIn substr() ----------\n");
     printf("JUMP $end_substr\n");
     printf("LABEL $substr\n");
     printf("PUSHFRAME\n");
@@ -170,7 +175,7 @@ void make_substr(){
     printf("POPFRAME\n");
     printf("RETURN\n");
     printf("LABEL $end_substr\n");
-    printf("#------------------------------\n");
+    printf("#------------------------------\n\n");
 }
 
 /**
@@ -178,7 +183,7 @@ void make_substr(){
  *
  */
 void make_chr(){
-    printf("#builtIn chr()\n");
+    printf("#---------- builtIn chr() ----------\n");
     printf("JUMP $end_chr\n");
     printf("LABEL $chr\n");
     printf("PUSHFRAME\n");
@@ -195,6 +200,7 @@ void make_chr(){
     printf("POPFRAME\n");
     printf("RETURN\n");
     printf("LABEL $end_chr\n");
+    printf("#------------------------------\n\n");
 }
 
 /**
@@ -202,7 +208,7 @@ void make_chr(){
  *
  */
 void make_ord(){
-    printf("#builtIn ord()\n");
+    printf("#---------- builtIn chr() ----------\n");
     printf("JUMP $end_ord\n");
     printf("LABEL $ord\n");
     printf("PUSHFRAME\n");
@@ -225,33 +231,7 @@ void make_ord(){
     printf("POPFRAME\n");
     printf("RETURN\n");
     printf("LABEL $end_ord\n");
-}
-
-/**
- * Funkce vytvori kod pro volani kodu pro vestavenou funkci reads.
- *
- */
-void call_reads(){
-    printf("CREATEFRAME\n");
-    printf("CALL $fnc_reads\n");
-}
-
-/**
- * Funkce vytvori kod pro volani kodu pro vestavenou funkci readi.
- *
- */
-void call_readi(){
-    printf("CREATEFRAME\n");
-    printf("CALL $fnc_readi\n");
-}
-
-/**
- * Funkce vytvori kod pro volani kodu pro vestavenou funkci readn.
- *
- */
-void call_readn(){
-    printf("CREATEFRAME\n");
-    printf("CALL $fnc_readn\n");
+    printf("#------------------------------\n\n");
 }
 
 /**
@@ -263,57 +243,4 @@ void call_write(char *str){
     printf("DEFVAR TF@_cvar\n");
     printf("MOVE TF@_cvar string@%s\n", str);
     printf("CALL $fnc_write\n");
-}
-
-/**
- * Funkce vytvori kod pro volani kodu pro vestavenou funkci toInteger.
- *
- */
-void call_toInteger(double var){
-    printf("CREATEFRAME\n");
-    printf("DEFVAR TF@_cvar1\n");
-    printf("MOVE TF@_cvar1 float@%a\n", var);
-    printf("CALL $toInteger\n");
-}
-
-/**
- * Funkce vytvori kod pro volani kodu pro vestavenou funkci substr.
- *
- */
-void call_substr(Dynamic_string *str, int var1, int var2){
-    printf("CREATEFRAME\n");
-    printf("DEFVAR TF@_cvar1\n");
-    printf("MOVE TF@_cvar1 %s\n", str->str);
-    printf("DEFVAR TF@_cvar2\n");
-    printf("MOVE TF@_cvar2 int@%d\n", var1);
-    printf("DEFVAR TF@_cvar3\n");
-    printf("MOVE TF@_cvar3 int@%d\n", var2);
-    printf("CALL $fnc_substr\n");
-}
-
-/**
- * Funkce vytvori kod pro volani kodu pro vestavenou funkci chr.
- *
- * @param var
- */
-void call_chr(int var){
-    printf("CREATEFRAME\n");
-    printf("DEFVAR TF@_cvar1\n");
-    printf("MOVE TF@_cvar1 int@%d\n", var);
-    printf("CALL $fnc_chr\n");
-}
-
-/**
- * Funkce vytvori kod pro volani kodu pro vestavenou funkci ord.
- *
- * @param str ukazatel na DS se stringem
- * @param var
- */
-void call_ord(Dynamic_string *str, int var){
-    printf("CREATEFRAME\n");
-    printf("DEFVAR TF@_cvar1\n");
-    printf("MOVE TF@_cvar1 %s\n", str->str);
-    printf("DEFVAR TF@_cvar1\n");
-    printf("MOVE TF@_cvar2 int@%d\n", var);
-    printf("CALL $fnc_chr\n");
 }

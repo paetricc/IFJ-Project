@@ -5,6 +5,8 @@
  * 
  * @details Zasobnik je implementovany jednosmerne vazanym seznamem
  *
+ * @property Kostra je založena na základě IAL DU1
+ *
  * @author Tomáš Bártů xbartu11@stud.fit.vutbr.cz
  */
 
