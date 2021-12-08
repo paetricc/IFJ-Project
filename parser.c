@@ -217,14 +217,23 @@ int start(Token *token, FILE *sourceFile) {
     printf("DEFVAR GF@&varBool\n");
     printf("DEFVAR GF@&if\n");
     printf("DEFVAR GF@&varType\n");
+    printf("DEFVAR GF@&desAct\n");
+    printf("DEFVAR GF@&desPrev\n");
     make_WRITE_TF();
     //printf("JUMP $$main\n");
 
     // brikule
     make_write();
-    make_reads();
+    //make_reads();
     make_substr();
     make_NILcompare();
+    printf("JUMP $$distributeEnd\n");
+    printf("LABEL $distrbute\n");
+    printf("JUMPIFEQ !disCheck GF@&desAct GF@&desPrev\n");
+    printf("MOVE GF@&desPrev GF@&desAct\n");
+    printf("LABEL !disCheck\n");
+    printf("RETURN\n");
+    printf("LABEL $$distributeEnd\n");
 
     // vse korektni - uplatnuju pravidlo a rozsiruju dalsi neterminal
     error = program(token, sourceFile); // aplikace pravidla 1
@@ -719,6 +728,7 @@ int fnc_call(Token *token, FILE *sourceFile) {
     *param = node_idFnc->funcData->paramList->firstElement;
 
     printf("CREATEFRAME\n");
+
 
     // rozvinuti neterminalu value
     if ((error = value(token, sourceFile, node_idFnc, param))) {
@@ -1956,14 +1966,16 @@ int if_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     DLL_Instruct_Init(dll_instruct);
     getAllVar(dll_instruct, symTable);
     movePrevious(dll_instruct);
-    DLL_Instruct_Dispose(dll_instruct);
-    free(dll_instruct);
+
 
     // rozvinu neterminal statements
     bool returnedInIf = false;
     if ((error = statements(token, sourceFile, fncRetType, &returnedInIf)))
         return error;
 
+    moveAfter(dll_instruct);
+    DLL_Instruct_Dispose(dll_instruct);
+    free(dll_instruct);
     printf("POPFRAME\n");
 
     // odstranim ramec pro blok if
@@ -2040,8 +2052,6 @@ int loop(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
     DLL_Instruct_Init(dll_instruct);
     getAllVar(dll_instruct, symTable);
     movePrevious(dll_instruct);
-    DLL_Instruct_Dispose(dll_instruct);
-    free(dll_instruct);
     printf("#VYTVORENI DOCASNYCH PROMENNYCH\n");
     printf("DEFVAR TF@&tmp\n");
     printf("DEFVAR TF@&tmp1\n");
@@ -2083,6 +2093,9 @@ int loop(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
         return ERROR_SYNTAX;
     else if (token->Value.keyword != KEYWORD_END)
         return ERROR_SYNTAX;
+    moveAfter(dll_instruct);
+    DLL_Instruct_Dispose(dll_instruct);
+    free(dll_instruct);
     printf("JUMP !loop%d\n", --loopCounter);
     printf("LABEL !endLoop%d\n", loopCounter);
     printf("POPFRAME\n");
