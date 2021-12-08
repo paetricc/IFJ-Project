@@ -24,7 +24,6 @@
 void TermStack_error( int error ) {
     static const char *ERRORS[TERM_SERR+1] = {
         "Stack error: unknown",
-        "Stack error: PUSH",
         "Stack error: POP",
         "Stack error: TOP",
         "Stack error: INIT",
