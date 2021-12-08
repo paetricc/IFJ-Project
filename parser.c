@@ -666,6 +666,9 @@ int fnc_call(Token *token, FILE *sourceFile) {
         return ERROR_COMPILER;
     *param = node_idFnc->funcData->paramList->firstElement;
 
+    if(symTable->TopLocalElement != NULL)
+        printf("PUSHFRAME\n");
+
     printf("CREATEFRAME\n");
 
     // rozvinuti neterminalu value
@@ -684,6 +687,10 @@ int fnc_call(Token *token, FILE *sourceFile) {
         return ERROR_SYNTAX;
 
     printf("CALL $%s\n", var);
+
+    if(symTable->TopLocalElement != NULL)
+        printf("POPFRAME\n");
+
 
     return ERROR_PASSED;
 } // fnc_call
@@ -852,11 +859,15 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
             setVarUsed(node_idVar, true);
             // overeni datovych typu
             if(typeVar(node_idVar) != (*param)->type) {
-                if((*param)->type == TYPE_NUMBER && typeVar(node_idVar) == TYPE_INTEGER)
-                    // pretypovani integer na number
+                if((*param)->type == TYPE_NUMBER && typeVar(node_idVar) == TYPE_INTEGER) {
+                    printf("MOVE TF@&%s LF@&%s\n", (*param)->name->str, token->Value.string->str);
                     node_idVar->varData->type = TYPE_NUMBER;
+                }
                 else // promenne nemaji kompatibilni typy
                     return ERROR_SEM_TYPE_COUNT;
+            }
+            else { // datove typy jsou kompatibilni
+                printf("MOVE TF@&%s LF@&%s\n", (*param)->name->str, token->Value.string->str);
             }
             break;
 

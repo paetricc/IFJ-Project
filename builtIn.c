@@ -114,8 +114,8 @@ void make_write(){
  *
  */
 void make_toInteger(){
-    printf("#builtIn toInteger()\n");
-    printf("JUMP $end_fnc_toInteger\n");
+    printf("#builtIn tointeger()\n");
+    printf("JUMP $end_tointeger\n");
     printf("LABEL $tointeger\n");
     printf("PUSHFRAME\n");
     printf("CREATEFRAME\n");
@@ -124,7 +124,7 @@ void make_toInteger(){
     printf("FLOAT2INT GF@*return TF@&f\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $end_fnc_toInteger\n");
+    printf("LABEL $end_tointeger\n");
 }
 
 /**
@@ -204,29 +204,28 @@ void make_chr(){
  */
 void make_ord(){
     printf("#builtIn ord()\n");
-    printf("JUMP $end_fnc_ord\n");
-    printf("LABEL $fnc_ord\n");
+    printf("JUMP $end_ord\n");
+    printf("LABEL $ord\n");
     printf("PUSHFRAME\n");
-    printf("DEFVAR LF@*return\n");
-    printf("MOVE LF@*return nil@nil\n");
-    printf("DEFVAR LF@_var1\n");
-    printf("MOVE LF@_var1 LF@_cvar1\n");
-    printf("DEFVAR LF@_var2\n");
-    printf("MOVE LF@_var2 LF@_cvar2\n");
-    printf("SUB LF@_var2 LF@_var2 int@1\n");
-    printf("DEFVAR LF@_vartmp\n");
-    printf("LT LF@_vartmp LF@_var2 int@0\n");
-    printf("JUMPIFEQ $outOfRangeORD LF@_vartmp bool@true\n");
-    printf("DEFVAR LF@_var3\n");
-    printf("STRLEN LF@_var3 LF@_var1\n");
-    printf("SUB LF@_var3 LF@_var3 int@1\n");
-    printf("GT LF@_vartmp LF@_var2 LF@_var3\n");
-    printf("JUMPIFEQ $outOfRangeORD LF@_vartmp bool@true\n");
-    printf("STRI2INT LF@*return LF@_var1 LF@_var2\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@&s\n");
+    printf("MOVE TF@&s LF@&s\n");
+    printf("DEFVAR TF@&i\n");
+    printf("MOVE TF@&i LF@&i\n");
+    printf("SUB TF@&i TF@&i int@1\n");
+    printf("DEFVAR TF@&vartmp\n");
+    printf("LT TF@&vartmp TF@&i int@0\n");
+    printf("JUMPIFEQ $outOfRangeORD TF@&vartmp bool@true\n");
+    printf("DEFVAR TF@&var3\n");
+    printf("STRLEN TF@&var3 TF@&s\n");
+    printf("SUB TF@&var3 TF@&var3 int@1\n");
+    printf("GT TF@&vartmp TF@&i TF@&var3\n");
+    printf("JUMPIFEQ $outOfRangeORD TF@&vartmp bool@true\n");
+    printf("STRI2INT GF@*return TF@&s TF@&i\n");
     printf("LABEL $outOfRangeORD\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $end_fnc_ord\n");
+    printf("LABEL $end_ord\n");
 }
 
 /**
