@@ -79,6 +79,13 @@ int writeFncCall(Token *token, FILE *sourceFile) {
     int error = ERROR_PASSED;
     error = get_non_white_token(token, sourceFile);
     while (token->ID != TOKEN_ID_RBR) {
+        if (token->ID == TOKEN_ID_INT || token->ID == TOKEN_ID_INT0 || token->ID == TOKEN_ID_ZERO) {
+            printf("WRITE int@%lld\n", token->Value.Integer);
+        }
+        if (token->ID == TOKEN_ID_DBL2 || token->ID == TOKEN_ID_DHEX2 || token->ID == TOKEN_ID_EXP3 ||
+            token->ID == TOKEN_ID_HEXP3 || token->ID == TOKEN_ID_HEX2) {
+            printf("WRITE float@%a\n", token->Value.Double);
+        }
         if (token->ID == TOKEN_ID_ID) {
             // vyhledam promennou
             bst_node_t *node_idVar = search_Iden(token->Value.string, symTable);
@@ -891,7 +898,7 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
             if((*param)->type != TYPE_INTEGER) {
                 if((*param)->type == TYPE_NUMBER) { // ocekavam number, davam mu integer
                     // TODO generovani kodu - int2float
-                    printf("MOVE TF@&%s float@%lld\n", (*param)->name->str, token->Value.Integer);
+                    printf("MOVE TF@&%s float@%a\n", (*param)->name->str, (double)token->Value.Integer);
                 }
                 else // datove typy nejsou kompatibilni
                     return ERROR_SEM_TYPE_COUNT;
@@ -910,7 +917,7 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
             if((*param)->type != TYPE_NUMBER) // datove typy nejsou kompatibilni
                 return ERROR_SEM_TYPE_COUNT;
             // TODO generace kodu pro number
-            printf("MOVE TF@&%s float@%a\n", (*param)->name->str, token->Value.Double);
+            printf("MOVE TF@&%s float@%a\n", (*param)->name->str, (double)token->Value.Double);
             break;
 
         case TOKEN_ID_FSTR: // str_value
