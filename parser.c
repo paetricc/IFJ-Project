@@ -873,7 +873,7 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
             if(typeVar(node_idVar) != (*param)->type) {
                 if((*param)->type == TYPE_NUMBER && typeVar(node_idVar) == TYPE_INTEGER) {
                     printf("MOVE TF@&%s LF@&%s\n", (*param)->name->str, token->Value.string->str);
-                    node_idVar->varData->type = TYPE_NUMBER;
+                    printf("INT2FLOAT TF@&%s TF@&%s\n", (*param)->name->str, (*param)->name->str);
                 }
                 else // promenne nemaji kompatibilni typy
                     return ERROR_SEM_TYPE_COUNT;
@@ -1150,7 +1150,7 @@ int fnc_def2(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
             return error;
 
         if(!returned) { // funkce nevratila zadnou hodnoty
-            // TODO generovani kodu return nil
+            printf("MOVE GF@*return nil@nil\n");
         }
 
     } else { // id_fce, id_var, local, if, while, return nebo end
@@ -1449,6 +1449,8 @@ int return_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned
 
     bst_node_t *node_idVar = NULL;
 
+    printf("DEFVAR TF@&return\n");
+
     switch(token->ID) {
         case TOKEN_ID_LBR: // '('
         case TOKEN_ID_LEN: // '#'
@@ -1471,13 +1473,12 @@ int return_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned
                         return error;
                 }
                 else {
-                    if ((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, "ha", NULL)))
+                    if ((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, "return", NULL)))
                         return error;
                 }
                 *returned = true;
-                // TODO generovani kodu vraceni hodnoty
-                return error;
             }
+            break;
 
         case TOKEN_ID_KEYWORD:
             if(token->Value.keyword == KEYWORD_NIL) {
@@ -1486,11 +1487,9 @@ int return_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned
                 else {
                     // aplikace pravidla 37
                     fsetpos(sourceFile, &lastReadPos);
-                    if ((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, token->Value.string->str, NULL)))
+                    if ((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, "return", NULL)))
                         return error;
                     *returned = true;
-                    // TODO generovani kodu vraceni nil
-                    return error;
                 }
             }
             else if(token->Value.keyword == KEYWORD_END || token->Value.keyword == KEYWORD_ELSE) {
@@ -1504,6 +1503,8 @@ int return_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned
             }
             else
                 return ERROR_SYNTAX;
+            break;
+            break;
 
         case TOKEN_ID_ID:
             // vyhledam identifikator v tabulce
@@ -1519,10 +1520,9 @@ int return_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned
             else { // id_var
                 fsetpos(sourceFile, &lastReadPos);
                 // zavolani bottomup SA pro neterminal expr
-                if((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, token->Value.string->str, NULL))) // aplikace pravidla 48
+                if((error = exprSyntaxCheck(token, sourceFile, symTable, fncRetType, "return", NULL))) // aplikace pravidla 48
                     return error;
                 *returned = true;
-                return error;
                 // TODO generovani kodu - vraceni hodnoty vyrazu
             }
             break;
@@ -1530,7 +1530,8 @@ int return_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned
         default:
             return ERROR_SYNTAX;
     }
-
+    printf("MOVE GF@*return TF@&return\n");
+    return error;
 } // return_
 
 
@@ -1570,8 +1571,9 @@ int fnc_body(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returne
                 break;
 
             case KEYWORD_RETURN: // return
-                return return_(token, sourceFile, fncRetType, &returnInBody);
+                error = return_(token, sourceFile, fncRetType, &returnInBody);
                 *returned = (*returned) || returnInBody;
+                return error;
                 break;
 
             case KEYWORD_END: // end
@@ -1827,7 +1829,6 @@ int var_assign(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var
                 }
                 else if(id->funcData->returnList->firstElement->type != node_idVar->varData->type) {
                     if(node_idVar->varData->type == TYPE_NUMBER && id->funcData->returnList->firstElement->type == TYPE_INTEGER) {
-                        // TODO  pretypovat pozdejsi volani funkce z integer na number
                     }
                     else // navratova hodnota fce neni kompatibilni s typem promenne
                         return ERROR_SEM_ASSIGN;
