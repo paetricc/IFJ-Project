@@ -43,6 +43,8 @@ void TypeStack_error( int error ) {
  *  Nemusel by se takto implementovat. Kdybychom ho ale implementovali polem,
  *  tak bychom museli mit pevne danou velikost ale to nechceme
  *
+ * @property Kostra je založena na základě IAL DU1
+ *
  * @param stack Ukazatel na strukturu jednosmerne vazaneho seznamu
  */
 void TypeStack_init( TypeStack *stack ) {

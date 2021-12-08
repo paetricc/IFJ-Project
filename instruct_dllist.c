@@ -4,6 +4,8 @@
  * @brief Implementace DLListu pro instrukce.
  *
  * @author Vít Janeček xjanec30@stud.fit.vutbr.cz
+ *
+ * @property Kostra je založena na základě IAL DU1
 */
 
 #include <stdio.h>

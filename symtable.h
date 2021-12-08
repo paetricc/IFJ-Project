@@ -4,6 +4,8 @@
  * @brief Implementace Tabulky symbolu.
  *
  * @author Vít Janeček xjanec30@stud.fit.vutbr.cz
+ *
+ * @property Kostra je založena na základě IAL DU1 a DU2
 */
 
 #ifndef _SYMTABLE_H
