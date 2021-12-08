@@ -4,6 +4,7 @@
  * @brief Implementace generovani kodu a vestavenych funkci.
  *
  * @author Vít Janeček xjanec30@stud.fit.vutbr.cz
+ * @author Tony Pham xphamt00@stud.fit.vutbr.cz
 */
 
 #include <stdio.h>
@@ -13,13 +14,31 @@
 
 #include "generate_code.h"
 
-
+/**
+ * Funkce vytvori hlavicku, globalni promenne, buildin a pomocne funkce
+ *
+ */
 void make_header() {
-    printf(".IFJcode2021\n");
+    printf(".IFJcode21\n");
     printf("DEFVAR GF@&varFloat\n");
     printf("DEFVAR GF@&varBool\n");
     printf("DEFVAR GF@&if\n");
     printf("DEFVAR GF@&varType\n");
+    printf("DEFVAR GF@*return\n");
+    make_MOVE_RETURN_NIL();
+    printf("DEFVAR GF@&desAct\n");
+    printf("DEFVAR GF@&desPrev\n");
+    make_WRITE_TF();
+    make_write();
+    make_reads();
+    make_readi();
+    make_readn();
+    make_substr();
+    make_toInteger();
+    make_ord();
+    make_chr();
+    make_NILcompare();
+    make_distribute();
 }
 
 /** Jednoslovne funkce*/
@@ -69,8 +88,8 @@ void make_NOTS(){
  * Funkce vytvori kod pro volani funkce.
  *
  */
-void make_CALL(Dynamic_string *string){
-    printf("CALL $%s\n", string->str);
+void make_CALL(char *string){
+    printf("CALL $%s\n", string);
 }
 /**
  * Funkce vytvori kod pro skakani na konec funce.
@@ -166,9 +185,9 @@ void make_DEFVAR_TF(Dynamic_string *string){
  * Funkce vytvori kod pro nastaveni na nil pro promenou temporyframu.
  *
  */
-void make_MOVE_TF_nil(Dynamic_string *string){
-    printf("#NASTAVENI PROMENNE _%s NA NIL\n", string->str);
-    printf("MOVE TF@&%s nil@nil\n", string->str);
+void make_MOVE_TF_nil(char *string){
+    printf("#NASTAVENI PROMENNE _%s NA NIL\n", string);
+    printf("MOVE TF@&%s nil@nil\n", string);
 }
 
 /**
@@ -198,6 +217,10 @@ void make_WRITE_TF(){
     printf("LABEL !fnc_call_end\n");
 }
 
+/**
+ * Funkce vytvori kod pro volani funkce.
+ *
+ */
 void makeWriteCall(Dynamic_string *string) {
     printf("PUSHFRAME\n");
     printf("CREATEFRAME\n");
@@ -223,11 +246,11 @@ void make_CREATEFRAME_TMP(){
  * Funkce vytvori kod pro konec funkce.
  *
  */
-void make_endOfFunc(Dynamic_string *string){
-    printf("#KONEC FUNKCE %s\n", string->str);
+void make_endOfFunc(char *string){
+    printf("#KONEC FUNKCE %s\n", string);
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $$end_fnc_%s\n", string->str);
+    printf("LABEL $$end_fnc_%s\n", string);
 }
 
 /**
@@ -245,6 +268,10 @@ void movePrevious(DLList_Instruct *dlListInstruct) {
     printf("#------------------------------\n");
 }
 
+/**
+ * Funkce po zavolanoni distribuce ulozi predchozi promennou.
+ *
+ */
 void moveAfter(DLList_Instruct *dlListInstruct) {
     printf("#DISTRIBUCE ZMENY DOLU\n");
     DLLElementPtr_Instruct pointer = dlListInstruct->firstElement;
@@ -288,6 +315,10 @@ void make_POPSandPUSH_float(){
     printf("PUSHS GF@&varFloat\n");
 }
 
+/**
+ * Funkce vytvori kod pro volanici funkce na porovnavani s nil.
+ *
+ */
 void call_NILcompare() {
     printf("PUSHFRAME\n");
     printf("CREATEFRAME\n");
@@ -296,6 +327,10 @@ void call_NILcompare() {
     printf("CALL $fnc_NILcompare\n");
 }
 
+/**
+ * Funkce vytvori kod pro porovnavani promenne s nil.
+ *
+ */
 void make_NILcompare() {
     printf("#---------- pomocna NILcompare ----------\n");
     printf("JUMP $$endNILcompare\n");
@@ -314,6 +349,10 @@ void make_NILcompare() {
     printf("#------------------------------\n\n");
 }
 
+/**
+ * Funkce vytvori kod pro predani promennych k porovnani s nil.
+ *
+ */
 void make_insertNILcompare() {
     printf("MOVE TF@&tmp TF@&tmp2\n");
     call_NILcompare();
@@ -536,5 +575,120 @@ void make_NEQ(int elseCounter){
     printf("JUMPIFEQ !else%d TF@&tmp2 TF@&tmp1\n", elseCounter);
 }
 
+/**
+ * Funkce vytvori kod pro distribuci.
+ *
+ */
+void make_distribute() {
+    printf("JUMP $$distributeEnd\n");
+    printf("LABEL $distrbute\n");
+    printf("JUMPIFEQ !disCheck GF@&desAct GF@&desPrev\n");
+    printf("MOVE GF@&desPrev GF@&desAct\n");
+    printf("LABEL !disCheck\n");
+    printf("RETURN\n");
+    printf("LABEL $$distributeEnd\n");
+}
 
+/**
+ * Funkce vytvori kod pro presun LF do TF.
+ *
+ */
+void make_MOVE_TF_to_LF(Dynamic_string *stringTF, Dynamic_string *stringLF){
+    printf("MOVE TF@&%s LF@&%s\n", stringTF->str, stringLF->str);
+}
+
+/**
+ * Funkce vytvori kod pro prevedeni INT TF do FLOAT TF.
+ *
+ */
+void make_INT2FLOAT_TF_TF(Dynamic_string *stringTF){
+    printf("INT2FLOAT TF@&%s TF@&%s\n", stringTF->str, stringTF->str);
+}
+
+/**
+ * Funkce vytvori kod pro zapsani int hodnoty do TF.
+ *
+ */
+void make_MOVE_TF_INT(Dynamic_string *stringTF , long long int x) {
+    printf("MOVE TF@&%s int@%lld\n", stringTF->str, x);
+}
+
+/**
+ * Funkce vytvori kod pro vytvoreni docasnych promennych pro loop.
+ *
+ */
+void make_LOOP_TMP(int loopCounter) {
+    printf("#VYTVORENI DOCASNYCH PROMENNYCH\n");
+    printf("DEFVAR TF@&tmp\n");
+    printf("DEFVAR TF@&tmp1\n");
+    printf("DEFVAR TF@&tmp2\n");
+    printf("#----------------\n");
+    printf("LABEL !loop%d\n", loopCounter);
+}
+
+/**
+ * Funkce vytvori kod pro skok do loopu.
+ *
+ */
+void make_LOOP_JUMP(int loopCounter) {
+    printf("JUMP !loop%d\n", --loopCounter);
+    printf("LABEL !endLoop%d\n", loopCounter);
+    printf("POPFRAME\n");
+}
+
+/**
+ * Funkce vytvori kod pro zapsani float hodnoty do TF po pouziti INT2FLOAT.
+ *
+ */
+void make_MOVE_TF_FLOAT_INT2FLOAT(Dynamic_string *stringTF , long long int x) {
+    printf("MOVE TF@&%s float@%a\n", stringTF->str, (double )x);
+}
+
+/**
+ * Funkce vytvori kod pro zapsani float hodnoty do TF.
+ *
+ */
+void make_MOVE_TF_FLOAT(Dynamic_string *stringTF , double x) {
+    printf("MOVE TF@&%s float@%a\n", stringTF->str, (double)x);
+}
+
+/**
+ * Funkce vytvori kod pro zapsani string hodnoty do TF.
+ *
+ */
+void make_MOVE_TF_STRING(Dynamic_string *stringTF , char *string) {
+    printf("MOVE TF@&%s string@%s\n", stringTF->str, string);
+}
+
+/**
+ * Funkce vytvori kod pro zapsani nil do GF*return.
+ *
+ */
+void make_MOVE_RETURN_NIL() {
+    printf("MOVE GF@*return nil@nil\n");
+}
+
+/**
+ * Funkce vytvori kod pro vytvoreni TF return.
+ *
+ */
+void make_TF_RETURN() {
+    printf("DEFVAR TF@&return\n");
+}
+
+/**
+ * Funkce vytvori kod pro nahrani TF return do GF.
+ *
+ */
+void make_TF_RETURN_to_GF() {
+    printf("MOVE GF@*return TF@&return\n");
+}
+
+/**
+ * Funkce vytvori kod pro nahrani GF*return do TF.
+ *
+ */
+void make_MOVE_GF_return_to_TF(char *var){
+    printf("MOVE TF@&%s GF@*return\n", var);
+}
 /** @endcode */
