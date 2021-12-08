@@ -37,7 +37,7 @@ int loopCounter = 0;
  * @return Typ erroru generovany analyzou
 */
 int get_non_white_token(Token *token, FILE *sourceFile) {
-    int error;
+    int error = ERROR_PASSED;
     do {
         // nacteni noveho tokenu a kontrola vysupu scanneru
         if ((error = get_token(token, sourceFile)) != ERROR_PASSED)
@@ -61,7 +61,7 @@ int checkDeclaredFncs(bst_node_t *func) {
     else if(!isDefFnc(func))
         return ERROR_SEM_UNDEFINED;
     else {
-        int error;
+        int error = ERROR_PASSED;
         if((error = checkDeclaredFncs(func->left)))
             return error;
         else
@@ -76,7 +76,7 @@ int checkDeclaredFncs(bst_node_t *func) {
  * @return Typ chyby, ktera nastane
  */
 int writeFncCall(Token *token, FILE *sourceFile) {
-    int error;
+    int error = ERROR_PASSED;
     error = get_non_white_token(token, sourceFile);
     while (token->ID != TOKEN_ID_RBR) {
         if (token->ID == TOKEN_ID_ID) {
@@ -117,7 +117,7 @@ int writeFncCall(Token *token, FILE *sourceFile) {
  * @return Typ erroru generovany analyzou
 */
 int start(Token *token, FILE *sourceFile) {
-    int error;
+    int error = ERROR_PASSED;
     // require
     if ((error = get_non_white_token(token, sourceFile)))
         // lexikalni nebo kompilatorova chyba
@@ -146,66 +146,10 @@ int start(Token *token, FILE *sourceFile) {
         return ERROR_COMPILER;
     // vytvoreni globalniho ramce
     SLL_Frame_Insert(symTable);
-    /* nacteni vestavenych funkci */
-    // dynamic string pro jmena vestavenych funkci
-    Dynamic_string *str = (Dynamic_string *) malloc(sizeof(Dynamic_string));
-    if(str == NULL)
-        return ERROR_COMPILER;
 
-    /* Naplneni stromu vestavenymi funkcemi */
+    // vlozeni vestavenych funkci do symtable
+    error = setBuildInFuns(symTable->globalElement);
 
-    // ord()
-    str->str = "ord";
-    error = setBuildInFun(symTable, str, TYPE_STRING, TYPE_INTEGER, TYPE_UNDEFINED, TYPE_INTEGER);
-
-    // chr()
-    if(!error) {
-        str->str = "chr";
-        error = setBuildInFun(symTable, str, TYPE_INTEGER, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_STRING);
-    }
-
-    // reads()
-    if(!error) {
-        str->str = "reads";
-        error = setBuildInFun(symTable, str, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_STRING);
-    }
-
-    // readn()
-    if(!error) {
-        str->str = "readn";
-        error = setBuildInFun(symTable, str, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_NUMBER);
-    }
-
-    // tointeger()
-    if(!error) {
-        str->str = "tointeger";
-        error = setBuildInFun(symTable, str, TYPE_NUMBER, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_INTEGER);
-    }
-
-    // readi()
-    if(!error) {
-        str->str = "readi";
-        error = setBuildInFun(symTable, str, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_UNDEFINED, TYPE_INTEGER);
-    }
-
-    // substr()
-    if(!error) {
-        str->str = "substr";
-        error = setBuildInFun(symTable, str, TYPE_STRING, TYPE_NUMBER, TYPE_NUMBER, TYPE_STRING);
-    }
-
-    // write()
-    if(!error) {
-        str->str = "write";
-        error = bst_insert(&(symTable->globalElement->node), str, true);
-        if(!error) {
-            bst_node_t *wr = bst_search(symTable->globalElement->node, str);
-            setFncDec(wr, true);
-            setFncDef(wr, true);
-        }
-    }
-
-    free(str);
     if(error) { // doslo k chybe prirazeni pameti
         SLL_Frame_Dispose(symTable);
         free(symTable);
@@ -217,15 +161,21 @@ int start(Token *token, FILE *sourceFile) {
     printf("DEFVAR GF@&varBool\n");
     printf("DEFVAR GF@&if\n");
     printf("DEFVAR GF@&varType\n");
+    printf("DEFVAR GF@*return\n");
+    printf("MOVE GF@*return nil@nil\n");
     printf("DEFVAR GF@&desAct\n");
     printf("DEFVAR GF@&desPrev\n");
     make_WRITE_TF();
     //printf("JUMP $$main\n");
 
-    // brikule
     make_write();
-    //make_reads();
+    make_reads();
+    make_readi();
+    make_readn();
     make_substr();
+    make_toInteger();
+    make_ord();
+    make_chr();
     make_NILcompare();
     printf("JUMP $$distributeEnd\n");
     printf("LABEL $distrbute\n");
@@ -259,7 +209,7 @@ int start(Token *token, FILE *sourceFile) {
  * @return Typ erroru generovany analyzou
 */
 int program(Token *token, FILE *sourceFile) {
-    int error;
+    int error = ERROR_PASSED;
 
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
@@ -325,7 +275,7 @@ int program(Token *token, FILE *sourceFile) {
 int fnc_dec(Token *token, FILE *sourceFile) {
     // token global byl prijaty o uroven vyse => pokracuju dale
     // aplikuju pravidlo 6
-    int error;
+    int error = ERROR_PASSED;
 
     // id_fnc
     if ((error = get_non_white_token(token, sourceFile)))
@@ -413,7 +363,7 @@ int fnc_dec(Token *token, FILE *sourceFile) {
  * @return Typ erroru generovany analyzou
 */
 int params_dec(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
-    int error;
+    int error = ERROR_PASSED;
 
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
@@ -463,7 +413,7 @@ int params_dec(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
  * @return Typ erroru generovany analyzou
 */
 int params_dec2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
-    int error;
+    int error = ERROR_PASSED;
 
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
@@ -499,7 +449,7 @@ int params_dec2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
  * @return Typ erroru generovany analyzou
 */
 int return_type(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
-    int error;
+    int error = ERROR_PASSED;
 
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
@@ -555,7 +505,7 @@ int return_type(Token *token, FILE *sourceFile, bst_node_t *node_idFnc) {
  * @return Typ erroru generovany analyzou
 */
 int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr_Param param, int dataSwitch) {
-    int error;
+    int error = ERROR_PASSED;
     if ((error = get_non_white_token(token, sourceFile)))
         // lexikalni nebo kompilatorova chyba
         return error;
@@ -688,7 +638,7 @@ int data_type(Token *token, FILE *sourceFile, bst_node_t *node_id, SLLElementPtr
 */
 int fnc_call(Token *token, FILE *sourceFile) {
     // aplikuju pravidlo 16
-    int error;
+    int error = ERROR_PASSED;
 
     // id_fnc
     if ((error = get_non_white_token(token, sourceFile)))
@@ -727,6 +677,9 @@ int fnc_call(Token *token, FILE *sourceFile) {
         return ERROR_COMPILER;
     *param = node_idFnc->funcData->paramList->firstElement;
 
+    if(symTable->TopLocalElement != NULL)
+        printf("PUSHFRAME\n");
+
     printf("CREATEFRAME\n");
 
 
@@ -747,6 +700,10 @@ int fnc_call(Token *token, FILE *sourceFile) {
 
     printf("CALL $%s\n", var);
 
+    if(symTable->TopLocalElement != NULL)
+        printf("POPFRAME\n");
+
+
     return ERROR_PASSED;
 } // fnc_call
 
@@ -763,7 +720,7 @@ int fnc_call(Token *token, FILE *sourceFile) {
  * @return Typ erroru generovany analyzou
 */
 int value(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param *param) {
-    int error;
+    int error = ERROR_PASSED;
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
     fgetpos(sourceFile, &lastReadPos);
@@ -839,7 +796,7 @@ int value(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_
  * @return Typ erroru generovany analyzou
 */
 int value2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param *param) {
-    int error;
+    int error = ERROR_PASSED;
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
     fgetpos(sourceFile, &lastReadPos);
@@ -891,7 +848,7 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
     if((*param) == NULL)
         return ERROR_SEM_TYPE_COUNT;
 
-    int error;
+    int error = ERROR_PASSED;
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
     fgetpos(sourceFile, &lastReadPos);
@@ -914,11 +871,15 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
             setVarUsed(node_idVar, true);
             // overeni datovych typu
             if(typeVar(node_idVar) != (*param)->type) {
-                if((*param)->type == TYPE_NUMBER && typeVar(node_idVar) == TYPE_INTEGER)
-                    // pretypovani integer na number
+                if((*param)->type == TYPE_NUMBER && typeVar(node_idVar) == TYPE_INTEGER) {
+                    printf("MOVE TF@&%s LF@&%s\n", (*param)->name->str, token->Value.string->str);
                     node_idVar->varData->type = TYPE_NUMBER;
+                }
                 else // promenne nemaji kompatibilni typy
                     return ERROR_SEM_TYPE_COUNT;
+            }
+            else { // datove typy jsou kompatibilni
+                printf("MOVE TF@&%s LF@&%s\n", (*param)->name->str, token->Value.string->str);
             }
             break;
 
@@ -991,7 +952,7 @@ int value_last(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
 int fnc_def(Token *token, FILE *sourceFile) {
     // token function byl prijaty o uroven vyse => pokracuju dale
     // aplikuju pravidlo 26
-    int error;
+    int error = ERROR_PASSED;
 
     // ukazatel na uzel s funkci
     bst_node_t **node_idFnc = (bst_node_t **) malloc(sizeof(bst_node_t *));
@@ -1076,7 +1037,7 @@ int fnc_def(Token *token, FILE *sourceFile) {
 int fnc_head(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
     // token function byl prijaty o uroven vyse => pokracuju dale
     // aplikuju pravidlo 27
-    int error;
+    int error = ERROR_PASSED;
 
     // id_fnc
     if ((error = get_non_white_token(token, sourceFile)))
@@ -1155,7 +1116,7 @@ int fnc_head(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
  * @return Typ erroru generovany analyzou
 */
 int fnc_def2(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
-    int error;
+    int error = ERROR_PASSED;
 
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
@@ -1246,7 +1207,7 @@ int fnc_def2(Token *token, FILE *sourceFile, bst_node_t **node_idFnc) {
  * @return Typ erroru generovany analyzou
 */
 int params_def(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param *param) {
-    int error;
+    int error = ERROR_PASSED;
 
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
@@ -1298,7 +1259,7 @@ int params_def(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElemen
  * @return Typ erroru generovany analyzou
 */
 int params_def2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param *param) {
-    int error;
+    int error = ERROR_PASSED;
 
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
@@ -1349,7 +1310,7 @@ int params_def2(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLEleme
  * @return Typ erroru generovany analyzou
 */
 int var_defParam(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElementPtr_Param *param) {
-    int error;
+    int error = ERROR_PASSED;
     // aplikace pravidla 34
 
     // id_var
@@ -1431,7 +1392,7 @@ int var_defParam(Token *token, FILE *sourceFile, bst_node_t *node_idFnc, SLLElem
 */
 int var_def(Token *token, FILE *sourceFile, bst_node_t **node_idVar) {
 
-    int error;
+    int error = ERROR_PASSED;
     // aplikace pravidla 34
 
     // id_var
@@ -1474,7 +1435,7 @@ int var_def(Token *token, FILE *sourceFile, bst_node_t **node_idVar) {
  * @return Typ erroru generovany analyzou
 */
 int return_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
-    int error;
+    int error = ERROR_PASSED;
 
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
@@ -1583,7 +1544,7 @@ int return_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned
  * @return Typ erroru generovany analyzou
 */
 int fnc_body(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
-    int error;
+    int error = ERROR_PASSED;
 
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
@@ -1648,7 +1609,7 @@ int fnc_body(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returne
  * @return Typ erroru generovany analyzou
 */
 int statement(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
-    int error;
+    int error = ERROR_PASSED;
 
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
@@ -1736,7 +1697,7 @@ int statement(Token *token, FILE *sourceFile, Data_type fncRetType, bool *return
 int var_dec(Token *token, FILE *sourceFile) {
     // aplikace pravidla 45
 
-    int error;
+    int error = ERROR_PASSED;
     // local bylo uz precteno volajicim
 
     // ukazatel na uzel s promennou
@@ -1780,7 +1741,7 @@ int var_dec(Token *token, FILE *sourceFile) {
  * @return Typ erroru generovany analyzou
 */
 int var_dec_init(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var) {
-    int error;
+    int error = ERROR_PASSED;
 
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
@@ -1838,7 +1799,7 @@ int var_dec_init(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *v
  * @return Typ erroru generovany analyzou
 */
 int var_assign(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var) {
-    int error;
+    int error = ERROR_PASSED;
 
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
@@ -1862,7 +1823,7 @@ int var_assign(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var
             else if (isFnc(id)) { // id_fnc
                 // test, zda vraci funkce spravny datovy typ
                 if(id->funcData->returnList->firstElement == NULL) { // funkce nevraci hodnotu
-                    // TODO generovani kodu rovnou priradit promenne hodnotu nil
+                    printf("MOVE TF@&%s nil@nil\n", var);
                 }
                 else if(id->funcData->returnList->firstElement->type != node_idVar->varData->type) {
                     if(node_idVar->varData->type == TYPE_NUMBER && id->funcData->returnList->firstElement->type == TYPE_INTEGER) {
@@ -1878,12 +1839,12 @@ int var_assign(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var
                 // rozvinuti neterminalu fnc_call
                 if((error = fnc_call(token, sourceFile))) // aplikace pravidla 49
                     return error;
+                printf("MOVE TF@&%s GF@*return\n", var);
             }
             else { // id_var
                 // zavolani bottomup SA pro neterminal expr
                 if((error = exprSyntaxCheck(token, sourceFile, symTable, typeVar(node_idVar), var, NULL))) // aplikace pravidla 48
                     return error;
-                // TODO generovani kodu - prirazeni promenne vysledek vyrazu
             }
             break;
 
@@ -1938,7 +1899,7 @@ int var_assign(Token *token, FILE *sourceFile, bst_node_t *node_idVar, char *var
  * @return Typ erroru generovany analyzou
 */
 int if_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
-    int error;
+    int error = ERROR_PASSED;
     // token if byl precten o uroven vyse => pokracuju dal
     // aplikace pravidla 50
 
@@ -2042,7 +2003,7 @@ int if_(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
  * @return Typ erroru generovany analyzou
 */
 int loop(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
-    int error;
+    int error = ERROR_PASSED;
     // token while byl precten o uroven vyse => pokracuju dal
     // aplikace pravidla 51
 
@@ -2114,7 +2075,7 @@ int loop(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
  * @return Typ erroru generovany analyzou
 */
 int statements(Token *token, FILE *sourceFile, Data_type fncRetType, bool *returned) {
-    int error;
+    int error = ERROR_PASSED;
 
     // promenne pro pripadne vraceni cteni
     fpos_t lastReadPos;
@@ -2174,7 +2135,8 @@ int parser(FILE *sourceFile) {
         return ERROR_COMPILER;
 
     // volani prvniho pravidla a nahrazovani prvniho neterminalu
-    int error = start(token, sourceFile);
+    int error = ERROR_PASSED;
+		error = start(token, sourceFile);
 
     // TODO hazi segfault
     //DS_Free(token->Value.string);
