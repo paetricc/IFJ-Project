@@ -18,20 +18,19 @@
  */
 void make_reads(){
     printf("#builtIn reads()\n");
-    printf("JUMP $end_fnc_reads\n");
-    printf("LABEL $fnc_reads\n");
+    printf("JUMP $end_reads\n");
+    printf("LABEL $reads\n");
     printf("PUSHFRAME\n");
-    printf("DEFVAR LF@*return\n");
-    printf("MOVE LF@*return nil@nil\n");
-    printf("READ LF@*return string\n");
-    printf("DEFVAR LF@_vartype\n");
-    printf("TYPE LF@_vartype LF@*return\n");
-    printf("JUMPIFEQ $isStringREADS LF@_vartype string@string\n");
-    printf("MOVE LF@*return nil@nil\n");
+    printf("CREATEFRAME\n");
+    printf("READ GF@*return string\n");
+    printf("DEFVAR TF@&vartype\n");
+    printf("TYPE TF@&vartype GF@*return\n");
+    printf("JUMPIFEQ $isStringREADS TF@&vartype string@string\n");
+    printf("MOVE GF@*return nil@nil\n");
     printf("LABEL $isStringREADS\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $end_fnc_reads\n");
+    printf("LABEL $end_reads\n");
 }
 
 /**
@@ -40,20 +39,19 @@ void make_reads(){
  */
 void make_readi(){
     printf("#builtIn readi()\n");
-    printf("JUMP $end_fnc_readi\n");
-    printf("LABEL $fnc_readi\n");
+    printf("JUMP $end_readi\n");
+    printf("LABEL $readi\n");
     printf("PUSHFRAME\n");
-    printf("DEFVAR LF@*return\n");
-    printf("MOVE LF@*return nil@nil\n");
-    printf("READ LF@*return int\n");
-    printf("DEFVAR LF@_vartype\n");
-    printf("TYPE LF@_vartype LF@*return\n");
-    printf("JUMPIFEQ $isIntREADI LF@_vartype string@int\n");
-    printf("MOVE LF@*return nil@nil\n");
+    printf("CREATEFRAME\n");
+    printf("READ GF@*return int\n");
+    printf("DEFVAR TF@&vartype\n");
+    printf("TYPE TF@&vartype GF@*return\n");
+    printf("JUMPIFEQ $isIntREADI TF@&vartype string@int\n");
+    printf("MOVE GF@*return nil@nil\n");
     printf("LABEL $isIntREADI\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $end_fnc_readi\n");
+    printf("LABEL $end_readi\n");
 }
 
 /**
@@ -62,20 +60,19 @@ void make_readi(){
  */
 void make_readn(){
     printf("#builtIn readn()\n");
-    printf("JUMP $end_fnc_readn\n");
-    printf("LABEL $fnc_readn\n");
+    printf("JUMP $end_readn\n");
+    printf("LABEL $readn\n");
     printf("PUSHFRAME\n");
-    printf("DEFVAR LF@*return\n");
-    printf("MOVE LF@*return nil@nil\n");
-    printf("READ LF@*return float\n");
-    printf("DEFVAR LF@_vartype\n");
-    printf("TYPE LF@_vartype LF@*return\n");
-    printf("JUMPIFEQ $isFloatREADN LF@_vartype string@float\n");
-    printf("MOVE LF@*return nil@nil\n");
+    printf("CREATEFRAME\n");
+    printf("READ GF@*return float\n");
+    printf("DEFVAR TF@&vartype\n");
+    printf("TYPE TF@&vartype GF@*return\n");
+    printf("JUMPIFEQ $isFloatREADN TF@&vartype string@float\n");
+    printf("MOVE GF@*return nil@nil\n");
     printf("LABEL $isFloatREADN\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $end_fnc_readn\n");
+    printf("LABEL $end_readn\n");
 }
 
 /**
@@ -179,23 +176,22 @@ void make_substr(){
  */
 void make_chr(){
     printf("#builtIn chr()\n");
-    printf("JUMP $end_fnc_chr\n");
-    printf("LABEL $fnc_chr\n");
+    printf("JUMP $end_chr\n");
+    printf("LABEL $chr\n");
     printf("PUSHFRAME\n");
-    printf("DEFVAR LF@*return\n");
-    printf("MOVE LF@*return nil@nil\n");
-    printf("DEFVAR LF@_var1\n");
-    printf("MOVE LF@_var1 LF@_cvar1\n");
-    printf("DEFVAR LF@_vartmp\n");
-    printf("LT LF@_vartmp LF@_var1 int@0\n");
-    printf("JUMPIFEQ $outOfRangeCHR LF@_vartmp bool@true\n");
-    printf("GT LF@_vartmp LF@_var1 int@255\n");
-    printf("JUMPIFEQ $outOfRangeCHR LF@_vartmp bool@true\n");
-    printf("INT2CHAR LF@*return LF@_var1\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@&i\n");
+    printf("MOVE TF@&i LF@&i\n");
+    printf("DEFVAR TF@&vartmp\n");
+    printf("LT TF@&vartmp TF@&i int@0\n");
+    printf("JUMPIFEQ $outOfRangeCHR TF@&vartmp bool@true\n");
+    printf("GT TF@&vartmp TF@&i int@255\n");
+    printf("JUMPIFEQ $outOfRangeCHR TF@&vartmp bool@true\n");
+    printf("INT2CHAR GF@*return TF@&i\n");
     printf("LABEL $outOfRangeCHR\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $end_fnc_chr\n");
+    printf("LABEL $end_chr\n");
 }
 
 /**
