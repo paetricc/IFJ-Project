@@ -18,20 +18,19 @@
  */
 void make_reads(){
     printf("#builtIn reads()\n");
-    printf("JUMP $end_fnc_reads\n");
-    printf("LABEL $fnc_reads\n");
+    printf("JUMP $end_reads\n");
+    printf("LABEL $reads\n");
     printf("PUSHFRAME\n");
-    printf("DEFVAR LF@*return\n");
-    printf("MOVE LF@*return nil@nil\n");
-    printf("READ LF@*return string\n");
-    printf("DEFVAR LF@_vartype\n");
-    printf("TYPE LF@_vartype LF@*return\n");
-    printf("JUMPIFEQ $isStringREADS LF@_vartype string@string\n");
-    printf("MOVE LF@*return nil@nil\n");
+    printf("CREATEFRAME\n");
+    printf("READ GF@*return string\n");
+    printf("DEFVAR TF@&vartype\n");
+    printf("TYPE TF@&vartype GF@*return\n");
+    printf("JUMPIFEQ $isStringREADS TF@&vartype string@string\n");
+    printf("MOVE GF@*return nil@nil\n");
     printf("LABEL $isStringREADS\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $end_fnc_reads\n");
+    printf("LABEL $end_reads\n");
 }
 
 /**
@@ -40,20 +39,19 @@ void make_reads(){
  */
 void make_readi(){
     printf("#builtIn readi()\n");
-    printf("JUMP $end_fnc_readi\n");
-    printf("LABEL $fnc_readi\n");
+    printf("JUMP $end_readi\n");
+    printf("LABEL $readi\n");
     printf("PUSHFRAME\n");
-    printf("DEFVAR LF@*return\n");
-    printf("MOVE LF@*return nil@nil\n");
-    printf("READ LF@*return int\n");
-    printf("DEFVAR LF@_vartype\n");
-    printf("TYPE LF@_vartype LF@*return\n");
-    printf("JUMPIFEQ $isIntREADI LF@_vartype string@int\n");
-    printf("MOVE LF@*return nil@nil\n");
+    printf("CREATEFRAME\n");
+    printf("READ GF@*return int\n");
+    printf("DEFVAR TF@&vartype\n");
+    printf("TYPE TF@&vartype GF@*return\n");
+    printf("JUMPIFEQ $isIntREADI TF@&vartype string@int\n");
+    printf("MOVE GF@*return nil@nil\n");
     printf("LABEL $isIntREADI\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $end_fnc_readi\n");
+    printf("LABEL $end_readi\n");
 }
 
 /**
@@ -62,20 +60,19 @@ void make_readi(){
  */
 void make_readn(){
     printf("#builtIn readn()\n");
-    printf("JUMP $end_fnc_readn\n");
-    printf("LABEL $fnc_readn\n");
+    printf("JUMP $end_readn\n");
+    printf("LABEL $readn\n");
     printf("PUSHFRAME\n");
-    printf("DEFVAR LF@*return\n");
-    printf("MOVE LF@*return nil@nil\n");
-    printf("READ LF@*return float\n");
-    printf("DEFVAR LF@_vartype\n");
-    printf("TYPE LF@_vartype LF@*return\n");
-    printf("JUMPIFEQ $isFloatREADN LF@_vartype string@float\n");
-    printf("MOVE LF@*return nil@nil\n");
+    printf("CREATEFRAME\n");
+    printf("READ GF@*return float\n");
+    printf("DEFVAR TF@&vartype\n");
+    printf("TYPE TF@&vartype GF@*return\n");
+    printf("JUMPIFEQ $isFloatREADN TF@&vartype string@float\n");
+    printf("MOVE GF@*return nil@nil\n");
     printf("LABEL $isFloatREADN\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $end_fnc_readn\n");
+    printf("LABEL $end_readn\n");
 }
 
 /**
@@ -114,18 +111,17 @@ void make_write(){
  *
  */
 void make_toInteger(){
-    printf("#builtIn toInteger()\n");
-    printf("JUMP $end_fnc_toInteger\n");
-    printf("LABEL $fnc_toInteger\n");
+    printf("#builtIn tointeger()\n");
+    printf("JUMP $end_tointeger\n");
+    printf("LABEL $tointeger\n");
     printf("PUSHFRAME\n");
-    printf("DEFVAR LF@*return\n");
-    printf("MOVE LF@*return nil@nil\n");
-    printf("DEFVAR LF@_var1\n");
-    printf("MOVE LF@_var1 LF@_cvar1\n");
-    printf("FLOAT2INT LF@*return LF@_var1\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@&f\n");
+    printf("MOVE TF@&f LF@&f\n");
+    printf("FLOAT2INT GF@*return TF@&f\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $end_fnc_toInteger\n");
+    printf("LABEL $end_tointeger\n");
 }
 
 /**
@@ -134,43 +130,46 @@ void make_toInteger(){
  */
 void make_substr(){
     printf("#builtIn substr()\n");
-    printf("JUMP $end_fnc_substr\n");
-    printf("LABEL $fnc_substr\n");
+    printf("JUMP $end_substr\n");
+    printf("LABEL $substr\n");
     printf("PUSHFRAME\n");
-    printf("DEFVAR LF@*return\n");
-    printf("MOVE LF@*return string@\n");
-    printf("DEFVAR LF@_var1\n");
-    printf("MOVE LF@_var1 LF@_cvar1\n");
-    printf("DEFVAR LF@_var2\n");
-    printf("MOVE LF@_var2 LF@_cvar2\n");
-    printf("DEFVAR LF@_var3\n");
-    printf("MOVE LF@_var3 LF@_cvar3\n");
-    printf("DEFVAR LF@$_tmp\n");
-    printf("LT LF@$_tmp LF@_var3 LF@_var2\n");
-    printf("JUMPIFEQ $end_while_substr LF@$_tmp bool@true\n");
-    printf("GT LF@$_tmp LF@_var2 int@0\n");
-    printf("JUMPIFNEQ $end_while_substr LF@$_tmp bool@true\n");
-    printf("GT LF@$_tmp LF@_var3 int@0\n");
-    printf("JUMPIFNEQ $end_while_substr LF@$_tmp bool@true\n");
-    printf("DEFVAR LF@_strlen\n");
-    printf("STRLEN LF@_strlen LF@_var1\n");
-    printf("ADD LF@_strlen LF@_strlen int@1\n");
-    printf("LT LF@$_tmp LF@_var2 LF@_strlen\n");
-    printf("JUMPIFNEQ $end_while_substr LF@$_tmp bool@true\n");
-    printf("LT LF@$_tmp LF@_var3 LF@_strlen\n");
-    printf("JUMPIFNEQ $end_while_substr LF@$_tmp bool@true\n");
-    printf("SUB LF@_var2 LF@_var2 int@1\n");
+    printf("CREATEFRAME\n");
+    printf("MOVE GF@*return string@\n");
+    printf("DEFVAR TF@&s\n");
+    printf("MOVE TF@&s LF@&s\n");
+    printf("DEFVAR TF@&i\n");
+    printf("MOVE TF@&i LF@&i\n");
+    printf("DEFVAR TF@&j\n");
+    printf("MOVE TF@&j LF@&j\n");
+    printf("DEFVAR TF@&tmp\n");
+    printf("LT TF@&tmp TF@&j TF@&i\n");
+    printf("JUMPIFEQ $end_while_substr TF@&tmp bool@true\n");
+    printf("GT TF@&tmp TF@&i float@%a\n", 0.0);
+    printf("JUMPIFNEQ $end_while_substr TF@&tmp bool@true\n");
+    printf("GT TF@&tmp TF@&j float@%a\n", 0.0);
+    printf("JUMPIFNEQ $end_while_substr TF@&tmp bool@true\n");
+    printf("DEFVAR TF@&strlen\n");
+    printf("STRLEN TF@&strlen TF@&s\n");
+    printf("ADD TF@&strlen TF@&strlen int@1\n");
+    printf("INT2FLOAT TF@&strlen TF@&strlen\n");
+    printf("LT TF@&tmp TF@&i TF@&strlen\n");
+    printf("JUMPIFNEQ $end_while_substr TF@&tmp bool@true\n");
+    printf("LT TF@&tmp TF@&j TF@&strlen\n");
+    printf("JUMPIFNEQ $end_while_substr TF@&tmp bool@true\n");
+    printf("SUB TF@&i TF@&i float@%a\n", 1.0);
     printf("LABEL $while_substr\n");
-    printf("LT LF@$_tmp LF@_var2 LF@_var3\n");
-    printf("JUMPIFNEQ $end_while_substr LF@$_tmp bool@true\n");
-    printf("GETCHAR LF@$_tmp LF@_var1 LF@_var2\n");
-    printf("CONCAT LF@*return LF@*return LF@$_tmp\n");
-    printf("ADD LF@_var2 LF@_var2 int@1\n");
+    printf("LT TF@&tmp TF@&i TF@&j\n");
+    printf("JUMPIFNEQ $end_while_substr TF@&tmp bool@true\n");
+    printf("FLOAT2INT TF@&i TF@&i\n");
+    printf("GETCHAR TF@&tmp TF@&s TF@&i\n");
+    printf("INT2FLOAT TF@&i TF@&i\n");
+    printf("CONCAT GF@*return GF@*return TF@&tmp\n");
+    printf("ADD TF@&i TF@&i float@%a\n", 1.0);
     printf("JUMP $while_substr\n");
     printf("LABEL $end_while_substr\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $end_fnc_substr\n");
+    printf("LABEL $end_substr\n");
     printf("#------------------------------\n");
 }
 
@@ -180,23 +179,22 @@ void make_substr(){
  */
 void make_chr(){
     printf("#builtIn chr()\n");
-    printf("JUMP $end_fnc_chr\n");
-    printf("LABEL $fnc_chr\n");
+    printf("JUMP $end_chr\n");
+    printf("LABEL $chr\n");
     printf("PUSHFRAME\n");
-    printf("DEFVAR LF@*return\n");
-    printf("MOVE LF@*return nil@nil\n");
-    printf("DEFVAR LF@_var1\n");
-    printf("MOVE LF@_var1 LF@_cvar1\n");
-    printf("DEFVAR LF@_vartmp\n");
-    printf("LT LF@_vartmp LF@_var1 int@0\n");
-    printf("JUMPIFEQ $outOfRangeCHR LF@_vartmp bool@true\n");
-    printf("GT LF@_vartmp LF@_var1 int@255\n");
-    printf("JUMPIFEQ $outOfRangeCHR LF@_vartmp bool@true\n");
-    printf("INT2CHAR LF@*return LF@_var1\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@&i\n");
+    printf("MOVE TF@&i LF@&i\n");
+    printf("DEFVAR TF@&vartmp\n");
+    printf("LT TF@&vartmp TF@&i int@0\n");
+    printf("JUMPIFEQ $outOfRangeCHR TF@&vartmp bool@true\n");
+    printf("GT TF@&vartmp TF@&i int@255\n");
+    printf("JUMPIFEQ $outOfRangeCHR TF@&vartmp bool@true\n");
+    printf("INT2CHAR GF@*return TF@&i\n");
     printf("LABEL $outOfRangeCHR\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $end_fnc_chr\n");
+    printf("LABEL $end_chr\n");
 }
 
 /**
@@ -205,29 +203,28 @@ void make_chr(){
  */
 void make_ord(){
     printf("#builtIn ord()\n");
-    printf("JUMP $end_fnc_ord\n");
-    printf("LABEL $fnc_ord\n");
+    printf("JUMP $end_ord\n");
+    printf("LABEL $ord\n");
     printf("PUSHFRAME\n");
-    printf("DEFVAR LF@*return\n");
-    printf("MOVE LF@*return nil@nil\n");
-    printf("DEFVAR LF@_var1\n");
-    printf("MOVE LF@_var1 LF@_cvar1\n");
-    printf("DEFVAR LF@_var2\n");
-    printf("MOVE LF@_var2 LF@_cvar2\n");
-    printf("SUB LF@_var2 LF@_var2 int@1\n");
-    printf("DEFVAR LF@_vartmp\n");
-    printf("LT LF@_vartmp LF@_var2 int@0\n");
-    printf("JUMPIFEQ $outOfRangeORD LF@_vartmp bool@true\n");
-    printf("DEFVAR LF@_var3\n");
-    printf("STRLEN LF@_var3 LF@_var1\n");
-    printf("SUB LF@_var3 LF@_var3 int@1\n");
-    printf("GT LF@_vartmp LF@_var2 LF@_var3\n");
-    printf("JUMPIFEQ $outOfRangeORD LF@_vartmp bool@true\n");
-    printf("STRI2INT LF@*return LF@_var1 LF@_var2\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@&s\n");
+    printf("MOVE TF@&s LF@&s\n");
+    printf("DEFVAR TF@&i\n");
+    printf("MOVE TF@&i LF@&i\n");
+    printf("SUB TF@&i TF@&i int@1\n");
+    printf("DEFVAR TF@&vartmp\n");
+    printf("LT TF@&vartmp TF@&i int@0\n");
+    printf("JUMPIFEQ $outOfRangeORD TF@&vartmp bool@true\n");
+    printf("DEFVAR TF@&var3\n");
+    printf("STRLEN TF@&var3 TF@&s\n");
+    printf("SUB TF@&var3 TF@&var3 int@1\n");
+    printf("GT TF@&vartmp TF@&i TF@&var3\n");
+    printf("JUMPIFEQ $outOfRangeORD TF@&vartmp bool@true\n");
+    printf("STRI2INT GF@*return TF@&s TF@&i\n");
     printf("LABEL $outOfRangeORD\n");
     printf("POPFRAME\n");
     printf("RETURN\n");
-    printf("LABEL $end_fnc_ord\n");
+    printf("LABEL $end_ord\n");
 }
 
 /**
