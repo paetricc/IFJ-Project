@@ -124,6 +124,14 @@ void make_GT_all(int elseCounter);
 
 void make_GTE_all(int elseCounter);
 
+void make_LT_loop();
+
+void make_LTE_loop();
+
+void make_GT_loop();
+
+void make_GTE_loop();
+
 void make_IF_nil(int elseCounter);
 
 void make_EQ(int elseCounter);

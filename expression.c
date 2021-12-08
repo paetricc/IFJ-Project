@@ -824,10 +824,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
             if (!(strcmp(var, "if")))
                 make_LT_all(elseCounter++);
             if(!(strcmp(var, "loop"))) {
-                printf("PUSHS TF@&tmp2\n");
-                printf("PUSHS TF@&tmp1\n");
-                printf("LTS\n");
-                printf("PUSHS bool@true\n");
+                make_LT_loop();
                 printf("JUMPIFNEQS !endLoop%d\n", (*loopCounter)++);
             }
             break;
@@ -836,11 +833,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
             if (!(strcmp(var, "if")))
                 make_LTE_all(elseCounter++);
             if(!(strcmp(var, "loop"))) {
-                printf("PUSHS TF@&tmp2\n");
-                printf("PUSHS TF@&tmp1\n");
-                printf("GTS\n");
-                printf("NOTS\n");
-                printf("PUSHS bool@true\n");
+                make_LTE_loop();
                 printf("JUMPIFNEQS !endLoop%d\n", (*loopCounter)++);
             }
             break;
@@ -849,10 +842,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
             if (!(strcmp(var, "if")))
                 make_GT_all(elseCounter++);
             if(!(strcmp(var, "loop"))) {
-                printf("PUSHS TF@&tmp2\n");
-                printf("PUSHS TF@&tmp1\n");
-                printf("GTS\n");
-                printf("PUSHS bool@true\n");
+                make_GT_loop();
                 printf("JUMPIFNEQS !endLoop%d\n", (*loopCounter)++);
             }
             break;
@@ -861,11 +851,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
             if (!(strcmp(var, "if")))
                 make_GTE_all(elseCounter++);
             if(!(strcmp(var, "loop"))) {
-                printf("PUSHS TF@&tmp2\n");
-                printf("PUSHS TF@&tmp1\n");
-                printf("LTS\n");
-                printf("NOTS\n");
-                printf("PUSHS bool@true\n");
+                make_GTE_loop();
                 printf("JUMPIFNEQS !endLoop%d\n", (*loopCounter)++);
             }
             break;
