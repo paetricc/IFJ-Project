@@ -3,35 +3,34 @@ chyba ve scanneru pri komentari -- nejaky text [narazano na zavorku ale jen jedn
 legenda: X - neprojde, D - hotovo, N - nedame
 
 [ ] Ondroid 001 - Chyba u podminky - nefunkcni a~=nil
-[ ] Ondroid 002 -
+[ ] Ondroid 002 - Vraceni funkce
 [D] Ondroid 003 - Chyba pretypovani ve vyrazu z number na integer
 [D] Ondroid 008 - Vetsi nez
 [D] Ondroid 009 - Vetsi rovno nez
 [D] Ondrios 011 - Konkatenace stringu
 [D] Ondroid 013 - dat. typ nil
-[ ] Ondroid 014 - dat. typ nil
-[ ] Ondroid 015 - dat. typ nil
+[D] Ondroid 014 - dat. typ nil
+[D] Ondroid 015 - dat. typ nil
 [N] Ondroid 016 - Nema prochazet - prace s neinicializovanou promennou
 [D] Ondroid 018 - Porovnavani hodnoty s nilem - ocekava error 8
-[ ] Ondroid 019 -
-[ ] Ondroid 020 -
+[ ] Ondroid 019 - Dva vnorene cykly s definici uvnitr
+[ ] Ondroid 020 - Cyklus s definici promenne
 [D] Ondroid 021 - Blokovy kometnar nebyl ukoncen -> lexikalni chyba
 [D] Ondroid 022 - # ve vyrazu
-[ ] Ondroid 023 - porovnavani s nilem v podmince
+[ ] Ondroid 023 - Vraceni hodnot
 [X] Ondroid 024 - Nema prochazet - vraceni vice hodnot funkce
-[ ] Ondroid 025 -
 
 [X] Rostik 001 - Nema prochazet - vraceni vice hodnot funkce
 [D] Rostik 003 - datovy typ nil
 [D] Rostik 004 - datovy typ nil
 [D] Rostik 005 - datovy typ nil
 [D] Rostik 007 - datovy typ nil
-[ ] Rostik 009 - Porovnavani hodnoty s nil v podmince
-[?] Rostik 010 - Funguje - nevim co je to za chybu
-[ ] Rostik 011 - Chyba u podminky - porovnani hodnoty s nil
+[ ] Rostik 009 - Faktorial iteracne
+[?] Rostik 010 - Vraceni hodnoty
+[ ] Rostik 011 - Nacitani hodnot z buildin
 [D] Rostik 013 - Doplnit predani parametru funkci
 [X] Rostik 031 - Nema prochazet- vraceni vice hodnot funkce
-[ ] Rostik 033 -
+[ ] Rostik 033 - Vraceni hodnot
 [D] Rostik 036 - Neprochazi zrejme kvuli instrukcim
 [ ] Rostik 041 - dat. typ nil
 [X] Rostik 042 - Nema prochazet- vraceni vice hodnot funkce
