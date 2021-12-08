@@ -183,14 +183,6 @@ int TermStack_isEmpty( const TermStack *stack ) {
     return !(stack->topElement);
 }
 
-int TermStack_isUSDLast( const TermStack *stack) {
-    struct TermStackElement *tmp = stack->topElement;
-    while(tmp->previousElement != NULL) {
-        tmp = tmp->previousElement;
-    }
-    return (tmp->data == USD) ? 1 : 0;
-}
-
 /**
  * @brief Prvni prvek na vrcholu zasobniku;
  * 

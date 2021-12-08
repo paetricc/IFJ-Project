@@ -45,8 +45,6 @@ void TermStack_init( TermStack *);
 
 int TermStack_isEmpty( const TermStack * );
 
-int TermStack_isUSDLast( const TermStack * );
-
 void TermStack_top( const TermStack *, TermStackElementPtr *);
 
 void TermStack_firstTermPtr( const TermStack *, struct TermStackElement **);
