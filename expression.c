@@ -809,7 +809,7 @@ int exprSyntaxCheck(Token *token, FILE *file, SLList_Frame *listFrame, Data_type
                 make_EQ(elseCounter++);
             if(!(strcmp(var, "loop")))
                 printf("JUMPIFNEQ !endLoop%d TF@&tmp2 TF@&tmp1\n", (*loopCounter)++);
-                break;
+            break;
         case NEQ:
             if (!(strcmp(var, "if")))
                 make_NEQ(elseCounter++);
