@@ -464,6 +464,52 @@ void make_GTE_all(int elseCounter){
 }
 
 /**
+ * Funkce vytvori kod pro cely LT s loopem.
+ * Potreba dat do funkce inkrementovanou hodnotu
+ */
+void make_LT_loop(){
+    printf("PUSHS TF@&tmp2\n");
+    printf("PUSHS TF@&tmp1\n");
+    printf("LTS\n");
+    printf("PUSHS bool@true\n");
+}
+
+/**
+ * Funkce vytvori kod pro cely LTE s loopem.
+ * Potreba dat do funkce inkrementovanou hodnotu
+ */
+void make_LTE_loop(){
+    printf("PUSHS TF@&tmp2\n");
+    printf("PUSHS TF@&tmp1\n");
+    printf("GTS\n");
+    printf("NOTS\n");
+    printf("PUSHS bool@true\n");
+}
+
+/**
+ * Funkce vytvori kod pro cely GT s loopem.
+ * Potreba dat do funkce inkrementovanou hodnotu
+ */
+void make_GT_loop(){
+    printf("PUSHS TF@&tmp2\n");
+    printf("PUSHS TF@&tmp1\n");
+    printf("GTS\n");
+    printf("PUSHS bool@true\n");
+}
+
+/**
+ * Funkce vytvori kod pro cely GTE s loopem.
+ * Potreba dat do funkce inkrementovanou hodnotu
+ */
+void make_GTE_loop(){
+    printf("PUSHS TF@&tmp2\n");
+    printf("PUSHS TF@&tmp1\n");
+    printf("LTS\n");
+    printf("NOTS\n");
+    printf("PUSHS bool@true\n");
+}
+
+/**
  * Funkce vytvori kod pro if porovnavajici s nil.
  * Potreba dat do funkce inkrementovanou hodnotu
  */
@@ -487,5 +533,6 @@ void make_EQ(int elseCounter){
 void make_NEQ(int elseCounter){
     printf("JUMPIFEQ !else%d TF@&tmp2 TF@&tmp1\n", elseCounter);
 }
+
 
 /** @endcode */
