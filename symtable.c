@@ -6,7 +6,6 @@
  * @author Vít Janeček xjanec30@stud.fit.vutbr.cz
 */
 
-#include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -572,3 +571,5 @@ int setBuildInFun(SLList_Frame *listFrame, Dynamic_string *string, Data_type par
     }
     return error;
 }
+
+/** @endcode */

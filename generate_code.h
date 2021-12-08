@@ -1,4 +1,10 @@
-
+/**
+ * Projekt: IFJ2021
+ *
+ * @brief Implementace generovani kodu a vestavenych funkci.
+ *
+ * @author Vít Janeček xjanec30@stud.fit.vutbr.cz
+*/
 
 #ifndef _GENERATE_CODE_H
 #define _GENERATE_CODE_H
@@ -123,3 +129,5 @@ void make_EQ(int elseCounter);
 void make_NEQ(int elseCounter);
 
 #endif //_GENERATE_CODE_H
+
+/** @endcode */

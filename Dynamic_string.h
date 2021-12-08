@@ -65,3 +65,5 @@ int DS_Cmp(Dynamic_string *string, const char *c_string);
 void DS_Free(Dynamic_string *string);
 
 #endif
+
+/** @endcode */

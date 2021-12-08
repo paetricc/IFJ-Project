@@ -1,3 +1,14 @@
+/**
+ * Projekt: IFJ2021
+ *
+ * @brief Zasobnik pro datove typy
+ *
+ * @details Zasobnik je implementovany jednosmerne vazanym seznamem
+ *
+ * @author Tomáš Bártů xbartu11@stud.fit.vutbr.cz
+ * @
+ */
+
 #ifndef _TYPE_STACK_H_
 #define _TYPE_STACK_H_
 
@@ -44,3 +55,5 @@ void TypeStack_error( int );
 void TypeStack_dispose( TypeStack * );
 
 #endif
+
+/** @endcode */

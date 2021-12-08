@@ -36,3 +36,5 @@ výrazech */
 #define ERROR_COMPILER 99
 
 #endif
+
+/** @endcode */
