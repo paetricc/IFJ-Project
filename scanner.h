@@ -13,6 +13,11 @@
 
 #include <stdio.h>
 #include "Dynamic_string.h"
+#include "error.h"
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
 /**
  * Stavy scanneru
  */
@@ -123,7 +128,7 @@ typedef enum {
  */
 typedef union {
     Dynamic_string *string;
-    int Integer;
+    long long int Integer;
     Keyword keyword;
     double Double;
 }Token_Value;
@@ -146,3 +151,5 @@ typedef struct {
 int get_token(Token *, FILE *);
 
 #endif
+
+/** @endcode */

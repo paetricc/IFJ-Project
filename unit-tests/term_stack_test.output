@@ -1,0 +1,94 @@
+Zasobnik implementovany jednosmerne vazanym seznamem
+----------------------------------------------------
+[TEST01] Inicializace zasobniku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+-- BOTTOM --
+[TEST02] Kontrola stavu zasobniku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Zasobnik je prazdny
+[TEST03] Vlozeni prvniho prvku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+     +
+-- BOTTOM --
+[TEST04] Kontrola zda je dolar na spodku zasobniku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+     +
+-- BOTTOM --
+Na spodku zasobniku neni dolar
+[TEST05] Zjisteni prvku na vrcholu zasobniku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Data v elementu jsou: +
+[TEST06] Kontrola stavu zasobniku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Zasobnik neni prazdny
+[TEST07] Odstraneni prvku zasobniku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+-- BOTTOM --
+[TEST08] Vlozeni terminalu na vrchol zasobniku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+     $
+-- BOTTOM --
+[TEST09] Kontrola zda je dolar na spodku zasobniku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+     $
+-- BOTTOM --
+Na spodku zasobniku je dolar
+[TEST10] Simulace vlozeni redukce s terminalem
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+     i
+     ←
+     $
+-- BOTTOM --
+[TEST11] Simulace redukce
+~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+     E
+     $
+-- BOTTOM --
+[TEST12] Vlozeni terminalu
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+     +
+     E
+     $
+-- BOTTOM --
+[TEST13] Simulace slozitejsi redukce s chybou
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+-- BOTTOM --
+[TEST14] Vlozeni nekolika hodnot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+     i
+     ←
+     +
+     E
+     ←
+     $
+-- BOTTOM --
+[TEST15] Simulace slozitejsi redukce bez chyby
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+     E
+     +
+     E
+     ←
+     $
+-- BOTTOM --
+[TEST16] Redukce pouze na expression
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+     E
+     $
+-- BOTTOM --
+[TEST17] Uvolneni pameti zasobniku
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--- TOP ----
+-- BOTTOM --

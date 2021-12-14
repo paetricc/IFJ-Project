@@ -19,6 +19,7 @@
 typedef struct {
     char *str;
     unsigned int length;
+    unsigned int alloc;
 } Dynamic_string;
 
 /**
@@ -64,3 +65,5 @@ int DS_Cmp(Dynamic_string *string, const char *c_string);
 void DS_Free(Dynamic_string *string);
 
 #endif
+
+/** @endcode */
