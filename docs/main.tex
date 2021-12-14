@@ -28,7 +28,7 @@
 			\begin{tabular}{l l l}
 			    Členové týmu: \\\\
 				\textbf{Tomáš Bártů} & \textbf{(xbartu11)} & \quad 25\,\% \\
-				Šimon Vacek  & (xjanec30) & \quad 25\,\% \\
+				Šimon Vacek  & (xvacek10) & \quad 25\,\% \\
 				Vít Janeček  & (xjanec30) & \quad 25\,\% \\
 				Tony Pham  & (xphamt00) & \quad 25\,\% \\\\\\
 			\end{tabular}
@@ -48,79 +48,114 @@
 	
 	\subsection{Lexikální analýza}
     \large
-	Při implementaci překladače jsme začali prvně s tvorbou lexikální analýzy.
-    Hlavní funkce je \textbf{\textit{get\_token}}, která je implementována jako konečný automat a žádá 2 parametry: strukturu token (po průchodu funkcí uloží do struktury \textbf{\textit{ID}} [typy tokenů: řetězec, klíčové slovo, číslo, EOL, EOF …] a \textbf{\textit{VALUE}} [value se dále rozděluje na: string, integer, keyword, double]) a vstupní soubor. Funkce čte soubor znak po znaku a rozhoduje do jakého stavu má jít pomocí využití switche a casu pro každý stav, kde je potřeba.\\\\
+    Jádro lexikální analýzy tvoří funkce \textbf{\textit{get\_token}}, která je implementována jako konečný automat. Vstupem jsou 2 parametry: struktura token a zdrojový kód jazyka ifj21. Po průchodu funkcí se do struktury token uloží \textbf{\textit{ID}} [typ tokenu: řetězec, klíčové slovo, číslo, EOL, EOF,…] a \textbf{\textit{VALUE}} [value může být typu: string, integer, keyword, double]). Funkce čte soubor znak po znaku na jehož základě rozhoduje do jakého stavu má jít využitím switche.\\\\
 
-	\subsection{Syntaktická analýza}
+	\subsection{Syntaktická a sémantická analýza}
     \large
-    Syntaktickou analýzu jsme implementovali rekurzivně a nachází se v \textbf{\textit{parser.c}} (top-down) a \textbf{\textit{expression.c}} (bottom-up) Vstupem jsou jednotlivé tokeny z lexikální analýzy.
-    Syntaktická analyzátor využívá LL-Gramatiku (LL-Tabulku a LL-Pravidla) k tomu, aby zjistil, zda jde vstup programu syntakticky správně.\\\\
-    
-    \textbf{\textit{Symtable.c}} je implementovaná pomocí binárního stromu, zásobníku a jednosměrně vázaných seznamů. Základem je sktruktura \textbf{\textit{SLList\_Frame}} , která tvoří počátek vázaného seznamu. Tato struktura dále obsahuje další 2 vázané seznamy: \textbf{\textit{topLocalElement}} a \textbf{\textit{globalElement}}.\\\\
-    \textbf{\textit{GlobalElement}} ukazuje na globální rámce (funkce) a tento rámec je struktura obsahující: \textbf{\textit{node}} a \textbf{\textit{previousElement}}.\\\\\\
-    \textbf{\textit{TopLocalElement}} ukazuje na lokální rámce(tělo funkce, cyklus, while) a tento rámec je struktura obsahující: \textbf{\textit{node}} a \textbf{\textit{previouElement}}.\\\\
-     \textbf{\textit{Node}} je ukazatel na kořen binárního stromu, kde jeho jednotlivé noty jsou struktury, které obsahují další vázané seznamy s informacemi o rámcích. \\\\
+    Syntaktickou analýzu shora dolů jsme implementovali rekurzivně a nachází se v \textbf{\textit{parser.c}} a analýzu zdola nahoru precedenčně v \textbf{\textit{expression.c}}. Vstupem jsou tokeny generované scannerem.
+    \\\\
+    Pro kontrolu syntaxe výrazů jsme implementovali zásobík na terminály a neterminály v souboru   \textbf{\textit{term\_stack.c}}
+    \\\\
+    Sématická analýza stejně jako syntaktická je implementována v \textbf{\textit{parser.c}} a \textbf{\textit{expression.c}}.
+    \\\\
+    \newpage
+    \textbf{\textit{Tabulka symbolů}} je implementovaná jednosměrně vázaným seznamem, do kterého lze přidávat rámce pouze na vrchol. Položka (rámec) v seznamu odpovídá jednomu bloku programu. Tento rámec má ukazatel na vrchol binárního vyhledávacího stromu, ve kterém už jsou identifikátry proměnných a funkcí.
+    Struktura tabulky obsahuje ukazatel na globální rámec (\textbf{\textit{GlobalElement}}) s identifikátory funkcí a nejvyšší rámec (\textbf{\textit{TopLocalElement}}) s identifikátory proměnných tohoto rámce. Nejvyšší rámec dál ukazuje na předchozí rámce, které překryl.
+    \\
+     Uzel stromu s identifikátorem obsahuje data k němu se vztahující, tzn. např. datový typ u proměnné a seznam s parametry a návratovými hodnotami u funkce.\\\\
      Pro zjednodušení jsme se rozhodli neimplementovat vícenásobné přiřazení hodnot do proměnných. Rovněž neimplementujeme funkce s více návratovými hodnotami. \\
-     Kvůli nejasnostem v zadaní jsme nil nebrali jako datový typ a pouze jako hodnotu. Deklarované proměnné je implicitně nastavena hodnota nil a nedá se použít, dokud není inicializována.
+     Tabulka symbolů je k nalezení v souboru \textbf{\textit{symtable.c}} .
     
-	\subsection{Sémantická analýza}
-    Sématická analýza stejně jako syntaktická analýza je implementována v \textbf{\textit{parser.c}} a \textbf{\textit{expression.c}}. Při implementaci bylo nutné rozdělit jeden z neterminálu na 2 funkce které dělají různé sémantické kontroly, ale syntaxi kontrolují stejně.
 	\subsection{Generování cílového kódu}
-    Generování kódu pro vestavěné funkce (reads, readi, readn, write, tointeger, substr, ord, chr) je v \textbf{\textit{buildIn.c}} . Dále jsme vytvořili pomocné funkce pro generování kódu, který se často opakuje a nachází se ve \textbf{\textit{generate\_code.c}}.\\\\
-    Samotné generování ifjcode21 je umístěné v \textbf{\textit{parser.c}} a \textbf{\textit{expression.c}}. Zde se generuje hlavička souboru, funkce programu, logika if a while atd. . Za zmínku stojí řešení stínění, které jsme vyřešili tak, že připisujeme proměnné ze spodku zásobníku rámců do rámce nad ním až na top.
+	Rozhodli jsme se generovat kód bez optimalizací a to tak, že tiskneme přímo instrukce na standardní výstup.\\\\
+    Výpis kódu vestavěných funkcí (reads, readi, readn, write, tointeger, substr, ord, chr) je v \textbf{\textit{buildIn.c}} . Dále jsme vytvořili pomocné funkce pro výpis instrukcí, které se často opakují a nachází se v \textbf{\textit{generate\_code.c}}.\\\\
+    \\
+    \newpage
+    Samotné generování ifjcode21 a volání výše zmíněných funkcí je umístěné v \textbf{\textit{parser.c}} a \textbf{\textit{expression.c}}. Za zmínku stojí vyřešení stínění tím, že kopírujeme proměnné z nižšího rámce datového zásobníku do následujícího rámce. Pokud se hodnota dané proměnné změní, propaguje se změno do nižšího rámce. \\\\
+    Na generování kódu pracovali všichni členové týmu a proto jsme zavedli konvence pro názvy návěští a proměnných. 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Práce v týmu %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\section{Práce v~týmu}
 
 	\subsection{Způsob práce v~týmu}
     
     \large
-    Na projektu jsme začali pracovat v půlce října. Ze začátku jsme si rozdělili základní úkoly a po dokončení jsme se vždy domluvili co má daný jedinec dělat dál.
+    Práci v týmu jsme pojali tak, že členové týmu si rozdělili úkoly na právě zpracovávané části tzn. nedělali jsme moduly. Na projektu jsme začali pracovat v půlce října.
     
 	\subsection{Verzovací systém}
     
     \large
-    Pro správu našich souborů jsme zvolili verzovací systém Git. Ten nám umožnil zpracovávat více souborů zároveň.
+    Pro správu našich souborů jsme zvolili verzovací systém Git, který jsme hostovali na platformě GitHub. Zvolili jsme přístup pull-requestů na repozitář vedoucího týmu.
     
 	\subsection{Komunikace}
 	\large
-	Jako komunikační prostředky jsme zvolili discord a massanger, kde jsme konzultovali aktuální témata k projektu. Později jsme se začali scházet ve školních prostorech, aby jsme mohli aktivněji řešit aktuální problémy. 
+	Jako komunikační prostředky jsme zvolili discord a messenger, kde jsme konzultovali aktuální témata k projektu. Později jsme se začali scházet ve školních prostorách, abychom mohli aktivněji řešit aktuální problémy. 
 
 	\subsection{Rozdělení práce mezi členy týmu}
 	\Large 
-	\textbf{Tomáš Bártů:}\\
+	\textbf{Tomáš Bártů:}\\\
 	Návrh automatu, Korekce, Syntaktická analýza zdola nahoru, Sématická analýza, Abstraktí datové struktury, Debug, Generování kódu \\
-
+	\\
 	Šimon Vacek:\\
 	Testy, LL gramatika, Syntaktická analýza shora dolu, Sématická analýza, Debug, Generování kódu\\
 	\\\\
 	Vít Janeček:\\
 	Lex. analýza, Abstraktí datové struktury včetně tabulky symbolů, Debug, Generování kódu\\
-	
+	\\
 	Tony Pham:\\
 	Lex. analýza, Dokumentace, Oprava leaků, Debug, Generování kódu\\
-	
+	\newpage
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Problémy při vývoji %%%%%%%%%%%%%%%%%%%%%%%%%%
 	\section{Problémy při vývoji}
 	\large
-    Během implementace scanneru jsme v syntaktické analýze museli řešit hned několik problému např.: přeskočení čtení znaku u některých stavů (pomohla nám funkce \textbf{\textit{ungetc}}), chybný návrh automatu (museli jsme často přidávat / opravovat stavy).
+    Během implementace scanneru jsme v lexikální analýze museli řešit hned několik problému např.: přeskočení čtení znaku u některých stavů (pomohla nám funkce \textbf{\textit{ungetc}}), chybný návrh automatu (museli jsme často přidávat / opravovat stavy).
 	\\
 	\\
-	Během syntaktické analýzy shora dolů se také projevila naše chabé dovednosti plánování. Pravidla LL gramatiky byly upraveny téměř jedenáctkrát a to i 3 dny před odevzdáním.
+	Během syntaktické analýzy shora dolů se také projevily naše chabé dovednosti plánování. Pravidla LL gramatiky byly upraveny téměř jedenáctkrát a to i 3 dny před odevzdáním.
 	\\
 	\\
-	Podcenili jsme časovou náročnost projektu, sice jsme začali poněkud brzy a ze začátku šlo vše bez problému, ale při implementaci Syntaktické analýzy se vývoj projektu velmi zpomalil.
+	Podcenili jsme časovou náročnost projektu, sice jsme začali poněkud brzy a ze začátku šlo vše bez problému, ale po dokončení lexikální analýzy se vývoj projektu zabrzdil.
+	\\
+	\\
+	Při příštím týmovém projektu bychom se více zaměřili na tvorbu testů.
+	\\
+	\\
+	U sémantické analýzy jsme narazili na problém kontroly datových typů. Ten jsme vyřešili implementací zásobníků datových typů v souboru \textbf{\textit{type\_stack.c}}.
+	\\
+	\\
+	Většinu paměti se nám podařilo uvolnit, ale problémem byla neuvolněná paměť ve struktuře
+	Token.
+	\\
+	\\
+	S většující se složitostí struktury bylo obtížnější správně uvolnit všechnu paměť.
+	\newpage
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Použité zdroje %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\section{Použité nástroje, programy a literatura}
+
+\begin{itemize}
+\normalsize
+  \item Prof. RNDr. Alexandr Meduna CSc. a Ing. Roman Lukáš Ph.D. - Formální jazyky a překladače, prezentace k přednáškám
+  \item Ing. Bohuslav Křena Ph.D., Ing. Ivana Burgetová Ph.D. - Algoritmy, prezentace k přednáškám
+  \item Ing. Zbyněk Křivka Ph.D. - Demonstrační cvičení IFJ, Implementace překladače IFJ21
+  \item Prof. RNDr. Milan Češka, CSc.- Teoretická informatika, Učební texty
+  \item Clion, https://www.jetbrains.com/clion/
+  \item GitHub, https://github.com/paetricc/IFJ-Project
+  \item Vim, https://www.vim.org
+  \item QFSM, http://qfsm.sourceforge.net
+  
+\end{itemize}
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%% Diagram automatu %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\begin{sidewaysfigure}
         \section{Diagram automatu}
 	        \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{LexAnalyzatorFSM.png}
     \end{sidewaysfigure}
     \newpage
-    
-    %%%%%%%%%%%%%%%%%%%%%%% Pravidla LL gramatiky %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \includepdf[scale=0.83,pages=1,pagecommand=\section{Pravidla LL gramatiky}]{LLGramatika.pdf}
-  \includepdf[scale=0.83,pages=2]{LLGramatika.pdf}
-
+    	%%%%%%%%%%%%%%%%%%%%%%%%%%%% Tabulka symbolů %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\includepdf[scale=0.75 ,pages=1,pagecommand=\section{Tabulka symbolů}]{Symtable.pdf}
+    \newpage
 	%%%%%%%%%%%%%%%%%%%%%%%%% Precedenční tabulka %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\includepdf[scale=0.83 ,pages=1,pagecommand=\section{Precedenční tabulka}]{precedenceTable.pdf}
+ \newpage
+ 	%%%%%%%%%%%%%%%%%%%%%%%%% Gramatika pro výrazy %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\section{Gramatika pro výrazy}
 	\begin{enumerate}
  \item EXP $\rightarrow$ i
@@ -139,29 +174,16 @@
  \item EXP $\rightarrow$ EXP == EXP
  \item EXP $\rightarrow$ $\#$EXP
  \end{enumerate}
- \newpage
-
-	%%%%%%%%%%%%%%%%%%%%%%%%% Precedenční tabulka %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	\includepdf[scale=0.83 ,pages=1,pagecommand=\section{Precedenční tabulka}]{precedenceTable.pdf}
- \newpage
  
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Použité zdroje %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	\section{Použité nástroje, programy a literatura}
+    %%%%%%%%%%%%%%%%%%%%%%% Pravidla LL gramatiky %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \includepdf[scale=0.83,pages=1,pagecommand=\section{Pravidla LL gramatiky}]{LLGramatika.pdf}
+  \newpage
+  \includepdf[scale=0.83,pages=2]{LLGramatika.pdf}
 
-\begin{itemize}
-\normalsize
-  \item Alexandr Meduna a Roman Lukáš, Formální jazyky a překladače, prezentace k přednáškám
-  \item Bohuslav Křena, Ivana Burgetová, Algoritmy, prezentace k přednáškám
-  \item Zbyněk Křivka, Demonstrační cvičení IFJ, Implementace překladače IFJ21 
-  \item Clion, https://www.jetbrains.com/clion/
-  \item GitHub, https://github.com/paetricc/IFJ-Project
-  \item Vim, https://www.vim.org
-  \item QFSM, http://qfsm.sourceforge.net
-\end{itemize}
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LL tabulka %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LL tabulka %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\begin{sidewaysfigure}
         \section{LL tabulka}
 	        \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{LLTabulka.pdf}
     \end{sidewaysfigure}
+    
 \end{document}
