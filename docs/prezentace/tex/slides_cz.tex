@@ -17,9 +17,9 @@
   \frametitle{Lexikální analyzátor}
     \centering
     \includegraphics[scale=0.34,keepaspectratio]{img/DiagramLex.png}
-  
+
   \vspace{1em}
-  
+
     \begin{itemize}
         \item KA implementovaný přepínači
         \item Tokeny na vyžádání syntaktické analýzy
@@ -39,12 +39,13 @@
             \item \emph{Uložení pozice čtení} před rozhodovacím tokenem
             \item Předání řízení analýze zdola nahoru u výrazů
         \end{itemize}
-    
+
     \vspace{1.5em}
-    
+
         \begin{flushleft}
         \fontdimen2\font=0.4em
         \texttt{
+        \\
         \emph{pos\_t} pos = \emph{fgetpos(}srcFile\emph{)}\newline\newline
         \textit{načtení tokenu a rozhodnutí}\newline\newline
         \emph{fsetpos(}pos\emph{)}}
@@ -63,8 +64,8 @@
         \item Precedenční tabulka implementovaná \emph{2D polem}
         \item Výraz se vyhodnotí při přijetí neočekávaného tokenu
     \end{itemize}
-    
-    
+
+
     \column{0.5\textwidth}
     \centering
     \includegraphics[scale=0.34,keepaspectratio]{img/DiagramSynt1.png}
@@ -89,7 +90,7 @@
             \item Doplněny k syntaktické analýze
             \item Zásobník na datové typy operandů
         \end{itemize}
-        
+
         \column{0.56\textwidth}
         \centering
         \includegraphics[scale=0.25,keepaspectratio]{img/DiagramSem.png}
@@ -120,9 +121,9 @@
         \item Systém \emph{forků a pullrequestů}
         \item Prezenční schůzky na fakultě
     \end{itemize}
-    
+
   \vspace{1em}
-    
+
   \centering
   \includegraphics[scale=0.4,keepaspectratio]{img/commit_kekw.png}
 \end{frame}
@@ -136,17 +137,18 @@
         \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/DiagramFinal2.png}
         \label{fig:my_label}
     \end{figure}
- 
+
 \end{frame}
 
 
 
-\begin{frame} 
+\begin{frame}
   \frametitle{LL tabulka}
   \makebox[\linewidth]{\includegraphics[width=\paperwidth]{img/LLTabulka.pdf}}
 \end{frame}
 
 
-\begin{frame} 
+\begin{frame}
   \frametitle{Precedenční tabulka}
+  \makebox[\linewidth]{\includegraphics[scale=0.43]{img/precedenceTable.pdf}}
 \end{frame}
