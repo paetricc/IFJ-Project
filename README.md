@@ -1,7 +1,9 @@
 <div align="center">
   <h1>IFJ-Project</h1>
- <img src="https://media.giphy.com/media/evtT0DkIIO1MI/giphy.gif" width="300" alt="jokes GIF">
-  <h1> GDE BODY? </h1>
+ <img src="https://media.giphy.com/media/3oKIPf3C7HqqYBVcCk/giphy.gif" width="300" alt="jokes GIF">
+  <h1> ? </h1>
+ <img src="https://media.giphy.com/media/Ajhi3tsHaGBB6/giphy.gif" width="300" alt="jokes GIF">
+  <h1> “All’s well that ends better.” </h1>
 </div>
 
 Prologue
